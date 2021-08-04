@@ -1,0 +1,47 @@
+version: '3.9'
+services:
+ redis-server:
+  container_name: auth-redis
+  image: 'redis'
+ nginx-load-balancer:
+  image: nginx
+  volumes:
+   - './nginx/default.conf:/etc/nginx/nginx.conf'
+   ports:
+    - '8080:80'     
+ auth-service:
+  build:
+   context: ./auth-service
+  container_name: auth-service
+  environment:
+    - NODE_ENV=auth-service
+    - REDIS_HOST=redis-server
+  volumes:
+   - .:/usr/src/app
+   - /usr/src/app/node_modules
+  ports:
+   - '4000:4000'
+  depends_on:
+   - redis-server
+#  chat-service:
+#   build:
+#    context: ./chat-service
+#   container_name: chat-service
+#   environment:
+#     - NODE_ENV=chat-service
+#   ports:
+#    - '4001:4001'
+#   volumes:
+#    - .:/usr/src/app
+#    - /usr/src/app/node_modules
+#  email-service:
+#   build:
+#    context: ./email-service
+#   container_name: email-service
+#   environment:
+#     - NODE_ENV=email-service
+#   ports:
+#    - '4003:4003'
+#   volumes:
+#    - .:/usr/src/app
+#    - /usr/src/app/node_modules

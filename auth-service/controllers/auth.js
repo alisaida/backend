@@ -1,0 +1,248 @@
+import express from 'express';
+import mongoose from 'mongoose';
+import createError from 'http-errors';
+import { validateLogin, validateRegister } from '../utils/validator.js';
+
+
+import User from '../models/users.js'
+import {
+    signAccessToken,
+    signRefreshToken,
+    verifyRefreshToken,
+    signPasswordResetToken,
+    verifyPasswordResetToken,
+    deleteRefreshToken,
+    signAccountConfirmationToken,
+    verifyAccountConfirmationToken
+} from '../utils/jwt.js'
+import { publishToQueue } from '../utils/rabbitmq.js'
+
+const router = express.Router();
+
+export const home = async (req, res, next) => {
+    res.send('Welcome!');
+}
+
+/**
+ * logs in user and generates a pair of access and refresh tokens
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const login = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+        await validateLogin(email, password)
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw createError.Unauthorized('User is not registered');
+        }
+
+        const isMatch = await user.isValidPassword(password);
+        if (!isMatch) {
+            throw createError.Unauthorized('Invalid username or password');
+        }
+
+        const accessToken = await signAccessToken(user.id);
+        const refreshToken = await signRefreshToken(user.id);
+        res.status(200).send({ accessToken, refreshToken });
+
+    } catch (error) {
+        console.log(error)
+        next(error);
+    }
+}
+
+/**
+ * registers user in the backend and propagate to other microservices
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const register = async (req, res, next) => {
+    try {
+        const { email, mobile, password } = req.body;
+        //validate destructured fields 
+        await validateRegister(email, mobile, password);
+
+        //check if user already exists and throw error if so
+        const doesExist = await User.findOne({ email });
+        if (doesExist) {
+            throw createError.Conflict(`${email} already exists`);
+        }
+
+        //otherwise save user into database and send a successful response
+        const user = new User(req.body);
+        const savedUser = await user.save();
+        const accessToken = await signAccessToken(savedUser.id)
+        const refreshToken = await signRefreshToken(savedUser.id);
+        const verifyAccountToken = await signAccountConfirmationToken(savedUser.id);
+
+        const uri = `http://localhost:4000/auth/verify-account/${savedUser._id}/${verifyAccountToken}`;
+
+        if (savedUser && savedUser._id) {
+            //prepare payload for user table in other microservices
+            let data = {
+                userId: savedUser._id,
+                name: savedUser.name,
+                email: savedUser.email,
+                mobile: savedUser.mobile,
+            }
+            publishToQueue('USER', data);
+
+            // prepare payload for the email service
+            data = {
+                name: savedUser.name,
+                email: savedUser.email,
+                subject: 'Welcome!',
+                uri: uri // verify your account
+            }
+            publishToQueue('SIGN_UP', data);
+        }
+
+        res.status(201).send({ accessToken, refreshToken });
+
+    } catch (error) {
+        next(error)
+    }
+}
+
+/**
+ * logout route removes the refreshToken from the redis.
+ * in the frontend we'll need to remove the access token from memory
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const logout = async (req, res, next) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+            throw createError.BadRequest();
+        }
+        const userId = await verifyRefreshToken(refreshToken);
+        await deleteRefreshToken(userId);
+
+        console.log(`logged out user ${userId}`);
+
+        res.status(204).send();
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * generates a new pair of accessToken and refreshToken
+ * it a takes refresh token in the request payload
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const refreshToken = async (req, res, next) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+            throw createError.BadRequest();
+        }
+
+        const userId = await verifyRefreshToken(refreshToken);
+        const accessToken = await signAccessToken(userId);
+        const newRefreshToken = await signRefreshToken(userId);
+        res.status(200).send({ accessToken, 'refreshToken': newRefreshToken });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+/**
+ * sends user email with a unique token to reset password
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const forgotPassword = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            throw createError.BadRequest();
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw createError.Unauthorized('User not registered');
+        }
+
+        const accessToken = await signPasswordResetToken(user);
+        const uri = `http://localhost:4000/auth/forgot-password/${user._id}/${accessToken}`;
+
+        // prepare payload for queue
+        const data = {
+            name: user.name,
+            email: user.email,
+            subject: 'Forgot your password?',
+            uri: uri
+        }
+        publishToQueue('RESET_PASSWORD', data);
+
+        res.status(200).send();
+    } catch (error) {
+        next(error)
+    }
+}
+
+/**
+ * protected route to resets user password
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const resetPassword = async (req, res, next) => {
+    try {
+        const { password } = req.body;
+        const { id, token } = req.params;
+
+        if (!password) {
+            throw createError.BadRequest();
+        }
+
+        let user = await User.findOne({ '_id': id });
+
+        if (!user) {
+            throw createError.Unauthorized();
+        }
+
+        await verifyPasswordResetToken(user, token);
+
+        user.password = password;
+        await user.save();
+
+        res.status(201).send('Password Reset');
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const verifyAccount = async (req, res, next) => {
+    const { id, token } = req.params;
+
+    try {
+        const user = await User.findOne({ '_id': id });
+
+        if (!user) {
+            throw createError.Unauthorized();
+        }
+
+        await verifyAccountConfirmationToken(token);
+
+        user.isVerified = true;
+        await user.save();
+
+        res.status(201).send('Account verified');
+    } catch (error) {
+        next(error);
+    }
+}
