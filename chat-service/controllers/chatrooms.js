@@ -21,10 +21,11 @@ export const fetchChatroom = async (req, res, next) => ***REMOVED***
     try ***REMOVED***
         const chatRoomObj = await ChatRoom.findById(***REMOVED*** _id: chatRoomId ***REMOVED***)
         if (!chatRoomObj) ***REMOVED***
-            createHttpError.NotFound();
+            throw createHttpError.NotFound();
         ***REMOVED***
 
         const recipients = await getRecipientsHelperFn(chatRoomId);
+        const messages = await fetchMessagesHelperFn(chatRoomId);
 
         const chatRoom = ***REMOVED***
             name: chatRoomObj.name || '',
@@ -32,7 +33,7 @@ export const fetchChatroom = async (req, res, next) => ***REMOVED***
             createdAt: chatRoomObj.createdAt,
             updatedAt: chatRoomObj.updatedAt || '',
             recipients: recipients,
-            messages: [] //needs to be implemented
+            messages: messages
         ***REMOVED***
 
         res.status(200).send(chatRoom);
@@ -300,9 +301,19 @@ export const fetchChatRoomMessages = async (req, res, next) => ***REMOVED***
             throw createHttpError.NotFound('ChatRoom does not exist');
         ***REMOVED***
 
-        const messages = await Message.find(***REMOVED*** chatRoomId: chatRoomId ***REMOVED***);
+        const messages = await fetchMessagesHelperFn(chatRoomId);
 
         res.status(200).send(messages);
+    ***REMOVED*** catch (error) ***REMOVED***
+        next(error);
+    ***REMOVED***
+***REMOVED***
+
+const fetchMessagesHelperFn = async (chatRoomId) => ***REMOVED***
+    try ***REMOVED***
+        const messages = await Message.find(***REMOVED*** chatRoomId: chatRoomId ***REMOVED***);
+
+        return messages;
     ***REMOVED*** catch (error) ***REMOVED***
         next(error);
     ***REMOVED***

@@ -1,7 +1,7 @@
 import JWT from 'jsonwebtoken';
 import createError from 'http-errors';
 
-import redisClient from '../utils/redis-client.js';
+// import redisClient from '../utils/redis-client.js';
 
 /**
  * signs access token
@@ -89,6 +89,7 @@ export const verifyAccessToken = (req, res, next) => ***REMOVED***
             next(createError.Unauthorized(errMessage));
         ***REMOVED*** else ***REMOVED***
             req.jwtPayload = jwtPayload;
+            req.authUser = jwtPayload.aud;
             next();
         ***REMOVED***
 

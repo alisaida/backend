@@ -89,6 +89,7 @@ export const verifyAccessToken = (req, res, next) => ***REMOVED***
             next(createError.Unauthorized(errMessage));
         ***REMOVED*** else ***REMOVED***
             req.jwtPayload = jwtPayload;
+            req.authUser = jwtPayload.aud;
             next();
         ***REMOVED***
 
