@@ -89,6 +89,7 @@ export const verifyAccessToken = (req, res, next) => {
             next(createError.Unauthorized(errMessage));
         } else {
             req.jwtPayload = jwtPayload;
+            req.authUser = jwtPayload.aud;
             next();
         }
 
