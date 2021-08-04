@@ -1,0 +1,61 @@
+### homepage
+GET http://localhost:4000
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4OTExNjAsImV4cCI6MTYyNzg5NDc2MCwiYXVkIjoiNjEwM2MxNzNkNmRkZGFmMzdmOTFlYjNhIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.0B4tnqKdsVHMGdjcUPWRTG89i8-eyXrQHvtYGMRDS4g
+
+### login
+POST  http://localhost:4000/login
+***REMOVED***
+
+***REMOVED***
+    "email": "si3iid@gmail.com",
+    "password": "pass"
+***REMOVED***
+
+### renew refresh token
+POST http://localhost:4000/auth/refresh-token
+***REMOVED***
+
+***REMOVED***
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4OTEwMzAsImV4cCI6MTY1OTQ0ODYzMCwiYXVkIjoiNjEwM2MxNzNkNmRkZGFmMzdmOTFlYjNhIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.fC6qlnAyZvRsjUC0oG4kdEs4i7cdTTotSuVV1P8JU9w"
+***REMOVED***
+
+### logout
+DELETE http://localhost:4000/logout
+***REMOVED***
+
+***REMOVED***
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4OTExNjAsImV4cCI6MTY1OTQ0ODc2MCwiYXVkIjoiNjEwM2MxNzNkNmRkZGFmMzdmOTFlYjNhIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.9p9giWOqU_MkQH0MmjcJtpxBQjIClwMXxZtETJqXBv0"
+***REMOVED***
+
+
+### register
+POST http://localhost:4000/register
+***REMOVED***
+
+***REMOVED***
+    "name": "Jon Snow",
+    "email": "si3iid@outlook.com",
+    "mobile": "0441551047",
+    "password": "pass"
+***REMOVED***
+
+### forgot password
+POST http://localhost:4000/auth/forgot-password
+***REMOVED***
+
+***REMOVED***
+    "email": "said.ali10@outlook.com"
+***REMOVED***
+
+
+### reset password
+POST http://localhost:4000/auth/forgot-password/6107b5d1eb46bdf8aa7e6116/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNhaWQuYWxpMTBAb3V0bG9vay5jb20iLCJpZCI6IjYxMDdiNWQxZWI0NmJkZjhhYTdlNjExNiIsImlhdCI6MTYyNzg5NjQyMSwiZXhwIjoxNjI3ODk3MDIxLCJhdWQiOiI2MTA3YjVkMWViNDZiZGY4YWE3ZTYxMTYiLCJpc3MiOiJodHRwczovL3d3dy5teXdlYnNpdGUuY29tIn0.qoHVyMKvPg7I5dRohR9vASP2YAabAhwbjllFihSE8Uk
+***REMOVED***
+
+***REMOVED***
+    "password": "heyyy"
+***REMOVED***
+
+### verify account
+GET http://localhost:4000/auth/verify-account/6107b5d1eb46bdf8aa7e6116/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4OTUyNDksImV4cCI6MTYyNzg5NTg0OSwiYXVkIjoidW5kZWZpbmVkIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.leV6B0dNmgzOTrX_mTC63NoJMrldwseBtUw-uDi6VFA

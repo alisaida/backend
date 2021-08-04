@@ -1,0 +1,63 @@
+***REMOVED***
+POST  http://localhost:4000/login
+***REMOVED***
+
+***REMOVED***
+    "email": "si3iid@gmail.com",
+    "password": "pass"
+***REMOVED***
+
+
+### homepage
+GET http://localhost:4001
+***REMOVED***
+
+### create chatroom
+POST  http://localhost:4001/chatrooms/new
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4MTQ3MzEsImV4cCI6MTYyNzgxODMzMSwiYXVkIjoiNjEwM2MxNzNkNmRkZGFmMzdmOTFlYjNhIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.IyBex8Kkh9Q6oe-8zwp5GoT2Y6JMOePN0xLcj2efoTI
+
+***REMOVED***
+    "email": "si3iid@gmail.com"
+***REMOVED***
+
+### fetch chatroom data by id
+GET  http://localhost:4001/chatrooms/610529411f691f0b3b1193e8
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4MTQ3MzEsImV4cCI6MTYyNzgxODMzMSwiYXVkIjoiNjEwM2MxNzNkNmRkZGFmMzdmOTFlYjNhIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.IyBex8Kkh9Q6oe-8zwp5GoT2Y6JMOePN0xLcj2efoTI
+
+### update chatroom
+PATCH  http://localhost:4001/chatrooms/610529411f691f0b3b1193e8
+***REMOVED***
+authorization: Bearer Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4MTQ3MzEsImV4cCI6MTYyNzgxODMzMSwiYXVkIjoiNjEwM2MxNzNkNmRkZGFmMzdmOTFlYjNhIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.IyBex8Kkh9Q6oe-8zwp5GoT2Y6JMOePN0xLcj2efoTI
+
+***REMOVED***
+    "name": "team",
+    "isGroupChat": true
+***REMOVED***
+
+### fetch user chat rooms
+GET  http://localhost:4001/users/6103c9f800949ffa12ac1477/chatrooms
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4MTQ3MzEsImV4cCI6MTYyNzgxODMzMSwiYXVkIjoiNjEwM2MxNzNkNmRkZGFmMzdmOTFlYjNhIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.IyBex8Kkh9Q6oe-8zwp5GoT2Y6JMOePN0xLcj2efoTI
+
+### fetch chatroom recipients
+GET  http://localhost:4001/chatrooms/610529411f691f0b3b1193e8/users
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4MTQ3MzEsImV4cCI6MTYyNzgxODMzMSwiYXVkIjoiNjEwM2MxNzNkNmRkZGFmMzdmOTFlYjNhIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.IyBex8Kkh9Q6oe-8zwp5GoT2Y6JMOePN0xLcj2efoTI
+
+### create new message
+POST  http://localhost:4001/messages/new
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4MTQ3MzEsImV4cCI6MTYyNzgxODMzMSwiYXVkIjoiNjEwM2MxNzNkNmRkZGFmMzdmOTFlYjNhIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.IyBex8Kkh9Q6oe-8zwp5GoT2Y6JMOePN0xLcj2efoTI
+
+***REMOVED***
+    "chatRoomId":"610529411f691f0b3b1193e8",
+    "content":"yooo",
+    "imageUri":"http://google.com"
+***REMOVED***
+
+### fetch chatroom messages
+GET  http://localhost:4001/chatrooms/610529411f691f0b3b1193e8/messages
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4MTQ3MzEsImV4cCI6MTYyNzgxODMzMSwiYXVkIjoiNjEwM2MxNzNkNmRkZGFmMzdmOTFlYjNhIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.IyBex8Kkh9Q6oe-8zwp5GoT2Y6JMOePN0xLcj2efoTI

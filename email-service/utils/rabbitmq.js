@@ -1,0 +1,39 @@
+import amqp from 'amqplib';
+
+import ***REMOVED*** prepareAndSendEmail ***REMOVED*** from './mailer.js'
+
+let amqpChannel;
+
+export const listenToEmailQueue = async () => ***REMOVED***
+    try ***REMOVED***
+        const conn = await amqp.connect(process.env.AMQP_URL);
+        amqpChannel = await conn.createChannel();
+        await amqpChannel.assertQueue('SIGN_UP');
+        await amqpChannel.assertQueue('RESET_PASSWORD');
+        console.log(`rabbitmq connection successful: $***REMOVED***process.env.AMQP_URL***REMOVED***`);
+
+        amqpChannel.consume('SIGN_UP', message => ***REMOVED***
+            prepareEmail(message);
+        ***REMOVED***);
+
+        amqpChannel.consume('RESET_PASSWORD', message => ***REMOVED***
+            prepareEmail(message);
+        ***REMOVED***);
+
+        process.on('beforeExit', () => ***REMOVED***
+            console.log('Closing amqp connection')
+        ***REMOVED***)
+
+    ***REMOVED*** catch (err) ***REMOVED***
+        console.log(`$***REMOVED***err***REMOVED*** failed to connect to database`)
+    ***REMOVED***
+***REMOVED***
+
+const prepareEmail = async (message) => ***REMOVED***
+    const data = JSON.parse(message.content.toString());
+    if (data) ***REMOVED***
+        console.log(`New email event data`);
+        prepareAndSendEmail(data);
+        amqpChannel.ack(message);
+    ***REMOVED***
+***REMOVED***
