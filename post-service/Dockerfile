@@ -11,7 +11,7 @@ RUN npm install
 COPY . /usr/src/app
 
 # Expose port to the outside once the container has launched
-EXPOSE 4005
+EXPOSE 4003
 
 #Default command
 CMD ["npm","start"]
