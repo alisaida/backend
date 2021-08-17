@@ -1,0 +1,77 @@
+### login via the auth service for access and refresh token pairs
+POST  http://localhost:4000/login
+content-type: application/json
+
+{
+    "email": "john.barnes1983@outlook.com",
+    "password": "pass"
+}
+
+### homepage
+GET http://localhost:4001
+content-type: application/json
+
+### create post
+POST  http://localhost:4003/posts/new
+content-type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+{
+    "content": "today was a good day", 
+    "imageUri": "http://google.com/images"
+}
+
+### create post
+PATCH  http://localhost:4003/posts/611b89e3a294ce03e22359e3
+content-type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+{
+    "content": "hit 'em up"
+}
+
+### fetch post data by id
+GET  http://localhost:4003/posts/611b89e3a294ce03e22359e3
+content-type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+### create comment on a post by id
+POST  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/comment/new
+content-type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+{
+    "comment":"hahaha"
+}
+
+### fetch posts comments
+GET  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/comments
+content-type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+### fetch user posts
+GET  http://localhost:4003/users/610d45731fbb6776fcc10dc6/posts
+content-type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+
+### fetch posts liked by auth user
+GET  http://localhost:4003/posts-likes
+content-type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+### fetch likes for post
+GET  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/likes
+content-type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+### like a post by id
+POST  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/like
+content-type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+### unlike a post by id
+DELETE  http://localhost:4003/posts/610faa241caa5eb319e7cf3d/unlike
+content-type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
