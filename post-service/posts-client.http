@@ -1,0 +1,77 @@
+***REMOVED***
+POST  http://localhost:4000/login
+***REMOVED***
+
+***REMOVED***
+    "email": "john.barnes1983@outlook.com",
+    "password": "pass"
+***REMOVED***
+
+### homepage
+GET http://localhost:4001
+***REMOVED***
+
+***REMOVED***
+POST  http://localhost:4003/posts/new
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+***REMOVED***
+    "content": "today was a good day", 
+    "imageUri": "http://google.com/images"
+***REMOVED***
+
+***REMOVED***
+PATCH  http://localhost:4003/posts/611b89e3a294ce03e22359e3
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+***REMOVED***
+    "content": "hit 'em up"
+***REMOVED***
+
+***REMOVED***
+GET  http://localhost:4003/posts/611b89e3a294ce03e22359e3
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+***REMOVED***
+POST  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/comment/new
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+***REMOVED***
+    "comment":"hahaha"
+***REMOVED***
+
+***REMOVED***
+GET  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/comments
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+***REMOVED***
+GET  http://localhost:4003/users/610d45731fbb6776fcc10dc6/posts
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+
+### fetch posts liked by auth user
+GET  http://localhost:4003/posts-likes
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+***REMOVED***
+GET  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/likes
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+***REMOVED***
+POST  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/like
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+
+***REMOVED***
+DELETE  http://localhost:4003/posts/610faa241caa5eb319e7cf3d/unlike
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+

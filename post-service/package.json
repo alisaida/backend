@@ -1,0 +1,27 @@
+***REMOVED***
+  "dependencies": ***REMOVED***
+    "amqplib": "^0.8.0",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "http-errors": "^1.8.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.13.5",
+    "morgan": "^1.10.0"
+  ***REMOVED***,
+  "name": "posts-service",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": ***REMOVED***
+    "nodemon": "^2.0.12"
+  ***REMOVED***,
+  "scripts": ***REMOVED***
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  ***REMOVED***,
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+***REMOVED***
