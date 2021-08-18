@@ -247,15 +247,18 @@ export const unLikePost = async (req, res, next) => ***REMOVED***
 ***REMOVED***;
 
 /**
- * fetch posts liked by auth user
+ * fetch posts liked by user
  * @param ***REMOVED*******REMOVED*** req
  * @param ***REMOVED*******REMOVED*** res
  * @param ***REMOVED*******REMOVED*** next
  */
 export const fetchLikedPosts = async (req, res, next) => ***REMOVED***
-  const userId = req.authUser;
+  const userId = req.params.id;
 
   try ***REMOVED***
+    if (!userId) ***REMOVED***
+      throw httpError.BadRequest();
+    ***REMOVED***
     const likedPosts = await Like.find(***REMOVED*** userId: userId ***REMOVED***);
     const postIds = likedPosts.map(likedPost => likedPost.postId);
     const likes = await Post.find(***REMOVED*** _id: ***REMOVED*** $in: postIds ***REMOVED*** ***REMOVED***);

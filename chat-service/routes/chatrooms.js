@@ -17,14 +17,14 @@ chatroomRoute.get('/', (req, res) => ***REMOVED***
     res.status(200).send('Welcome');
 ***REMOVED***)
 
-chatroomRoute.get('/chatrooms/:id', verifyAccessToken, fetchChatroom);
-chatroomRoute.patch('/chatrooms/:id', verifyAccessToken, updateChatroom);
-chatroomRoute.post('/chatrooms/new', verifyAccessToken, createChatroom); //push new chat data to rabbitmq
+chatroomRoute.get('/api/chats/:id', verifyAccessToken, fetchChatroom);
+chatroomRoute.patch('/api/chats/:id', verifyAccessToken, updateChatroom);
+chatroomRoute.post('/api/chats/new', verifyAccessToken, createChatroom); //push new chat data to rabbitmq
 
-chatroomRoute.get('/chatrooms/:id/users', verifyAccessToken, fetchChatRoomRecipients);
-chatroomRoute.get('/users/:id/chatrooms', verifyAccessToken, fetchUserChatRooms);
+chatroomRoute.get('/api/chats/:id/users', verifyAccessToken, fetchChatRoomRecipients);
+chatroomRoute.get('/api/chats/users/:id/chatrooms', verifyAccessToken, fetchUserChatRooms);
 
-chatroomRoute.post('/messages/new', verifyAccessToken, createMessage); //push new message data to rabbitmq
-chatroomRoute.get('/chatrooms/:id/messages', verifyAccessToken, fetchChatRoomMessages);
+chatroomRoute.post('/api/chats/:id/messages/new', verifyAccessToken, createMessage); //push new message data to rabbitmq
+chatroomRoute.get('/api/chats/:id/messages', verifyAccessToken, fetchChatRoomMessages);
 
 export default chatroomRoute;

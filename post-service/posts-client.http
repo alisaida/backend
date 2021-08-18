@@ -1,5 +1,5 @@
 ***REMOVED***
-POST  http://localhost:4000/login
+***REMOVED***
 ***REMOVED***
 
 ***REMOVED***
@@ -7,71 +7,67 @@ POST  http://localhost:4000/login
     "password": "pass"
 ***REMOVED***
 
-### homepage
-GET http://localhost:4001
 ***REMOVED***
+***REMOVED***
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 ***REMOVED***
-POST  http://localhost:4003/posts/new
-***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
-
-***REMOVED***
-    "content": "today was a good day", 
+    "content": "hey there!", 
     "imageUri": "http://google.com/images"
 ***REMOVED***
 
 ***REMOVED***
-PATCH  http://localhost:4003/posts/611b89e3a294ce03e22359e3
+PATCH  http://localhost:4003/api/posts/611d19f4810a7ab8981c74ac
 ***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 ***REMOVED***
     "content": "hit 'em up"
 ***REMOVED***
 
 ***REMOVED***
-GET  http://localhost:4003/posts/611b89e3a294ce03e22359e3
+GET  http://localhost:4003/api/posts/611d19f4810a7ab8981c74ac
 ***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 ***REMOVED***
-POST  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/comment/new
+POST  http://localhost:4003/api/posts/611d19f4810a7ab8981c74ac/comment/new
 ***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 ***REMOVED***
-    "comment":"hahaha"
+    "comment":"yooooo!"
 ***REMOVED***
 
 ***REMOVED***
-GET  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/comments
+GET  http://localhost:4003/api/posts/611d19f4810a7ab8981c74ac/comments
 ***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 ***REMOVED***
-GET  http://localhost:4003/users/610d45731fbb6776fcc10dc6/posts
+GET  http://localhost:4003/api/posts/users/611d1765a972c0741b74e578/fetchPosts
 ***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 
-### fetch posts liked by auth user
-GET  http://localhost:4003/posts-likes
 ***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+GET  http://localhost:4003/api/posts/users/611d1765a972c0741b74e578/fetchLikedPosts
+***REMOVED***
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 ***REMOVED***
-GET  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/likes
+GET  http://localhost:4003/api/posts/611d19f4810a7ab8981c74ac/likes
 ***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 ***REMOVED***
-POST  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/like
+POST  http://localhost:4003/api/posts/611d19f4810a7ab8981c74ac/like
 ***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 ***REMOVED***
-DELETE  http://localhost:4003/posts/610faa241caa5eb319e7cf3d/unlike
+DELETE  http://localhost:4003/api/posts/611d19f4810a7ab8981c74ac/unlike
 ***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 

@@ -12,80 +12,39 @@ GET http://localhost:4004
 ***REMOVED***
 
 ### create profile
-POST  http://localhost:4004/profiles/new
+POST  http://localhost:4004/api/profiles/new
 ***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxMTc4NzEsImV4cCI6MTYyOTI5MDY3MSwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.NJju0ijPtt-mKbj9SJ98lMrCr1XqX9GjnGJGAVMi3kA
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTkwMDAsImV4cCI6MTYyOTQ3MTgwMCwiYXVkIjoiNjExZDIxMzhhOTcyYzA3NDFiNzRlNTdjIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.6upFoNEgRZ6wm8ecxFbgGJxSDrlgE0he4j63qPIsKgw
 
 ***REMOVED***
-    "username":"bond007",
-    "name":"bond",
+    "username":"si3iid",
+    "name":"said",
     "profilePicture":"http://google.com/p/si3iid",
-    "bio":"bond, james bond!"
+    "bio":""
 ***REMOVED***
 
 ### fetch profile data by userId
-GET  http://localhost:4004/profiles/users/611a55e3a72b7c92878afb34
+GET  http://localhost:4004/api/profiles/users/611d2138a972c0741b74e57c
 ***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxMTc4NzEsImV4cCI6MTYyOTI5MDY3MSwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.NJju0ijPtt-mKbj9SJ98lMrCr1XqX9GjnGJGAVMi3kA
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTkwMDAsImV4cCI6MTYyOTQ3MTgwMCwiYXVkIjoiNjExZDIxMzhhOTcyYzA3NDFiNzRlNTdjIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.6upFoNEgRZ6wm8ecxFbgGJxSDrlgE0he4j63qPIsKgw
 
 ### fetch profile data by username
-GET  http://localhost:4004/profiles/user?username=jackson
+GET  http://localhost:4004/api/profiles/user?username=si3iid
 ***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxMTc4NzEsImV4cCI6MTYyOTI5MDY3MSwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.NJju0ijPtt-mKbj9SJ98lMrCr1XqX9GjnGJGAVMi3kA
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTkwMDAsImV4cCI6MTYyOTQ3MTgwMCwiYXVkIjoiNjExZDIxMzhhOTcyYzA3NDFiNzRlNTdjIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.6upFoNEgRZ6wm8ecxFbgGJxSDrlgE0he4j63qPIsKgw
 
 ### fetch profile data by name
-GET  http://localhost:4004/profiles/user?name=jackson
+GET  http://localhost:4004/api/profiles/user?name=said
 ***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxMTc4NzEsImV4cCI6MTYyOTI5MDY3MSwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.NJju0ijPtt-mKbj9SJ98lMrCr1XqX9GjnGJGAVMi3kA
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTkwMDAsImV4cCI6MTYyOTQ3MTgwMCwiYXVkIjoiNjExZDIxMzhhOTcyYzA3NDFiNzRlNTdjIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.6upFoNEgRZ6wm8ecxFbgGJxSDrlgE0he4j63qPIsKgw
 
 ### update profile
-PATCH  http://localhost:4004/profiles/update
+PATCH  http://localhost:4004/api/profiles/update
 ***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxMTc4NzEsImV4cCI6MTYyOTI5MDY3MSwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.NJju0ijPtt-mKbj9SJ98lMrCr1XqX9GjnGJGAVMi3kA
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTkwMDAsImV4cCI6MTYyOTQ3MTgwMCwiYXVkIjoiNjExZDIxMzhhOTcyYzA3NDFiNzRlNTdjIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.6upFoNEgRZ6wm8ecxFbgGJxSDrlgE0he4j63qPIsKgw
 
 ***REMOVED***
-    "username":"bond007",
-    "name":"bond",
+    "username":"si3iid",
+    "name":"Said",
     "profilePicture":"http://google.com/p/bond007"
 ***REMOVED***
-
-***REMOVED***
-POST  http://localhost:4004/posts/610faa0f1caa5eb319e7cf3b/comment/new
-***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxMTc4NzEsImV4cCI6MTYyOTI5MDY3MSwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.NJju0ijPtt-mKbj9SJ98lMrCr1XqX9GjnGJGAVMi3kA
-
-***REMOVED***
-    "comment":"hahaha"
-***REMOVED***
-
-***REMOVED***
-GET  http://localhost:4004/posts/610faa0f1caa5eb319e7cf3b/comments
-***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxMTc4NzEsImV4cCI6MTYyOTI5MDY3MSwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.NJju0ijPtt-mKbj9SJ98lMrCr1XqX9GjnGJGAVMi3kA
-
-***REMOVED***
-GET  http://localhost:4004/users/610d45731fbb6776fcc10dc6/posts
-***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxMTc4NzEsImV4cCI6MTYyOTI5MDY3MSwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.NJju0ijPtt-mKbj9SJ98lMrCr1XqX9GjnGJGAVMi3kA
-
-
-### fetch posts liked by auth user
-GET  http://localhost:4004/posts-likes
-***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxMTc4NzEsImV4cCI6MTYyOTI5MDY3MSwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.NJju0ijPtt-mKbj9SJ98lMrCr1XqX9GjnGJGAVMi3kA
-
-***REMOVED***
-GET  http://localhost:4004/posts/610faa0f1caa5eb319e7cf3b/likes
-***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxMTc4NzEsImV4cCI6MTYyOTI5MDY3MSwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.NJju0ijPtt-mKbj9SJ98lMrCr1XqX9GjnGJGAVMi3kA
-
-***REMOVED***
-POST  http://localhost:4004/posts/610faa0f1caa5eb319e7cf3b/like
-***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxMTc4NzEsImV4cCI6MTYyOTI5MDY3MSwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.NJju0ijPtt-mKbj9SJ98lMrCr1XqX9GjnGJGAVMi3kA
-
-***REMOVED***
-DELETE  http://localhost:4004/posts/610faa241caa5eb319e7cf3d/unlike
-***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxMTc4NzEsImV4cCI6MTYyOTI5MDY3MSwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.NJju0ijPtt-mKbj9SJ98lMrCr1XqX9GjnGJGAVMi3kA
-

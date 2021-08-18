@@ -1,47 +1,47 @@
 ### homepage
 GET http://localhost:4000
 ***REMOVED***
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4OTExNjAsImV4cCI6MTYyNzg5NDc2MCwiYXVkIjoiNjEwM2MxNzNkNmRkZGFmMzdmOTFlYjNhIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.0B4tnqKdsVHMGdjcUPWRTG89i8-eyXrQHvtYGMRDS4g
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTA1NjIsImV4cCI6MTYyOTQ2MzM2MiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.9toRKcjpxnwQz6LkgAUgfzJFaHI83001Jn-Vxj4eLz4
 
 ### login
-POST  http://localhost:4000/login
+***REMOVED***
 ***REMOVED***
 
 ***REMOVED***
-    "email": "si3iid@gmail.com",
+    "email": "si3iid@icloud.com",
     "password": "pass"
 ***REMOVED***
 
 ### renew refresh token
-POST http://localhost:4000/auth/refresh-token
+POST http://localhost:4000/api/auth/refresh-token
 ***REMOVED***
 
 ***REMOVED***
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4OTEwMzAsImV4cCI6MTY1OTQ0ODYzMCwiYXVkIjoiNjEwM2MxNzNkNmRkZGFmMzdmOTFlYjNhIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.fC6qlnAyZvRsjUC0oG4kdEs4i7cdTTotSuVV1P8JU9w"
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTA4NzcsImV4cCI6MTY2MDg0ODQ3NywiYXVkIjoiNjExZDAxM2Y1MzEwNDU2NGU4OGUwZGJmIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.bI2A0bF8ngmQaHXXsOmQDF1Jxsjuz2B9l2gB4oTEMUU"
 ***REMOVED***
 
 ### logout
-DELETE http://localhost:4000/logout
+POST http://localhost:4000/api/auth/logout
 ***REMOVED***
 
 ***REMOVED***
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4OTExNjAsImV4cCI6MTY1OTQ0ODc2MCwiYXVkIjoiNjEwM2MxNzNkNmRkZGFmMzdmOTFlYjNhIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.9p9giWOqU_MkQH0MmjcJtpxBQjIClwMXxZtETJqXBv0"
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTA4NzcsImV4cCI6MTY2MDg0ODQ3NywiYXVkIjoiNjExZDAxM2Y1MzEwNDU2NGU4OGUwZGJmIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.bI2A0bF8ngmQaHXXsOmQDF1Jxsjuz2B9l2gB4oTEMUU"
 ***REMOVED***
 
 
 ### register
-POST http://localhost:4000/register
+POST http://localhost:4000/api/auth/register
 ***REMOVED***
 
 ***REMOVED***
-    "name": "Jon Snow",
-    "email": "si3iid@outlook.com",
-    "mobile": "0441551047",
+    "name": "ali",
+    "email": "said.ali10@outlook.com",
+    "mobile": "0441551027",
     "password": "pass"
 ***REMOVED***
 
 ### forgot password
-POST http://localhost:4000/auth/forgot-password
+POST http://localhost:4000/api/auth/forgot-password
 ***REMOVED***
 
 ***REMOVED***
@@ -50,7 +50,7 @@ POST http://localhost:4000/auth/forgot-password
 
 
 ### reset password
-POST http://localhost:4000/auth/forgot-password/6107b5d1eb46bdf8aa7e6116/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNhaWQuYWxpMTBAb3V0bG9vay5jb20iLCJpZCI6IjYxMDdiNWQxZWI0NmJkZjhhYTdlNjExNiIsImlhdCI6MTYyNzg5NjQyMSwiZXhwIjoxNjI3ODk3MDIxLCJhdWQiOiI2MTA3YjVkMWViNDZiZGY4YWE3ZTYxMTYiLCJpc3MiOiJodHRwczovL3d3dy5teXdlYnNpdGUuY29tIn0.qoHVyMKvPg7I5dRohR9vASP2YAabAhwbjllFihSE8Uk
+POST http://localhost:4000/api/auth/forgot-password/6107b5d1eb46bdf8aa7e6116/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNhaWQuYWxpMTBAb3V0bG9vay5jb20iLCJpZCI6IjYxMDdiNWQxZWI0NmJkZjhhYTdlNjExNiIsImlhdCI6MTYyNzg5NjQyMSwiZXhwIjoxNjI3ODk3MDIxLCJhdWQiOiI2MTA3YjVkMWViNDZiZGY4YWE3ZTYxMTYiLCJpc3MiOiJodHRwczovL3d3dy5teXdlYnNpdGUuY29tIn0.qoHVyMKvPg7I5dRohR9vASP2YAabAhwbjllFihSE8Uk
 ***REMOVED***
 
 ***REMOVED***
@@ -58,4 +58,4 @@ POST http://localhost:4000/auth/forgot-password/6107b5d1eb46bdf8aa7e6116/eyJhbGc
 ***REMOVED***
 
 ### verify account
-GET http://localhost:4000/auth/verify-account/6107b5d1eb46bdf8aa7e6116/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4OTUyNDksImV4cCI6MTYyNzg5NTg0OSwiYXVkIjoidW5kZWZpbmVkIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.leV6B0dNmgzOTrX_mTC63NoJMrldwseBtUw-uDi6VFA
+GET http://localhost:4000/api/auth/verify-account/6107b5d1eb46bdf8aa7e6116/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Mjc4OTUyNDksImV4cCI6MTYyNzg5NTg0OSwiYXVkIjoidW5kZWZpbmVkIiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.leV6B0dNmgzOTrX_mTC63NoJMrldwseBtUw-uDi6VFA

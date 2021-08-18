@@ -4,13 +4,12 @@ import ***REMOVED*** verifyAccessToken ***REMOVED*** from '../utils/jwt.js';
 
 const authRoute = express.Router();
 authRoute.get('/', verifyAccessToken, home); //protected with jwt
-authRoute.post('/login', login);
-authRoute.delete('/logout', logout);
-authRoute.post('/register', register);
-authRoute.post('/auth/refresh-token', refreshToken);
-authRoute.post('/auth/forgot-password', forgotPassword);
-authRoute.post('/auth/forgot-password/:id/:token', resetPassword);
-
-authRoute.get('/auth/verify-account/:id/:token', verifyAccount);
+authRoute.post('/api/auth/login', login);
+authRoute.post('/api/auth/logout', logout);
+authRoute.post('/api/auth/register', register);
+authRoute.post('/api/auth/refresh-token', refreshToken);
+authRoute.post('/api/auth/forgot-password', forgotPassword);
+authRoute.post('/api/auth/forgot-password/:id/:token', resetPassword);
+authRoute.get('/api/auth/verify-account/:id/:token', verifyAccount);
 
 export default authRoute;

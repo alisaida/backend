@@ -20,15 +20,15 @@ postsRoute.get("/", (req, res) => ***REMOVED***
   res.status(200).send("Welcome");
 ***REMOVED***);
 
-postsRoute.get("/posts/:id", verifyAccessToken, fetchPost);
-postsRoute.patch("/posts/:id", verifyAccessToken, updatePost);
-postsRoute.get('/posts/:id/comments', verifyAccessToken, fetchPostComments);
-postsRoute.post("/posts/new", verifyAccessToken, createPost);
-postsRoute.get("/users/:id/posts", verifyAccessToken, fetchUserPosts);
-postsRoute.get("/posts-likes", verifyAccessToken, fetchLikedPosts); //auth user likes
-postsRoute.get("/posts/:id/likes", verifyAccessToken, fetchLikes); //post likes
-postsRoute.post("/posts/:id/like", verifyAccessToken, likePost);
-postsRoute.delete("/posts/:id/unlike", verifyAccessToken, unLikePost);
-postsRoute.post("/posts/:id/comment/new", verifyAccessToken, createComment);
+postsRoute.get("/api/posts/:id", verifyAccessToken, fetchPost);
+postsRoute.patch("/api/posts/:id", verifyAccessToken, updatePost);
+postsRoute.get('/api/posts/:id/comments', verifyAccessToken, fetchPostComments);
+postsRoute.post("/api/posts/new", verifyAccessToken, createPost);
+postsRoute.get("/api/posts/users/:id/fetchPosts", verifyAccessToken, fetchUserPosts);
+postsRoute.get("/api/posts/users/:id/fetchLikedPosts", verifyAccessToken, fetchLikedPosts);
+postsRoute.get("/api/posts/:id/likes", verifyAccessToken, fetchLikes); //post likes
+postsRoute.post("/api/posts/:id/like", verifyAccessToken, likePost);
+postsRoute.delete("/api/posts/:id/unlike", verifyAccessToken, unLikePost);
+postsRoute.post("/api/posts/:id/comment/new", verifyAccessToken, createComment);
 export default postsRoute;
 
