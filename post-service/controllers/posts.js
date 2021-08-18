@@ -247,15 +247,18 @@ export const unLikePost = async (req, res, next) => {
 };
 
 /**
- * fetch posts liked by auth user
+ * fetch posts liked by user
  * @param {*} req
  * @param {*} res
  * @param {*} next
  */
 export const fetchLikedPosts = async (req, res, next) => {
-  const userId = req.authUser;
+  const userId = req.params.id;
 
   try {
+    if (!userId) {
+      throw httpError.BadRequest();
+    }
     const likedPosts = await Like.find({ userId: userId });
     const postIds = likedPosts.map(likedPost => likedPost.postId);
     const likes = await Post.find({ _id: { $in: postIds } });

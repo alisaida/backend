@@ -243,20 +243,20 @@ const getRecipientsHelperFn = async (chatRoomId) => {
 }
 
 export const createMessage = async (req, res, next) => {
+    const chatRoomId = req.params.id;
 
-    const { chatRoomId, content, imageUri } = req.body;
+    const { content, imageUri } = req.body;
     const userId = req.authUser;
-
-    if (!chatRoomId) {
-        throw createHttpError.BadRequest('Payload missing chatRoomId');
-    }
-    if (!content && !imageUri) {
-        throw createHttpError.BadRequest('Payload requires either content or imageUri');
-    }
 
     const session = await mongoose.startSession();
 
     try {
+        if (!chatRoomId) {
+            throw createHttpError.BadRequest();
+        }
+        if (!content && !imageUri) {
+            throw createHttpError.BadRequest('Payload requires either content or imageUri');
+        }
         session.startTransaction();
 
         const doesExist = await ChatRoom.findOne({ _id: chatRoomId });

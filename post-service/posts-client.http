@@ -1,5 +1,5 @@
 ### login via the auth service for access and refresh token pairs
-POST  http://localhost:4000/login
+POST  http://localhost:4000/api/auth/login
 content-type: application/json
 
 {
@@ -7,71 +7,67 @@ content-type: application/json
     "password": "pass"
 }
 
-### homepage
-GET http://localhost:4001
-content-type: application/json
-
 ### create post
-POST  http://localhost:4003/posts/new
+POST  http://localhost:4003/api/posts/new
 content-type: application/json
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 {
-    "content": "today was a good day", 
+    "content": "hey there!", 
     "imageUri": "http://google.com/images"
 }
 
 ### create post
-PATCH  http://localhost:4003/posts/611b89e3a294ce03e22359e3
+PATCH  http://localhost:4003/api/posts/611d19f4810a7ab8981c74ac
 content-type: application/json
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 {
     "content": "hit 'em up"
 }
 
 ### fetch post data by id
-GET  http://localhost:4003/posts/611b89e3a294ce03e22359e3
+GET  http://localhost:4003/api/posts/611d19f4810a7ab8981c74ac
 content-type: application/json
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 ### create comment on a post by id
-POST  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/comment/new
+POST  http://localhost:4003/api/posts/611d19f4810a7ab8981c74ac/comment/new
 content-type: application/json
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 {
-    "comment":"hahaha"
+    "comment":"yooooo!"
 }
 
 ### fetch posts comments
-GET  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/comments
+GET  http://localhost:4003/api/posts/611d19f4810a7ab8981c74ac/comments
 content-type: application/json
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 ### fetch user posts
-GET  http://localhost:4003/users/610d45731fbb6776fcc10dc6/posts
+GET  http://localhost:4003/api/posts/users/611d1765a972c0741b74e578/fetchPosts
 content-type: application/json
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 
-### fetch posts liked by auth user
-GET  http://localhost:4003/posts-likes
+### fetch posts liked by user
+GET  http://localhost:4003/api/posts/users/611d1765a972c0741b74e578/fetchLikedPosts
 content-type: application/json
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 ### fetch likes for post
-GET  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/likes
+GET  http://localhost:4003/api/posts/611d19f4810a7ab8981c74ac/likes
 content-type: application/json
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 ### like a post by id
-POST  http://localhost:4003/posts/610faa0f1caa5eb319e7cf3b/like
+POST  http://localhost:4003/api/posts/611d19f4810a7ab8981c74ac/like
 content-type: application/json
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
 ### unlike a post by id
-DELETE  http://localhost:4003/posts/610faa241caa5eb319e7cf3d/unlike
+DELETE  http://localhost:4003/api/posts/611d19f4810a7ab8981c74ac/unlike
 content-type: application/json
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkxOTQ2MzIsImV4cCI6MTYyOTM2NzQzMiwiYXVkIjoiNjExYTU1ZTNhNzJiN2M5Mjg3OGFmYjM0IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.ewc80z6o8ghLYB11g58XJAnNX6_79XMKVf4_Vk1ee4E
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MjkyOTY1MDEsImV4cCI6MTYyOTQ2OTMwMSwiYXVkIjoiNjExZDE3NjVhOTcyYzA3NDFiNzRlNTc4IiwiaXNzIjoiaHR0cHM6Ly93d3cubXl3ZWJzaXRlLmNvbSJ9.D_LqmDKQ6NNLNnzOiVYbOLRdf7erI_BEsSJFyVgQmHQ
 
