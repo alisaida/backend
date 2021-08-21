@@ -1,8 +1,25 @@
 version: '3.9'
 services:
+  # rabbitmq container
+  rabbitmq:
+    hostname: rabbitmq
+    image: 'rabbitmq:3.9-management-alpine'
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+    networks:
+      - backend_network
+  # redis container
   redis-server:
     container_name: auth-redis
     image: 'redis'
+    networks:
+      - backend_network
+  # nginx container
   nginx:
     image: nginx
     volumes:
@@ -11,36 +28,101 @@ services:
       - "5000:80"
     depends_on:
       - auth
+      - chat
+      - profile
+      - post
+    networks:
+      - backend_network
+  # auth service
   auth:
     build:
-      context: ./auth-service
+      context: ./auth
     environment:
       - NODE_ENV=auth-service
       - REDIS_HOST=redis-server
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672
     volumes:
-      - ./auth-service/:/usr/src/app
+      - ./auth/:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
+      - rabbitmq
       - redis-server
-#  chat-service:
-#   build:
-#    context: ./chat-service
-#   container_name: chat-service
-#   environment:
-#     - NODE_ENV=chat-service
-#   ports:
-#    - '4001:4001'
-#   volumes:
-#    - .:/usr/src/app
-#    - /usr/src/app/node_modules
-#  email-service:
-#   build:
-#    context: ./email-service
-#   container_name: email-service
-#   environment:
-#     - NODE_ENV=email-service
-#   ports:
-#    - '4003:4003'
-#   volumes:
-#    - .:/usr/src/app
-#    - /usr/src/app/node_modules
+    links: 
+      - rabbitmq
+    networks:
+      - backend_network
+  # chat service
+  chat:
+    build:
+      context: ./chat
+    environment:
+      - NODE_ENV=chat-service
+      # - REDIS_HOST=redis-server
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672
+    volumes:
+      - ./chat/:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - rabbitmq
+      # - redis-server
+    links: 
+      - rabbitmq
+    networks:
+      - backend_network
+  # profile service    
+  profile:
+    build:
+      context: ./profile
+    environment:
+      - NODE_ENV=profile-service
+      # - REDIS_HOST=redis-server
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672
+    volumes:
+      - ./profile/:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - rabbitmq
+      # - redis-server
+    links: 
+      - rabbitmq
+    networks:
+      - backend_network   
+  # post service    
+  post:
+    build:
+      context: ./post
+    environment:
+      - NODE_ENV=post-service
+      # - REDIS_HOST=redis-server
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672
+    volumes:
+      - ./post/:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - rabbitmq
+      # - redis-server
+    links: 
+      - rabbitmq
+    networks:
+      - backend_network
+  # # mail service    
+  # mail:
+  #   build:
+  #     context: ./mail
+  #   environment:
+  #     - NODE_ENV=mail-service
+  #     # - REDIS_HOST=redis-server
+  #     - AMQP_URL=amqp://guest:guest@rabbitmq:5672
+  #   volumes:
+  #     - ./mail/:/usr/src/app
+  #     - /usr/src/app/node_modules
+  #   depends_on:
+  #     - rabbitmq
+  #     # - redis-server
+  #   links: 
+  #     - rabbitmq
+  #   networks:
+  #     - backend_network
+networks:
+  backend_network:
+    driver: bridge

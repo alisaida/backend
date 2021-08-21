@@ -15,13 +15,8 @@ export const consumeUsersQueue = async () => {
         amqpChannel.consume('USER', message => {
             saveUser(message);
         })
-
-        process.on('beforeExit', () => {
-            console.log('Closing amqp connection')
-        })
-
     } catch (err) {
-        console.log(`${err} failed to connect to database`)
+        console.log(`${err} failed to connect to amqp`);
     }
 }
 

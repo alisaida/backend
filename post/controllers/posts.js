@@ -5,6 +5,17 @@ import Post from "../models/posts.js";
 import User from "../models/users.js";
 import Like from "../models/likes.js";
 import Comment from "../models/comments.js";
+
+/**
+ * home
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const home = async (req, res, next) => {
+  res.send('Welcome!');
+}
+
 /**
  * fetch post by id, with comments and likes
  * @param {*} req

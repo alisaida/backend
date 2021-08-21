@@ -4,6 +4,17 @@ import mongoose from 'mongoose';
 import Profile from '../models/profiles.js';
 import User from '../models/users.js';
 
+
+/**
+ * home
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const home = async (req, res, next) => {
+  res.send('Welcome!');
+}
+
 /**
  * create profile
  * @param req

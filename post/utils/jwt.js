@@ -13,9 +13,10 @@ export const signAccessToken = (userId) => {
         const payload = {}
 
         const secret = process.env.ACCESS_TOKEN_SECRET;
+        const expiresIn = process.env.NODE_ENV === 'dev' ? '48hr' : '15m';
 
         const options = {
-            expiresIn: '1hr',
+            expiresIn: expiresIn,
             audience: userId,
             issuer: 'https://www.mywebsite.com'
         }

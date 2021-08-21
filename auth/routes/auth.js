@@ -3,7 +3,7 @@ import { home, login, logout, register, refreshToken, forgotPassword, resetPassw
 import { verifyAccessToken } from '../utils/jwt.js';
 
 const authRoute = express.Router();
-authRoute.get('/api/auth/', verifyAccessToken, home); //protected with jwt
+authRoute.get('/api/auth/', home);
 authRoute.post('/api/auth/login', login);
 authRoute.post('/api/auth/logout', logout);
 authRoute.post('/api/auth/register', register);

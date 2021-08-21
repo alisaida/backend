@@ -5,6 +5,7 @@ FROM node:14
 WORKDIR /usr/src/app
 
 # Copy the application to the /app directory and install dependencies
+COPY scripts /usr/src/app/scripts
 COPY package.json /usr/src/app
 RUN npm install
 
@@ -14,4 +15,4 @@ COPY . /usr/src/app
 EXPOSE 4001
 
 #Default command
-CMD ["npm","start"]
+CMD ["./scripts/wait-for-it.sh", "rabbitmq:5672", "--", "npm", "start"]

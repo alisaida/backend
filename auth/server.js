@@ -9,6 +9,7 @@ import authRouter from './routes/auth.js';
 
 dotenv.config();
 const NODE_ENV = process.env.NODE_ENV;
+const SERVICE_NAME = process.env.SERVICE_NAME;
 const PORT = process.env.PORT;
 const DB_NAME = process.env.DB_NAME;
 const DB_USER = process.env.DB_USER;
@@ -44,7 +45,7 @@ app.use((err, req, res, next) => {
 
 mongoose.connect(dbConnectionUrl, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false })
     .then(() => app.listen(PORT, () => {
-        console.log(`${NODE_ENV} running on http://localhost:${PORT}`);
+        console.log(`${SERVICE_NAME}.${NODE_ENV} running on http://localhost:${PORT}`);
         console.log(`database connection successful: ${dbConnectionUrl}`);
     }))
     .catch((error) => console.log(`${error} failed to connect to database`));

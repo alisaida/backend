@@ -7,6 +7,16 @@ import User from '../models/users.js'
 import Message from '../models/messages.js'
 
 /**
+ * home
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const home = async (req, res, next) => {
+    res.send('Welcome!');
+}
+
+/**
  * fetch entire chatroom data, recipients and messages
  * @param {*} req 
  * @param {*} res 

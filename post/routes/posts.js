@@ -11,15 +11,13 @@ import {
   likePost,
   unLikePost,
   fetchLikedPosts,
-  fetchLikes
+  fetchLikes,
+  home
 } from "../controllers/posts.js";
 
 const postsRoute = express.Router();
 
-postsRoute.get("/", (req, res) => {
-  res.status(200).send("Welcome");
-});
-
+postsRoute.get('/api/posts', home);
 postsRoute.get("/api/posts/:id", verifyAccessToken, fetchPost);
 postsRoute.patch("/api/posts/:id", verifyAccessToken, updatePost);
 postsRoute.get('/api/posts/:id/comments', verifyAccessToken, fetchPostComments);
