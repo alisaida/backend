@@ -8,14 +8,13 @@ import ***REMOVED***
     fetchUserChatRooms,
     fetchChatRoomRecipients,
     createMessage,
-    fetchChatRoomMessages
+    fetchChatRoomMessages,
+    home
 ***REMOVED*** from '../controllers/chatrooms.js';
 
 const chatroomRoute = express.Router();
 
-chatroomRoute.get('/', (req, res) => ***REMOVED***
-    res.status(200).send('Welcome');
-***REMOVED***)
+chatroomRoute.get('/api/chats', home)
 
 chatroomRoute.get('/api/chats/:id', verifyAccessToken, fetchChatroom);
 chatroomRoute.patch('/api/chats/:id', verifyAccessToken, updateChatroom);

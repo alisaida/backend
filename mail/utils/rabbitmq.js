@@ -19,13 +19,8 @@ export const listenToEmailQueue = async () => ***REMOVED***
         amqpChannel.consume('RESET_PASSWORD', message => ***REMOVED***
             prepareEmail(message);
         ***REMOVED***);
-
-        process.on('beforeExit', () => ***REMOVED***
-            console.log('Closing amqp connection')
-        ***REMOVED***)
-
     ***REMOVED*** catch (err) ***REMOVED***
-        console.log(`$***REMOVED***err***REMOVED*** failed to connect to database`)
+        console.log(`$***REMOVED***err***REMOVED*** failed to connect to amqp`);
     ***REMOVED***
 ***REMOVED***
 
