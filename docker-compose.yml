@@ -1,6 +1,5 @@
 version: '3.9'
 services:
-  # rabbitmq container
   rabbitmq:
     hostname: rabbitmq
     image: 'rabbitmq:3.9-management-alpine'
@@ -13,13 +12,10 @@ services:
       RABBITMQ_DEFAULT_PASS: "guest"
     networks:
       - backend_network
-  # redis container
   redis-server:
-    container_name: auth-redis
     image: 'redis'
     networks:
       - backend_network
-  # nginx container
   nginx:
     image: nginx
     volumes:
@@ -33,12 +29,12 @@ services:
       - post
     networks:
       - backend_network
-  # auth service
   auth:
     build:
       context: ./auth
     environment:
-      - NODE_ENV=auth-service
+      - SERVICE_NAME=auth
+      - NODE_ENV=staging
       - REDIS_HOST=redis-server
       - AMQP_URL=amqp://guest:guest@rabbitmq:5672
     volumes:
@@ -51,56 +47,50 @@ services:
       - rabbitmq
     networks:
       - backend_network
-  # chat service
   chat:
     build:
       context: ./chat
     environment:
-      - NODE_ENV=chat-service
-      # - REDIS_HOST=redis-server
+      - SERVICE_NAME=chat
+      - NODE_ENV=staging
       - AMQP_URL=amqp://guest:guest@rabbitmq:5672
     volumes:
       - ./chat/:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       - rabbitmq
-      # - redis-server
     links: 
       - rabbitmq
     networks:
       - backend_network
-  # profile service    
   profile:
     build:
       context: ./profile
     environment:
-      - NODE_ENV=profile-service
-      # - REDIS_HOST=redis-server
+      - SERVICE_NAME=profile
+      - NODE_ENV=staging
       - AMQP_URL=amqp://guest:guest@rabbitmq:5672
     volumes:
       - ./profile/:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       - rabbitmq
-      # - redis-server
     links: 
       - rabbitmq
     networks:
       - backend_network   
-  # post service    
   post:
     build:
       context: ./post
     environment:
-      - NODE_ENV=post-service
-      # - REDIS_HOST=redis-server
+      - SERVICE_NAME=post
+      - NODE_ENV=staging
       - AMQP_URL=amqp://guest:guest@rabbitmq:5672
     volumes:
       - ./post/:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       - rabbitmq
-      # - redis-server
     links: 
       - rabbitmq
     networks:
