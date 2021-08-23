@@ -17,6 +17,22 @@ export const home = async (req, res, next) => ***REMOVED***
 ***REMOVED***
 
 /**
+ * fetch all posts
+ * @param ***REMOVED*******REMOVED*** req
+ * @param ***REMOVED*******REMOVED*** res
+ * @param ***REMOVED*******REMOVED*** next
+ */
+export const fetchFeed = async (req, res, next) => ***REMOVED***
+  try ***REMOVED***
+    const posts = await Post.find(***REMOVED******REMOVED***);
+
+    res.status(200).send(posts);
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error);
+  ***REMOVED***
+***REMOVED***;
+
+/**
  * fetch post by id, with comments and likes
  * @param ***REMOVED*******REMOVED*** req
  * @param ***REMOVED*******REMOVED*** res

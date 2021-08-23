@@ -12,13 +12,15 @@ import ***REMOVED***
   unLikePost,
   fetchLikedPosts,
   fetchLikes,
-  home
+  home,
+  fetchFeed
 ***REMOVED*** from "../controllers/posts.js";
 
 const postsRoute = express.Router();
 
 postsRoute.get('/api/posts', home);
 postsRoute.get("/api/posts/:id", verifyAccessToken, fetchPost);
+postsRoute.get("/api/posts/feed/all", verifyAccessToken, fetchFeed);
 postsRoute.patch("/api/posts/:id", verifyAccessToken, updatePost);
 postsRoute.get('/api/posts/:id/comments', verifyAccessToken, fetchPostComments);
 postsRoute.post("/api/posts/new", verifyAccessToken, createPost);
