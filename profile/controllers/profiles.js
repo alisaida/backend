@@ -16,6 +16,22 @@ export const home = async (req, res, next) => {
 }
 
 /**
+ * logs in user and generates a pair of access and refresh tokens
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const me = async (req, res, next) => {
+  try {
+    const profile = await Profile.findOne({ userId: req.authUser });
+
+    res.status(200).send({ profile });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * create profile
  * @param req
  * @param res

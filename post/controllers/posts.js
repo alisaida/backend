@@ -17,6 +17,22 @@ export const home = async (req, res, next) => {
 }
 
 /**
+ * fetch all posts
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+export const fetchFeed = async (req, res, next) => {
+  try {
+    const posts = await Post.find({});
+
+    res.status(200).send(posts);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * fetch post by id, with comments and likes
  * @param {*} req
  * @param {*} res
