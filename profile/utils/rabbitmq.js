@@ -1,7 +1,8 @@
 import amqp from 'amqplib';
 import mongoose from 'mongoose';
 
-import User from '../models/users.js'
+import User from '../models/users.js';
+import Profile from '../models/profiles.js';
 
 let amqpChannel;
 
@@ -24,17 +25,29 @@ const saveUser = async (message) => {
     const user = JSON.parse(message.content.toString());
     if (user) {
         console.log(`New asynchronous message received`);
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
 
-        const { userId, email, username, name } = user;
+            const { userId, email, username, name } = user;
 
-        const doesExist = await User.findOne({ email });
-        if (!doesExist) {
-            const userData = new User({ userId, email, username, name });
-            const savedUser = await userData.save();
-            if (savedUser && savedUser._id) {
+            const doesExist = await User.findOne({ email });
+            if (!doesExist) {
+                const userData = new User({ userId, email, username, name });
+                const profileData = new Profile({ userId, username, name });
+
+                await userData.save({ session });
+                await profileData.save({ session });
+
+                await session.commitTransaction();
+
                 console.log(`persisted event data for _id: ${userId}`);
+
                 amqpChannel.ack(message);
             }
+        } catch (err) {
+            console.log(`failed to persist user and profile data: ${err}`)
+            await session.abortTransaction();
         }
     }
 
