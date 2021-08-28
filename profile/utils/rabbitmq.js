@@ -25,11 +25,11 @@ const saveUser = async (message) => {
     if (user) {
         console.log(`New asynchronous message received`);
 
-        const { userId, email, mobile, name } = user;
+        const { userId, email, username, name } = user;
 
         const doesExist = await User.findOne({ email });
         if (!doesExist) {
-            const userData = new User({ userId, email, mobile, name });
+            const userData = new User({ userId, email, username, name });
             const savedUser = await userData.save();
             if (savedUser && savedUser._id) {
                 console.log(`persisted event data for _id: ${userId}`);

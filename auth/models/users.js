@@ -12,10 +12,10 @@ const userSchema = mongoose.Schema({
         lowercase: true,
         unique: true,
     },
-    mobile: {
+    username: {
         type: String,
-        required: false,
-        unique: false
+        required: true,
+        unique: true
     },
     isVerified: {
         type: Boolean,

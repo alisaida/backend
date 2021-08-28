@@ -36,7 +36,7 @@ export const login = async (req, res, next) => {
 
         const user = await User.findOne({ email });
         if (!user) {
-            throw createError.Unauthorized('User is not registered');
+            throw createError.Unauthorized('Invalid username or password');
         }
 
         const isMatch = await user.isValidPassword(password);
@@ -62,14 +62,19 @@ export const login = async (req, res, next) => {
  */
 export const register = async (req, res, next) => {
     try {
-        const { email, mobile, password } = req.body;
+        const { email, username, password } = req.body;
         //validate destructured fields 
-        await validateRegister(email, mobile, password);
+        await validateRegister(email, username, password);
 
         //check if user already exists and throw error if so
-        const doesExist = await User.findOne({ email });
+        let doesExist = await User.findOne({ email });
         if (doesExist) {
             throw createError.Conflict(`${email} already exists`);
+        }
+
+        doesExist = await User.findOne({ username });
+        if (doesExist) {
+            throw createError.Conflict(`${username} already exists`);
         }
 
         //otherwise save user into database and send a successful response
@@ -87,7 +92,7 @@ export const register = async (req, res, next) => {
                 userId: savedUser._id,
                 name: savedUser.name,
                 email: savedUser.email,
-                mobile: savedUser.mobile,
+                username: savedUser.username,
             }
             publishToQueue('USER_CHAT', data);
             publishToQueue('USER_POST', data);
@@ -97,6 +102,7 @@ export const register = async (req, res, next) => {
             data = {
                 name: savedUser.name,
                 email: savedUser.email,
+                username: savedUser.username,
                 subject: 'Welcome!',
                 uri: uri // verify your account
             }
@@ -175,7 +181,8 @@ export const forgotPassword = async (req, res, next) => {
 
         const user = await User.findOne({ email });
         if (!user) {
-            throw createError.Unauthorized('User not registered');
+            //if user is not registered, just send successful response, and avoid having a security hole
+            res.status(200).send();
         }
 
         const accessToken = await signPasswordResetToken(user);
