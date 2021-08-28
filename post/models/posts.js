@@ -5,7 +5,7 @@ const postSchema = mongoose.Schema({
     type: "string",
     required: true,
   },
-  content: {
+  caption: {
     type: "string",
     required: false,
   },

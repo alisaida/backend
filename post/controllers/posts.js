@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import Post from "../models/posts.js";
 import User from "../models/users.js";
 import Like from "../models/likes.js";
+import Bookmark from "../models/bookmarks.js";
 import Comment from "../models/comments.js";
 
 /**
@@ -160,12 +161,17 @@ export const createComment = async (req, res, next) => {
 export const createPost = async (req, res, next) => {
   const userId = req.authUser;
 
-  const { content, imageUri } = req.body;
+  const { caption, imageUri } = req.body;
 
   try {
+
+    if (!imageUri || imageUri === '') {
+      throw httpError.BadRequest('Image uri missing from the payload');
+    }
+
     const post = new Post({
       userId: userId,
-      content: content,
+      caption: caption,
       imageUri: imageUri,
     });
 
@@ -188,14 +194,13 @@ export const createPost = async (req, res, next) => {
  */
 export const updatePost = async (req, res, next) => {
   const postId = req.params.id;
-  const { content, imageUri } = req.body;
+  const { caption, imageUri } = req.body;
 
   try {
-    if (!postId && !content && !imageUri) {
-      throw httpError.BadRequest('postId not provided');
+    if (!postId) {
+      throw httpError.BadRequest();
     }
-
-    if (!postId && !content && !imageUri) {
+    else if (!caption && !imageUri) {
       throw httpError.BadRequest('nothing to update');
     }
 
@@ -203,7 +208,7 @@ export const updatePost = async (req, res, next) => {
       { _id: postId },
       {
         $set: {
-          content: content,
+          caption: caption,
           imageUri: imageUri,
           updatedAt: new Date()
         }
@@ -267,7 +272,7 @@ export const unLikePost = async (req, res, next) => {
 
     await like.delete();
 
-    res.status(201).send('Post unliked');
+    res.status(200).send('Post unliked');
   } catch (error) {
     next(error);
   }
@@ -297,7 +302,7 @@ export const fetchLikedPosts = async (req, res, next) => {
 };
 
 /**
- * fetch post likes
+ * fetch likes for a specific post
  * @param {*} req
  * @param {*} res
  * @param {*} next
@@ -348,6 +353,85 @@ const fetchLikesHelperFn = async (postId, next) => {
     const result = likes.map(likedPost => ({ _id: likedPost._id, userId: likedPost.userId }));
 
     return result;
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+/** 
+ * bookmark post
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const bookmarkPost = async (req, res, next) => {
+  const postId = req.params.id;
+  const userId = req.authUser;
+  if (!postId) {
+    throw httpError.BadRequest();
+  }
+  try {
+
+    const exists = await Bookmark.findOne({ postId: postId, userId: userId });
+    if (exists) {
+      throw httpError.Conflict();
+    }
+    const bookmarks = new Bookmark({ postId: postId, userId: userId });
+    await bookmarks.save();
+
+    res.status(201).send('Post bookmarked');
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** 
+ * un-bookmark post
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const unBookmarkPost = async (req, res, next) => {
+  const postId = req.params.id;
+  const userId = req.authUser;
+  if (!postId) {
+    throw httpError.BadRequest();
+  }
+  try {
+
+    const bookmark = await Bookmark.findOne({ postId: postId, userId: userId });
+    if (!bookmark) {
+      throw httpError.NotFound();
+    }
+
+    await bookmark.delete();
+
+    res.status(200).send('Post bookmarked removed');
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * fetch posts bookmarked by user
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+export const fetchBookmarkedPosts = async (req, res, next) => {
+  const userId = req.authUser;
+
+  try {
+    if (!userId) {
+      throw httpError.BadRequest();
+    }
+    const bookmarkedPosts = await Bookmark.find({ userId: userId });
+    const postIds = bookmarkedPosts.map(bookmarkedPost => bookmarkedPost.postId);
+    console.log(postIds)
+    const bookmarks = await Bookmark.find({ postId: { $in: postIds } });
+
+    res.status(200).send(bookmarks);
   } catch (error) {
     next(error);
   }
