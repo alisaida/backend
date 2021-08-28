@@ -36,7 +36,7 @@ export const login = async (req, res, next) => ***REMOVED***
 
         const user = await User.findOne(***REMOVED*** email ***REMOVED***);
         if (!user) ***REMOVED***
-            throw createError.Unauthorized('User is not registered');
+            throw createError.Unauthorized('Invalid username or password');
         ***REMOVED***
 
         const isMatch = await user.isValidPassword(password);
@@ -62,14 +62,19 @@ export const login = async (req, res, next) => ***REMOVED***
  */
 export const register = async (req, res, next) => ***REMOVED***
     try ***REMOVED***
-        const ***REMOVED*** email, mobile, password ***REMOVED*** = req.body;
+        const ***REMOVED*** email, username, password ***REMOVED*** = req.body;
         //validate destructured fields 
-        await validateRegister(email, mobile, password);
+        await validateRegister(email, username, password);
 
         //check if user already exists and throw error if so
-        const doesExist = await User.findOne(***REMOVED*** email ***REMOVED***);
+        let doesExist = await User.findOne(***REMOVED*** email ***REMOVED***);
         if (doesExist) ***REMOVED***
             throw createError.Conflict(`$***REMOVED***email***REMOVED*** already exists`);
+        ***REMOVED***
+
+        doesExist = await User.findOne(***REMOVED*** username ***REMOVED***);
+        if (doesExist) ***REMOVED***
+            throw createError.Conflict(`$***REMOVED***username***REMOVED*** already exists`);
         ***REMOVED***
 
         //otherwise save user into database and send a successful response
@@ -87,7 +92,7 @@ export const register = async (req, res, next) => ***REMOVED***
                 userId: savedUser._id,
                 name: savedUser.name,
                 email: savedUser.email,
-                mobile: savedUser.mobile,
+                username: savedUser.username,
             ***REMOVED***
             publishToQueue('USER_CHAT', data);
             publishToQueue('USER_POST', data);
@@ -97,6 +102,7 @@ export const register = async (req, res, next) => ***REMOVED***
             data = ***REMOVED***
                 name: savedUser.name,
                 email: savedUser.email,
+                username: savedUser.username,
                 subject: 'Welcome!',
                 uri: uri // verify your account
             ***REMOVED***
@@ -175,7 +181,8 @@ export const forgotPassword = async (req, res, next) => ***REMOVED***
 
         const user = await User.findOne(***REMOVED*** email ***REMOVED***);
         if (!user) ***REMOVED***
-            throw createError.Unauthorized('User not registered');
+            //if user is not registered, just send successful response, and avoid having a security hole
+            res.status(200).send();
         ***REMOVED***
 
         const accessToken = await signPasswordResetToken(user);
