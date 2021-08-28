@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import Post from "../models/posts.js";
 import User from "../models/users.js";
 import Like from "../models/likes.js";
+import Bookmark from "../models/bookmarks.js";
 import Comment from "../models/comments.js";
 
 /**
@@ -160,12 +161,17 @@ export const createComment = async (req, res, next) => ***REMOVED***
 export const createPost = async (req, res, next) => ***REMOVED***
   const userId = req.authUser;
 
-  const ***REMOVED*** content, imageUri ***REMOVED*** = req.body;
+  const ***REMOVED*** caption, imageUri ***REMOVED*** = req.body;
 
   try ***REMOVED***
+
+    if (!imageUri || imageUri === '') ***REMOVED***
+      throw httpError.BadRequest('Image uri missing from the payload');
+    ***REMOVED***
+
     const post = new Post(***REMOVED***
       userId: userId,
-      content: content,
+      caption: caption,
       imageUri: imageUri,
     ***REMOVED***);
 
@@ -188,14 +194,13 @@ export const createPost = async (req, res, next) => ***REMOVED***
  */
 export const updatePost = async (req, res, next) => ***REMOVED***
   const postId = req.params.id;
-  const ***REMOVED*** content, imageUri ***REMOVED*** = req.body;
+  const ***REMOVED*** caption, imageUri ***REMOVED*** = req.body;
 
   try ***REMOVED***
-    if (!postId && !content && !imageUri) ***REMOVED***
-      throw httpError.BadRequest('postId not provided');
+    if (!postId) ***REMOVED***
+      throw httpError.BadRequest();
     ***REMOVED***
-
-    if (!postId && !content && !imageUri) ***REMOVED***
+    else if (!caption && !imageUri) ***REMOVED***
       throw httpError.BadRequest('nothing to update');
     ***REMOVED***
 
@@ -203,7 +208,7 @@ export const updatePost = async (req, res, next) => ***REMOVED***
       ***REMOVED*** _id: postId ***REMOVED***,
       ***REMOVED***
         $set: ***REMOVED***
-          content: content,
+          caption: caption,
           imageUri: imageUri,
           updatedAt: new Date()
         ***REMOVED***
@@ -267,7 +272,7 @@ export const unLikePost = async (req, res, next) => ***REMOVED***
 
     await like.delete();
 
-    res.status(201).send('Post unliked');
+    res.status(200).send('Post unliked');
   ***REMOVED*** catch (error) ***REMOVED***
     next(error);
   ***REMOVED***
@@ -297,7 +302,7 @@ export const fetchLikedPosts = async (req, res, next) => ***REMOVED***
 ***REMOVED***;
 
 /**
- * fetch post likes
+ * fetch likes for a specific post
  * @param ***REMOVED*******REMOVED*** req
  * @param ***REMOVED*******REMOVED*** res
  * @param ***REMOVED*******REMOVED*** next
@@ -348,6 +353,85 @@ const fetchLikesHelperFn = async (postId, next) => ***REMOVED***
     const result = likes.map(likedPost => (***REMOVED*** _id: likedPost._id, userId: likedPost.userId ***REMOVED***));
 
     return result;
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error);
+  ***REMOVED***
+***REMOVED***;
+
+
+/** 
+ * bookmark post
+ * @param ***REMOVED*******REMOVED*** req 
+ * @param ***REMOVED*******REMOVED*** res 
+ * @param ***REMOVED*******REMOVED*** next 
+ */
+export const bookmarkPost = async (req, res, next) => ***REMOVED***
+  const postId = req.params.id;
+  const userId = req.authUser;
+  if (!postId) ***REMOVED***
+    throw httpError.BadRequest();
+  ***REMOVED***
+  try ***REMOVED***
+
+    const exists = await Bookmark.findOne(***REMOVED*** postId: postId, userId: userId ***REMOVED***);
+    if (exists) ***REMOVED***
+      throw httpError.Conflict();
+    ***REMOVED***
+    const bookmarks = new Bookmark(***REMOVED*** postId: postId, userId: userId ***REMOVED***);
+    await bookmarks.save();
+
+    res.status(201).send('Post bookmarked');
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error);
+  ***REMOVED***
+***REMOVED***;
+
+/** 
+ * un-bookmark post
+ * @param ***REMOVED*******REMOVED*** req 
+ * @param ***REMOVED*******REMOVED*** res 
+ * @param ***REMOVED*******REMOVED*** next 
+ */
+export const unBookmarkPost = async (req, res, next) => ***REMOVED***
+  const postId = req.params.id;
+  const userId = req.authUser;
+  if (!postId) ***REMOVED***
+    throw httpError.BadRequest();
+  ***REMOVED***
+  try ***REMOVED***
+
+    const bookmark = await Bookmark.findOne(***REMOVED*** postId: postId, userId: userId ***REMOVED***);
+    if (!bookmark) ***REMOVED***
+      throw httpError.NotFound();
+    ***REMOVED***
+
+    await bookmark.delete();
+
+    res.status(200).send('Post bookmarked removed');
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error);
+  ***REMOVED***
+***REMOVED***;
+
+/**
+ * fetch posts bookmarked by user
+ * @param ***REMOVED*******REMOVED*** req
+ * @param ***REMOVED*******REMOVED*** res
+ * @param ***REMOVED*******REMOVED*** next
+ */
+export const fetchBookmarkedPosts = async (req, res, next) => ***REMOVED***
+  const userId = req.authUser;
+
+  try ***REMOVED***
+    if (!userId) ***REMOVED***
+      throw httpError.BadRequest();
+    ***REMOVED***
+    const bookmarkedPosts = await Bookmark.find(***REMOVED*** userId: userId ***REMOVED***);
+    const postIds = bookmarkedPosts.map(bookmarkedPost => bookmarkedPost.postId);
+    console.log(postIds)
+    const bookmarks = await Bookmark.find(***REMOVED*** postId: ***REMOVED*** $in: postIds ***REMOVED*** ***REMOVED***);
+
+    res.status(200).send(bookmarks);
   ***REMOVED*** catch (error) ***REMOVED***
     next(error);
   ***REMOVED***

@@ -5,7 +5,7 @@ const postSchema = mongoose.Schema(***REMOVED***
     type: "string",
     required: true,
   ***REMOVED***,
-  content: ***REMOVED***
+  caption: ***REMOVED***
     type: "string",
     required: false,
   ***REMOVED***,
