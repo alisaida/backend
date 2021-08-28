@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import createError from 'http-errors';
 import ***REMOVED*** validateLogin, validateRegister ***REMOVED*** from '../utils/validator.js';
+import lodash from 'lodash';
 
 
 import User from '../models/users.js'
@@ -21,6 +22,22 @@ const router = express.Router();
 
 export const home = async (req, res, next) => ***REMOVED***
     res.send('Welcome!');
+***REMOVED***
+
+/**
+ * returns the user object for current authenticated user
+ * @param ***REMOVED*******REMOVED*** req 
+ * @param ***REMOVED*******REMOVED*** res 
+ * @param ***REMOVED*******REMOVED*** next 
+ */
+export const me = async (req, res, next) => ***REMOVED***
+    try ***REMOVED***
+        const user = await User.findOne(***REMOVED*** _id: req.authUser ***REMOVED***);
+        const result = lodash.pick(user, ['name', 'email', 'username', '_id', 'isVerified']);
+        res.status(200).send(result);
+    ***REMOVED*** catch (err) ***REMOVED***
+        next(err);
+    ***REMOVED***
 ***REMOVED***
 
 /**

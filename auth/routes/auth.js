@@ -1,9 +1,10 @@
 import express from 'express';
-import ***REMOVED*** home, login, logout, register, refreshToken, forgotPassword, resetPassword, verifyAccount ***REMOVED*** from '../controllers/Auth.js';
+import ***REMOVED*** home, login, logout, register, refreshToken, forgotPassword, resetPassword, verifyAccount, me ***REMOVED*** from '../controllers/Auth.js';
 import ***REMOVED*** verifyAccessToken ***REMOVED*** from '../utils/jwt.js';
 
 const authRoute = express.Router();
 authRoute.get('/api/auth/', home);
+authRoute.get('/api/auth/me', verifyAccessToken, me);
 authRoute.post('/api/auth/login', login);
 authRoute.post('/api/auth/logout', logout);
 authRoute.post('/api/auth/register', register);
