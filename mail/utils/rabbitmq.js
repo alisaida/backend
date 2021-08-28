@@ -27,7 +27,7 @@ export const listenToEmailQueue = async () => {
 const prepareEmail = async (message) => {
     const data = JSON.parse(message.content.toString());
     if (data) {
-        console.log(`New email event data`);
+        console.log(`New asynchronous message received`);
         prepareAndSendEmail(data);
         amqpChannel.ack(message);
     }

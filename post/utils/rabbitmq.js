@@ -9,10 +9,10 @@ export const consumeUsersQueue = async () => {
     try {
         const conn = await amqp.connect(process.env.AMQP_URL);
         amqpChannel = await conn.createChannel();
-        await amqpChannel.assertQueue('USER');
+        await amqpChannel.assertQueue('USER_POST');
         console.log(`rabbitmq connection successful: ${process.env.AMQP_URL}`);
 
-        amqpChannel.consume('USER', message => {
+        amqpChannel.consume('USER_POST', message => {
             saveUser(message);
         })
     } catch (err) {
@@ -23,7 +23,7 @@ export const consumeUsersQueue = async () => {
 const saveUser = async (message) => {
     const user = JSON.parse(message.content.toString());
     if (user) {
-        console.log(`New user event data`);
+        console.log(`New asynchronous message received`);
 
         const { userId, email, mobile, name } = user;
 
