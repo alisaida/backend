@@ -89,7 +89,9 @@ export const register = async (req, res, next) => ***REMOVED***
                 email: savedUser.email,
                 mobile: savedUser.mobile,
             ***REMOVED***
-            publishToQueue('USER', data);
+            publishToQueue('USER_CHAT', data);
+            publishToQueue('USER_POST', data);
+            publishToQueue('USER_PROFILE', data);
 
             // prepare payload for the email service
             data = ***REMOVED***
