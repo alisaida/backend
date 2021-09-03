@@ -20,6 +20,7 @@ services:
     image: nginx
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/static:/var/www/html/web/static
     ports:
       - "5000:80"
     depends_on:
@@ -32,87 +33,74 @@ services:
   auth:
     build:
       context: ./auth
-    environment:
-      - SERVICE_NAME=auth
-      - NODE_ENV=staging
-      - REDIS_HOST=redis-server
-      - AMQP_URL=amqp://guest:guest@rabbitmq:5672
+    env_file:
+      - ./auth.env
     volumes:
       - ./auth/:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       - rabbitmq
       - redis-server
-    links: 
+    links:
       - rabbitmq
     networks:
       - backend_network
   chat:
     build:
       context: ./chat
-    environment:
-      - SERVICE_NAME=chat
-      - NODE_ENV=staging
-      - AMQP_URL=amqp://guest:guest@rabbitmq:5672
+    env_file:
+      - ./chat.env
     volumes:
       - ./chat/:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       - rabbitmq
-    links: 
+    links:
       - rabbitmq
     networks:
       - backend_network
   profile:
     build:
       context: ./profile
-    environment:
-      - SERVICE_NAME=profile
-      - NODE_ENV=staging
-      - AMQP_URL=amqp://guest:guest@rabbitmq:5672
+    env_file:
+      - ./profile.env
     volumes:
       - ./profile/:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       - rabbitmq
-    links: 
+    links:
       - rabbitmq
     networks:
-      - backend_network   
+      - backend_network
   post:
     build:
       context: ./post
-    environment:
-      - SERVICE_NAME=post
-      - NODE_ENV=staging
-      - AMQP_URL=amqp://guest:guest@rabbitmq:5672
+    env_file:
+      - ./post.env
     volumes:
       - ./post/:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       - rabbitmq
-    links: 
+    links:
       - rabbitmq
     networks:
       - backend_network
-  # # mail service    
-  # mail:
-  #   build:
-  #     context: ./mail
-  #   environment:
-  #     - NODE_ENV=mail-service
-  #     # - REDIS_HOST=redis-server
-  #     - AMQP_URL=amqp://guest:guest@rabbitmq:5672
-  #   volumes:
-  #     - ./mail/:/usr/src/app
-  #     - /usr/src/app/node_modules
-  #   depends_on:
-  #     - rabbitmq
-  #     # - redis-server
-  #   links: 
-  #     - rabbitmq
-  #   networks:
-  #     - backend_network
+  mail:
+     build:
+       context: ./mail
+     env_file:
+       - ./mail.env
+     volumes:
+       - ./mail/:/usr/src/app
+       - /usr/src/app/node_modules
+     depends_on:
+       - rabbitmq
+     links:
+       - rabbitmq
+     networks:
+       - backend_network
 networks:
   backend_network:
     driver: bridge
