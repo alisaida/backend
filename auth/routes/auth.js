@@ -1,5 +1,5 @@
 import express from 'express';
-import { home, login, logout, register, refreshToken, forgotPassword, resetPassword, verifyAccount, me } from '../controllers/Auth.js';
+import { home, login, logout, register, refreshToken, forgotPassword, resetPassword, verifyAccount, me } from '../controllers/auth.js';
 import { verifyAccessToken } from '../utils/jwt.js';
 
 const authRoute = express.Router();
