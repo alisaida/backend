@@ -13,7 +13,7 @@ export const signAccessToken = (userId) => ***REMOVED***
         const payload = ***REMOVED******REMOVED***
 
         const secret = process.env.ACCESS_TOKEN_SECRET;
-        const expiresIn = process.env.NODE_ENV === 'dev' ? '48hr' : '15m';
+        const expiresIn = process.env.NODE_ENV === 'dev' ? '1hr' : '15m';
 
         const options = ***REMOVED***
             expiresIn: expiresIn,
@@ -43,7 +43,7 @@ export const signRefreshToken = (userId) => ***REMOVED***
         const secret = process.env.REFRESH_TOKEN_SECRET;
 
         const options = ***REMOVED***
-            expiresIn: '1y',
+            expiresIn: '7d',
             audience: userId,
             issuer: 'https://www.mywebsite.com'
         ***REMOVED***
@@ -55,7 +55,7 @@ export const signRefreshToken = (userId) => ***REMOVED***
             ***REMOVED***
 
             // guard against reusing the same refresh token multiple times, alway over write it
-            redisClient.SET(userId, token, 'EX', 60 * 60 * 24 * 365, (error, reply) => ***REMOVED***
+            redisClient.SET(userId, token, 'EX', 60 * 60 * 24 * 7, (error, reply) => ***REMOVED***
                 if (error) ***REMOVED***
                     console.log(error.message);
                     return reject(createError.InternalServerError());
