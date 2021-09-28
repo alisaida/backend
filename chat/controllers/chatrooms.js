@@ -125,9 +125,9 @@ export const fetchChatRoomRecipients = async (req, res, next) => ***REMOVED***
  * @param ***REMOVED*******REMOVED*** next 
  */
 export const createChatroom = async (req, res, next) => ***REMOVED***
-    const ***REMOVED*** email ***REMOVED*** = req.body;
+    const ***REMOVED*** username ***REMOVED*** = req.body;
 
-    if (!email) ***REMOVED***
+    if (!username) ***REMOVED***
         throw createHttpError.BadRequest();
     ***REMOVED***
 
@@ -137,7 +137,7 @@ export const createChatroom = async (req, res, next) => ***REMOVED***
         session.startTransaction();
 
         const sender = await User.findOne(***REMOVED*** userId: req.authUser ***REMOVED***);
-        const recipient = await User.findOne(***REMOVED*** email ***REMOVED***);
+        const recipient = await User.findOne(***REMOVED*** username ***REMOVED***);
 
         if (!recipient) ***REMOVED***
             throw createHttpError.InternalServerError();
