@@ -8,9 +8,9 @@ import Message from '../models/messages.js'
 
 /**
  * home
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
 export const home = async (req, res, next) => {
     res.send('Welcome!');
@@ -18,9 +18,9 @@ export const home = async (req, res, next) => {
 
 /**
  * fetch entire chatroom data, recipients and messages
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
 export const fetchChatroom = async (req, res, next) => {
     const chatRoomId = req.params.id;
@@ -53,47 +53,64 @@ export const fetchChatroom = async (req, res, next) => {
 }
 
 /**
- * fetch all chatrooms where user is recipient
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
+ * fetch all chatrooms where current authenticated user is recipient
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const fetchUserChatRooms = async (req, res, next) => {
+export const me = async (req, res, next) => {
 
-    const userId = req.params.id
     try {
-        const doesExist = await User.findOne({ userId });
 
-        if (!doesExist) {
-            throw createHttpError.NotFound();
+        const user = await User.findOne({ userId: req.authUser });
+        const chatRooms = await fetchChatsByUserId(user.userId);
+
+        if(chatRooms){
+            res.status(200).send({ chatRooms });
+        }else{
+            throw createHttpError.InternalServerError();
         }
-
-        const chatRoomsArray = await ChatRoomUser.find({ userId: userId });
-
-        //if user isnt part of any chatrooms
-        if (!chatRoomsArray || chatRoomsArray.length === 0) {
-            res.status(200).send([]);
-        }
-
-        //otherwise link ChatRoomUsers back to chatrooms data
-        const chatRoomIds = chatRoomsArray.map(chatRoomUser => {
-            return {
-                _id: chatRoomUser.chatRoomId
-            }
-        });
-        const chatRooms = await ChatRoom.find({ _id: { $in: chatRoomIds } });
-
-        res.status(200).send({ chatRooms });
-    } catch (error) {
-        next(error);
+    } catch (err) {
+        next(err);
     }
 }
 
 /**
+ * fetch all chatrooms where user is recipient
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+export const fetchUserChatRooms = async (req, res, next) => {
+    try {
+
+        const userId = req.params.id
+
+        const doesExist = await User.findOne({userId});
+
+        if (!doesExist) {
+            throw createHttpError.NotFound("User not found!");
+        }
+
+        const chatRooms = await fetchChatsByUserId(userId);
+
+        if(chatRooms){
+            res.status(200).send({ chatRooms });
+        }else{
+            throw createHttpError.InternalServerError();
+        }
+    }catch (err) {
+        next(err);
+    }
+
+
+}
+
+/**
  * fetch chatroom recipients
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
 export const fetchChatRoomRecipients = async (req, res, next) => {
     const chatRoomId = req.params.id;
@@ -120,9 +137,9 @@ export const fetchChatRoomRecipients = async (req, res, next) => {
 
 /**
  * creates a new chatoom entity
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
 export const createChatroom = async (req, res, next) => {
     const { username } = req.body;
@@ -169,9 +186,9 @@ export const createChatroom = async (req, res, next) => {
 
 /**
  * update chatroom and links recipient to chatroom if included in the request payload
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
 export const updateChatroom = async (req, res, next) => {
     const chatRoomId = req.params.id;
@@ -222,8 +239,8 @@ export const updateChatroom = async (req, res, next) => {
 
 /**
  * reusable helper function to return chatroom recipients
- * @param {*} chatRoomId 
- * @returns 
+ * @param {*} chatRoomId
+ * @returns
  */
 const getRecipientsHelperFn = async (chatRoomId) => {
     if (!chatRoomId) {
@@ -244,8 +261,7 @@ const getRecipientsHelperFn = async (chatRoomId) => {
         return {
             userId: user.userId,
             name: user.name,
-            email: user.email,
-            mobile: user.mobile,
+            username: user.username,
         }
     })
 
@@ -298,9 +314,9 @@ export const createMessage = async (req, res, next) => {
 
 /**
  * retreive chat messages
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
 export const fetchChatRoomMessages = async (req, res, next) => {
 
@@ -326,5 +342,40 @@ const fetchMessagesHelperFn = async (chatRoomId) => {
         return messages;
     } catch (error) {
         next(error);
+    }
+}
+
+/**
+ * reusable helper function to retrieve chat rooms by userId
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+export const fetchChatsByUserId = async (userId) => {
+    try {
+        const doesExist = await User.findOne({ userId });
+
+        if (!doesExist) {
+            throw createHttpError.NotFound();
+        }
+
+        const chatRoomsArray = await ChatRoomUser.find({ userId: userId });
+
+        //if user isnt part of any chatrooms
+        if (!chatRoomsArray || chatRoomsArray.length === 0) {
+            res.status(200).send([]);
+        }
+
+        //otherwise link ChatRoomUsers back to chatrooms data
+        const chatRoomIds = chatRoomsArray.map(chatRoomUser => {
+            return {
+                _id: chatRoomUser.chatRoomId
+            }
+        });
+        const chatRooms = await ChatRoom.find({ _id: { $in: chatRoomIds } });
+
+        return chatRooms;
+    } catch (error) {
+        return null;
     }
 }
