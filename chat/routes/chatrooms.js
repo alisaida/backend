@@ -9,13 +9,14 @@ import ***REMOVED***
     fetchChatRoomRecipients,
     createMessage,
     fetchChatRoomMessages,
+    me,
     home
 ***REMOVED*** from '../controllers/chatrooms.js';
 
 const chatroomRoute = express.Router();
 
-chatroomRoute.get('/api/chats', home)
-
+chatroomRoute.get('/api/chats', home);
+chatroomRoute.get('/api/chats/me', verifyAccessToken, me);
 chatroomRoute.get('/api/chats/:id', verifyAccessToken, fetchChatroom);
 chatroomRoute.patch('/api/chats/:id', verifyAccessToken, updateChatroom);
 chatroomRoute.post('/api/chats/new', verifyAccessToken, createChatroom); //push new chat data to rabbitmq

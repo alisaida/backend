@@ -8,9 +8,9 @@ import Message from '../models/messages.js'
 
 /**
  * home
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param ***REMOVED*******REMOVED*** req
+ * @param ***REMOVED*******REMOVED*** res
+ * @param ***REMOVED*******REMOVED*** next
  */
 export const home = async (req, res, next) => ***REMOVED***
     res.send('Welcome!');
@@ -18,9 +18,9 @@ export const home = async (req, res, next) => ***REMOVED***
 
 /**
  * fetch entire chatroom data, recipients and messages
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param ***REMOVED*******REMOVED*** req
+ * @param ***REMOVED*******REMOVED*** res
+ * @param ***REMOVED*******REMOVED*** next
  */
 export const fetchChatroom = async (req, res, next) => ***REMOVED***
     const chatRoomId = req.params.id;
@@ -53,47 +53,64 @@ export const fetchChatroom = async (req, res, next) => ***REMOVED***
 ***REMOVED***
 
 /**
- * fetch all chatrooms where user is recipient
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * fetch all chatrooms where current authenticated user is recipient
+ * @param ***REMOVED*******REMOVED*** req
+ * @param ***REMOVED*******REMOVED*** res
+ * @param ***REMOVED*******REMOVED*** next
  */
-export const fetchUserChatRooms = async (req, res, next) => ***REMOVED***
+export const me = async (req, res, next) => ***REMOVED***
 
-    const userId = req.params.id
     try ***REMOVED***
-        const doesExist = await User.findOne(***REMOVED*** userId ***REMOVED***);
 
-        if (!doesExist) ***REMOVED***
-            throw createHttpError.NotFound();
+        const user = await User.findOne(***REMOVED*** userId: req.authUser ***REMOVED***);
+        const chatRooms = await fetchChatsByUserId(user.userId);
+
+        if(chatRooms)***REMOVED***
+            res.status(200).send(***REMOVED*** chatRooms ***REMOVED***);
+        ***REMOVED***else***REMOVED***
+            throw createHttpError.InternalServerError();
         ***REMOVED***
-
-        const chatRoomsArray = await ChatRoomUser.find(***REMOVED*** userId: userId ***REMOVED***);
-
-        //if user isnt part of any chatrooms
-        if (!chatRoomsArray || chatRoomsArray.length === 0) ***REMOVED***
-            res.status(200).send([]);
-        ***REMOVED***
-
-        //otherwise link ChatRoomUsers back to chatrooms data
-        const chatRoomIds = chatRoomsArray.map(chatRoomUser => ***REMOVED***
-            return ***REMOVED***
-                _id: chatRoomUser.chatRoomId
-            ***REMOVED***
-        ***REMOVED***);
-        const chatRooms = await ChatRoom.find(***REMOVED*** _id: ***REMOVED*** $in: chatRoomIds ***REMOVED*** ***REMOVED***);
-
-        res.status(200).send(***REMOVED*** chatRooms ***REMOVED***);
-    ***REMOVED*** catch (error) ***REMOVED***
-        next(error);
+    ***REMOVED*** catch (err) ***REMOVED***
+        next(err);
     ***REMOVED***
 ***REMOVED***
 
 /**
+ * fetch all chatrooms where user is recipient
+ * @param ***REMOVED*******REMOVED*** req
+ * @param ***REMOVED*******REMOVED*** res
+ * @param ***REMOVED*******REMOVED*** next
+ */
+export const fetchUserChatRooms = async (req, res, next) => ***REMOVED***
+    try ***REMOVED***
+
+        const userId = req.params.id
+
+        const doesExist = await User.findOne(***REMOVED***userId***REMOVED***);
+
+        if (!doesExist) ***REMOVED***
+            throw createHttpError.NotFound("User not found!");
+        ***REMOVED***
+
+        const chatRooms = await fetchChatsByUserId(userId);
+
+        if(chatRooms)***REMOVED***
+            res.status(200).send(***REMOVED*** chatRooms ***REMOVED***);
+        ***REMOVED***else***REMOVED***
+            throw createHttpError.InternalServerError();
+        ***REMOVED***
+    ***REMOVED***catch (err) ***REMOVED***
+        next(err);
+    ***REMOVED***
+
+
+***REMOVED***
+
+/**
  * fetch chatroom recipients
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param ***REMOVED*******REMOVED*** req
+ * @param ***REMOVED*******REMOVED*** res
+ * @param ***REMOVED*******REMOVED*** next
  */
 export const fetchChatRoomRecipients = async (req, res, next) => ***REMOVED***
     const chatRoomId = req.params.id;
@@ -120,9 +137,9 @@ export const fetchChatRoomRecipients = async (req, res, next) => ***REMOVED***
 
 /**
  * creates a new chatoom entity
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param ***REMOVED*******REMOVED*** req
+ * @param ***REMOVED*******REMOVED*** res
+ * @param ***REMOVED*******REMOVED*** next
  */
 export const createChatroom = async (req, res, next) => ***REMOVED***
     const ***REMOVED*** username ***REMOVED*** = req.body;
@@ -169,9 +186,9 @@ export const createChatroom = async (req, res, next) => ***REMOVED***
 
 /**
  * update chatroom and links recipient to chatroom if included in the request payload
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param ***REMOVED*******REMOVED*** req
+ * @param ***REMOVED*******REMOVED*** res
+ * @param ***REMOVED*******REMOVED*** next
  */
 export const updateChatroom = async (req, res, next) => ***REMOVED***
     const chatRoomId = req.params.id;
@@ -222,8 +239,8 @@ export const updateChatroom = async (req, res, next) => ***REMOVED***
 
 /**
  * reusable helper function to return chatroom recipients
- * @param ***REMOVED*******REMOVED*** chatRoomId 
- * @returns 
+ * @param ***REMOVED*******REMOVED*** chatRoomId
+ * @returns
  */
 const getRecipientsHelperFn = async (chatRoomId) => ***REMOVED***
     if (!chatRoomId) ***REMOVED***
@@ -244,8 +261,7 @@ const getRecipientsHelperFn = async (chatRoomId) => ***REMOVED***
         return ***REMOVED***
             userId: user.userId,
             name: user.name,
-            email: user.email,
-            mobile: user.mobile,
+            username: user.username,
         ***REMOVED***
     ***REMOVED***)
 
@@ -298,9 +314,9 @@ export const createMessage = async (req, res, next) => ***REMOVED***
 
 /**
  * retreive chat messages
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param ***REMOVED*******REMOVED*** req
+ * @param ***REMOVED*******REMOVED*** res
+ * @param ***REMOVED*******REMOVED*** next
  */
 export const fetchChatRoomMessages = async (req, res, next) => ***REMOVED***
 
@@ -326,5 +342,40 @@ const fetchMessagesHelperFn = async (chatRoomId) => ***REMOVED***
         return messages;
     ***REMOVED*** catch (error) ***REMOVED***
         next(error);
+    ***REMOVED***
+***REMOVED***
+
+/**
+ * reusable helper function to retrieve chat rooms by userId
+ * @param ***REMOVED*******REMOVED*** req
+ * @param ***REMOVED*******REMOVED*** res
+ * @param ***REMOVED*******REMOVED*** next
+ */
+export const fetchChatsByUserId = async (userId) => ***REMOVED***
+    try ***REMOVED***
+        const doesExist = await User.findOne(***REMOVED*** userId ***REMOVED***);
+
+        if (!doesExist) ***REMOVED***
+            throw createHttpError.NotFound();
+        ***REMOVED***
+
+        const chatRoomsArray = await ChatRoomUser.find(***REMOVED*** userId: userId ***REMOVED***);
+
+        //if user isnt part of any chatrooms
+        if (!chatRoomsArray || chatRoomsArray.length === 0) ***REMOVED***
+            res.status(200).send([]);
+        ***REMOVED***
+
+        //otherwise link ChatRoomUsers back to chatrooms data
+        const chatRoomIds = chatRoomsArray.map(chatRoomUser => ***REMOVED***
+            return ***REMOVED***
+                _id: chatRoomUser.chatRoomId
+            ***REMOVED***
+        ***REMOVED***);
+        const chatRooms = await ChatRoom.find(***REMOVED*** _id: ***REMOVED*** $in: chatRoomIds ***REMOVED*** ***REMOVED***);
+
+        return chatRooms;
+    ***REMOVED*** catch (error) ***REMOVED***
+        return null;
     ***REMOVED***
 ***REMOVED***
