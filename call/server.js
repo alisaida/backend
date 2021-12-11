@@ -19,7 +19,7 @@ const peerServer = ExpressPeerServer(server, ***REMOVED***
 
 app.use('/peerjs', peerServer);
 
-const PORT = 5000;
+const PORT = 5053;
 
 app.get('/', (req, res) => ***REMOVED***
 	res.send('server is running');
@@ -50,6 +50,12 @@ const removeClientFromSocketMap = (userId, socketId) => ***REMOVED***
 	***REMOVED***
 ***REMOVED***
 
+const getUserSocketId = (userId) => ***REMOVED***
+	const userSocketIdSet = userSocketIdMap.get(userId);
+	const socketId = [...userSocketIdSet][0];
+	return socketId;
+***REMOVED***
+
 io.on("connection", (socket) => ***REMOVED***
 	console.log('socket id: ', socket.id)
 	let userId = socket.handshake.query.userId;
@@ -64,18 +70,15 @@ io.on("connection", (socket) => ***REMOVED***
 	***REMOVED***);
 
 	socket.on("end-call", (callData) => ***REMOVED***
-		if (callData.sockets.to)
-			io.to(callData.sockets.to).emit("call-ended", callData);
-		if (callData.sockets.from)
-			io.to(callData.sockets.from).emit("call-ended", callData);
+		console.log('ending call', callData);
+		socket.broadcast.emit("call-ended", callData);
 	***REMOVED***);
 
 	socket.on("call-user", (callData) => ***REMOVED***
 		console.log('calling user...', callData.callId.to.name);
 
 		if (userSocketIdMap.has(callData.callId.to.userId)) ***REMOVED***
-			const userSocketIdSet = userSocketIdMap.get(callData.callId.to.userId);
-			const socketIdToCall = [...userSocketIdSet][0];
+			const socketIdToCall = getUserSocketId(callData.callId.to.userId);
 
 			const data = ***REMOVED*** ...callData, sockets: ***REMOVED*** from: socket.id, to: socketIdToCall ***REMOVED*** ***REMOVED***;
 
@@ -91,11 +94,10 @@ io.on("connection", (socket) => ***REMOVED***
 	***REMOVED***);
 
 	socket.on("accept-call", (callData) => ***REMOVED***
-		console.log('accepted call...')
-		console.log('callData', callData)
-		const userSocketIdSet = userSocketIdMap.get(callData.callId.to.userId);
-		const socketIdToCall = [...userSocketIdSet][0];
-		io.to(socketIdToCall).emit("accept-call", callData);
+		// console.log('accepted call: ', callData)
+		const socketIdToCall = getUserSocketId(callData.callId.from.userId);
+		if (socketIdToCall)
+			io.to(socketIdToCall).emit("call-connected", callData);
 	***REMOVED***);
 ***REMOVED***);
 
