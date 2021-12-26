@@ -127,6 +127,74 @@ export const fetchProfileByQueryParams = async (req, res, next) => ***REMOVED***
 ***REMOVED***
 
 /**
+ * update profile picture
+ * @param req
+ * @param res
+ * @param next
+ */
+export const updateProfilePicture = async (req, res, next) => ***REMOVED***
+  const userId = req.authUser;
+  const ***REMOVED*** imageUri ***REMOVED*** = req.body;
+
+  try ***REMOVED***
+    if (!imageUri) ***REMOVED***
+      throw httpError.BadRequest('missing profile picture image uri from the request body: imageUri');
+    ***REMOVED***
+
+    await Profile.findOneAndUpdate(
+      ***REMOVED*** userId: userId ***REMOVED***,
+      ***REMOVED***
+        $set: ***REMOVED***
+          profilePicture: imageUri,
+          updatedAt: new Date().toISOString()
+        ***REMOVED***
+      ***REMOVED***
+      , ***REMOVED***
+        upsert: true
+      ***REMOVED***
+    );
+
+    res.status(200).send('Profile updated successfully');
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error)
+  ***REMOVED***
+***REMOVED***
+
+/**
+ * update profile bio
+ * @param req
+ * @param res
+ * @param next
+ */
+export const updateProfileBio = async (req, res, next) => ***REMOVED***
+  const userId = req.authUser;
+  const ***REMOVED*** bio ***REMOVED*** = req.body;
+
+  try ***REMOVED***
+    if (!bio) ***REMOVED***
+      throw httpError.BadRequest('missing bio from the request body');
+    ***REMOVED***
+
+    await Profile.findOneAndUpdate(
+      ***REMOVED*** userId: userId ***REMOVED***,
+      ***REMOVED***
+        $set: ***REMOVED***
+          bio: bio,
+          updatedAt: new Date().toISOString()
+        ***REMOVED***
+      ***REMOVED***
+      , ***REMOVED***
+        upsert: true
+      ***REMOVED***
+    );
+
+    res.status(200).send('Profile updated successfully');
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error)
+  ***REMOVED***
+***REMOVED***
+
+/**
  * update profile
  * @param req
  * @param res
@@ -149,7 +217,7 @@ export const updateProfile = async (req, res, next) => ***REMOVED***
           name: name,
           profilePicture: profilePicture,
           username: username,
-          updatedAt: new Date()
+          updatedAt: new Date().toISOString()
         ***REMOVED***
       ***REMOVED***
       , ***REMOVED***

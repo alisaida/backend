@@ -210,7 +210,7 @@ export const updatePost = async (req, res, next) => ***REMOVED***
         $set: ***REMOVED***
           caption: caption,
           imageUri: imageUri,
-          updatedAt: new Date()
+          updatedAt: new Date().toISOString()
         ***REMOVED***
       ***REMOVED***
       , ***REMOVED***
