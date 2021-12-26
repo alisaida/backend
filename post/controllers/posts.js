@@ -210,7 +210,7 @@ export const updatePost = async (req, res, next) => {
         $set: {
           caption: caption,
           imageUri: imageUri,
-          updatedAt: new Date()
+          updatedAt: new Date().toISOString()
         }
       }
       , {

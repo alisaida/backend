@@ -127,6 +127,74 @@ export const fetchProfileByQueryParams = async (req, res, next) => {
 }
 
 /**
+ * update profile picture
+ * @param req
+ * @param res
+ * @param next
+ */
+export const updateProfilePicture = async (req, res, next) => {
+  const userId = req.authUser;
+  const { imageUri } = req.body;
+
+  try {
+    if (!imageUri) {
+      throw httpError.BadRequest('missing profile picture image uri from the request body: imageUri');
+    }
+
+    await Profile.findOneAndUpdate(
+      { userId: userId },
+      {
+        $set: {
+          profilePicture: imageUri,
+          updatedAt: new Date().toISOString()
+        }
+      }
+      , {
+        upsert: true
+      }
+    );
+
+    res.status(200).send('Profile updated successfully');
+  } catch (error) {
+    next(error)
+  }
+}
+
+/**
+ * update profile bio
+ * @param req
+ * @param res
+ * @param next
+ */
+export const updateProfileBio = async (req, res, next) => {
+  const userId = req.authUser;
+  const { bio } = req.body;
+
+  try {
+    if (!bio) {
+      throw httpError.BadRequest('missing bio from the request body');
+    }
+
+    await Profile.findOneAndUpdate(
+      { userId: userId },
+      {
+        $set: {
+          bio: bio,
+          updatedAt: new Date().toISOString()
+        }
+      }
+      , {
+        upsert: true
+      }
+    );
+
+    res.status(200).send('Profile updated successfully');
+  } catch (error) {
+    next(error)
+  }
+}
+
+/**
  * update profile
  * @param req
  * @param res
@@ -149,7 +217,7 @@ export const updateProfile = async (req, res, next) => {
           name: name,
           profilePicture: profilePicture,
           username: username,
-          updatedAt: new Date()
+          updatedAt: new Date().toISOString()
         }
       }
       , {

@@ -36,12 +36,14 @@ export const fetchChatroom = async (req, res, next) => {
 
         const recipients = await getRecipientsHelperFn(chatRoomId);
         const messages = await fetchMessagesHelperFn(chatRoomId);
+        const lastMessage = (messages && messages.length > 0) ? messages[messages.length - 1] : null;
 
         const chatRoom = {
             name: chatRoomObj.name || '',
             isGroupChat: chatRoomObj.isGroupChat,
             createdAt: chatRoomObj.createdAt,
             updatedAt: chatRoomObj.updatedAt || '',
+            lastMessage: lastMessage,
             recipients: recipients,
             messages: messages
         }
@@ -61,14 +63,82 @@ export const fetchChatroom = async (req, res, next) => {
 export const me = async (req, res, next) => {
 
     try {
-
         const user = await User.findOne({ userId: req.authUser });
-        const chatRooms = await fetchChatsByUserId(user.userId);
+        let chatRooms = await fetchChatsByUserId(user.userId);
 
-        if(chatRooms){
-            res.status(200).send({ chatRooms });
-        }else{
+        const data = await Promise.all(chatRooms.map(async (chatRoom, index) => {
+            const lastMessage = await fetchLastMessageInChatRoom(chatRoom._id);
+
+            return {
+                isGroupChat: chatRoom.isGroupChat,
+                createdAt: chatRoom.createdAt,
+                _id: chatRoom._id,
+                lastMessage: lastMessage
+            }
+        }));
+
+        if (data) {
+            res.status(200).send({ chatRooms: data });
+        } else {
             throw createHttpError.InternalServerError();
+        }
+    } catch (err) {
+        next(err);
+    }
+}
+
+const fetchLastMessageInChatRoom = async (chatRoomId) => {
+    try {
+        const lastList = await Message.find({ chatRoomId: chatRoomId }).sort({ _id: -1 }).limit(1).exec();
+
+        if (lastList && lastList.length === 1) {
+            return lastList[0];
+        } else {
+            return null
+        }
+    } catch (error) {
+        return null
+    }
+}
+
+/**
+ * fetch all chatrooms where user is recipient
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+export const fetchChatRoomIdByUserId = async (req, res, next) => {
+    try {
+
+        const authUser = await User.findOne({ userId: req.authUser });
+        let authChatRooms = [];
+        authChatRooms = await fetchChatsByUserId(authUser.userId);
+
+        const userId = req.params.id
+
+        const doesExist = await User.findOne({ userId });
+
+        if (!doesExist) {
+            throw createHttpError.NotFound("User not found!");
+        }
+
+        let userChatRooms = [];
+        userChatRooms = await fetchChatsByUserId(userId);
+
+        //no chats between authUser and recipient
+        if (!authChatRooms || authChatRooms.length === 0 || !userChatRooms || userChatRooms.length === 0) {
+            throw createHttpError.NotFound("Chatroom not found!");
+        }
+
+        const chatsArray1 = authChatRooms.map(chatRooms => chatRooms._id.toString());
+        const chatsArray2 = userChatRooms.map(chatRooms => chatRooms._id.toString());
+
+        const filteredArray = chatsArray1.filter(chatRoom => chatsArray2.includes(chatRoom));
+
+        if (filteredArray && filteredArray.length > 0) {
+            res.status(200).send({ id: filteredArray[0] });
+        } else {
+            throw createHttpError.NotFound("Chatroom not found!");
         }
     } catch (err) {
         next(err);
@@ -86,7 +156,7 @@ export const fetchUserChatRooms = async (req, res, next) => {
 
         const userId = req.params.id
 
-        const doesExist = await User.findOne({userId});
+        const doesExist = await User.findOne({ userId });
 
         if (!doesExist) {
             throw createHttpError.NotFound("User not found!");
@@ -94,12 +164,12 @@ export const fetchUserChatRooms = async (req, res, next) => {
 
         const chatRooms = await fetchChatsByUserId(userId);
 
-        if(chatRooms){
+        if (chatRooms) {
             res.status(200).send({ chatRooms });
-        }else{
+        } else {
             throw createHttpError.InternalServerError();
         }
-    }catch (err) {
+    } catch (err) {
         next(err);
     }
 
@@ -175,7 +245,7 @@ export const createChatroom = async (req, res, next) => {
         await session.commitTransaction();
         console.log(`New chatroom ${savedChatRoom._id} created between ${sender.userId} and ${recipient.userId}`)
 
-        res.status(201).send('ChatRoom created');
+        res.status(201).send(savedChatRoom);
     } catch (error) {
         await session.abortTransaction();
         next(error);
@@ -208,7 +278,7 @@ export const updateChatroom = async (req, res, next) => {
             $set: {
                 name: name,
                 isGroupChat: isGroupChat,
-                updatedAt: new Date()
+                updatedAt: new Date().toISOString()
             }
         },
             { upsert: true }
@@ -271,7 +341,7 @@ const getRecipientsHelperFn = async (chatRoomId) => {
 export const createMessage = async (req, res, next) => {
     const chatRoomId = req.params.id;
 
-    const { content, imageUri } = req.body;
+    const { content } = req.body;
     const userId = req.authUser;
 
     const session = await mongoose.startSession();
@@ -281,7 +351,7 @@ export const createMessage = async (req, res, next) => {
             throw createHttpError.BadRequest();
         }
         if (!content && !imageUri) {
-            throw createHttpError.BadRequest('Payload requires either content or imageUri');
+            throw createHttpError.BadRequest('Payload missing content');
         }
         session.startTransaction();
 
@@ -295,14 +365,58 @@ export const createMessage = async (req, res, next) => {
             chatRoomId: chatRoomId,
             userId: userId,
             content: content,
-            imageUri: imageUri
+            createdAt: new Date().toISOString()
         });
 
         await message.save({ session });
 
         await session.commitTransaction();
 
-        res.status(201).send('Message created');
+        res.status(201).send(message);
+
+    } catch (error) {
+        session.abortTransaction();
+        next(error);
+    } finally {
+        session.endSession();
+    }
+}
+
+export const createImageMessage = async (req, res, next) => {
+    const chatRoomId = req.params.id;
+
+    const { imageUri } = req.body;
+    const userId = req.authUser;
+
+    const session = await mongoose.startSession();
+
+    try {
+        if (!chatRoomId) {
+            throw createHttpError.BadRequest();
+        }
+        if (!imageUri) {
+            throw createHttpError.BadRequest('Payload missing imageUri');
+        }
+        session.startTransaction();
+
+        const doesExist = await ChatRoom.findOne({ _id: chatRoomId });
+
+        if (!doesExist) {
+            throw createHttpError.NotFound('Chatroom does not exist');
+        }
+
+        const message = new Message({
+            chatRoomId: chatRoomId,
+            userId: userId,
+            imageUri: imageUri,
+            createdAt: new Date().toISOString()
+        });
+
+        await message.save({ session });
+
+        await session.commitTransaction();
+
+        res.status(201).send(message);
 
     } catch (error) {
         session.abortTransaction();
