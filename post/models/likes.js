@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const likeSchema = mongoose.Schema(***REMOVED***
   userId: ***REMOVED***
@@ -10,6 +11,8 @@ const likeSchema = mongoose.Schema(***REMOVED***
     require: true,
   ***REMOVED***,
 ***REMOVED***);
+
+likeSchema.plugin(mongoosePaginate);
 
 const Like = mongoose.model("Like", likeSchema);
 export default Like;

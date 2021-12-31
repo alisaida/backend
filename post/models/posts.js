@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const postSchema = mongoose.Schema(***REMOVED***
   userId: ***REMOVED***
@@ -15,13 +16,13 @@ const postSchema = mongoose.Schema(***REMOVED***
   ***REMOVED***,
   createdAt: ***REMOVED***
     type: Date,
-    default: new Date(),
   ***REMOVED***,
   updatedAt: ***REMOVED***
     type: Date,
   ***REMOVED***,
 ***REMOVED***);
 
-const Post = mongoose.model("Post", postSchema);
+postSchema.plugin(mongoosePaginate);
 
+const Post = mongoose.model("Post", postSchema);
 export default Post;

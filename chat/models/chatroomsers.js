@@ -11,7 +11,6 @@ const chatRoomUserSchema = mongoose.Schema(***REMOVED***
     ***REMOVED***,
     createdAt: ***REMOVED***
         type: Date,
-        default: new Date()
     ***REMOVED***,
     updatedAt: ***REMOVED***
         type: Date,

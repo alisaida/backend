@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
+import mongoosePaginate from "mongoose-paginate-v2";
 
-const ChatRoomSchema = mongoose.Schema(***REMOVED***
+const chatRoomSchema = mongoose.Schema(***REMOVED***
     name: ***REMOVED***
         type: 'string',
         required: false
@@ -10,13 +11,13 @@ const ChatRoomSchema = mongoose.Schema(***REMOVED***
         default: false
     ***REMOVED***,
     createdAt: ***REMOVED***
-        type: Date,
-        default: new Date()
+        type: Date
     ***REMOVED***,
     updatedAt: ***REMOVED***
         type: Date
     ***REMOVED***
 ***REMOVED***)
 
-const ChatRoom = mongoose.model('ChatRoom', ChatRoomSchema);
+chatRoomSchema.plugin(mongoosePaginate);
+const ChatRoom = mongoose.model('ChatRoom', chatRoomSchema);
 export default ChatRoom;

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const messageSchema = mongoose.Schema(***REMOVED***
     chatRoomId: ***REMOVED***
@@ -18,14 +19,14 @@ const messageSchema = mongoose.Schema(***REMOVED***
         required: false,
     ***REMOVED***,
     createdAt: ***REMOVED***
-        type: Date,
-        default: new Date()
+        type: Date
     ***REMOVED***,
     updatedAt: ***REMOVED***
         type: Date
     ***REMOVED***
 ***REMOVED***);
 
+messageSchema.plugin(mongoosePaginate);
 const Message = mongoose.model('Message', messageSchema);
 
 export default Message;

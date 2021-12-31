@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const commentSchema = mongoose.Schema(***REMOVED***
   postId: ***REMOVED***
@@ -15,12 +16,12 @@ const commentSchema = mongoose.Schema(***REMOVED***
   ***REMOVED***,
   createdAt: ***REMOVED***
     type: Date,
-    default: new Date(),
   ***REMOVED***,
   updateAt: ***REMOVED***
     type: Date,
   ***REMOVED***,
 ***REMOVED***);
 
+commentSchema.plugin(mongoosePaginate);
 const Comment = mongoose.model("Comment", commentSchema);
 export default Comment;

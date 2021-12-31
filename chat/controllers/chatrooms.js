@@ -17,7 +17,7 @@ export const home = async (req, res, next) => ***REMOVED***
 ***REMOVED***
 
 /**
- * fetch entire chatroom data, recipients and messages
+ * fetch chatroom data, recipients and last message
  * @param ***REMOVED*******REMOVED*** req
  * @param ***REMOVED*******REMOVED*** res
  * @param ***REMOVED*******REMOVED*** next
@@ -35,17 +35,18 @@ export const fetchChatroom = async (req, res, next) => ***REMOVED***
         ***REMOVED***
 
         const recipients = await getRecipientsHelperFn(chatRoomId);
-        const messages = await fetchMessagesHelperFn(chatRoomId);
-        const lastMessage = (messages && messages.length > 0) ? messages[messages.length - 1] : null;
+
+        const lastList = await Message.find(***REMOVED*** chatRoomId: chatRoomId ***REMOVED***).sort(***REMOVED*** createdAt: -1 ***REMOVED***).limit(1).exec();
+        const lastMessage = (lastList && lastList.length === 1) ? lastList[0] : null;
 
         const chatRoom = ***REMOVED***
+            chatRoomId: chatRoomObj._id,
             name: chatRoomObj.name || '',
             isGroupChat: chatRoomObj.isGroupChat,
             createdAt: chatRoomObj.createdAt,
             updatedAt: chatRoomObj.updatedAt || '',
             lastMessage: lastMessage,
-            recipients: recipients,
-            messages: messages
+            recipients: recipients
         ***REMOVED***
 
         res.status(200).send(chatRoom);
@@ -55,59 +56,12 @@ export const fetchChatroom = async (req, res, next) => ***REMOVED***
 ***REMOVED***
 
 /**
- * fetch all chatrooms where current authenticated user is recipient
+ * fetch chatroom between me is recipient userId
  * @param ***REMOVED*******REMOVED*** req
  * @param ***REMOVED*******REMOVED*** res
  * @param ***REMOVED*******REMOVED*** next
  */
-export const me = async (req, res, next) => ***REMOVED***
-
-    try ***REMOVED***
-        const user = await User.findOne(***REMOVED*** userId: req.authUser ***REMOVED***);
-        let chatRooms = await fetchChatsByUserId(user.userId);
-
-        const data = await Promise.all(chatRooms.map(async (chatRoom, index) => ***REMOVED***
-            const lastMessage = await fetchLastMessageInChatRoom(chatRoom._id);
-
-            return ***REMOVED***
-                isGroupChat: chatRoom.isGroupChat,
-                createdAt: chatRoom.createdAt,
-                _id: chatRoom._id,
-                lastMessage: lastMessage
-            ***REMOVED***
-        ***REMOVED***));
-
-        if (data) ***REMOVED***
-            res.status(200).send(***REMOVED*** chatRooms: data ***REMOVED***);
-        ***REMOVED*** else ***REMOVED***
-            throw createHttpError.InternalServerError();
-        ***REMOVED***
-    ***REMOVED*** catch (err) ***REMOVED***
-        next(err);
-    ***REMOVED***
-***REMOVED***
-
-const fetchLastMessageInChatRoom = async (chatRoomId) => ***REMOVED***
-    try ***REMOVED***
-        const lastList = await Message.find(***REMOVED*** chatRoomId: chatRoomId ***REMOVED***).sort(***REMOVED*** _id: -1 ***REMOVED***).limit(1).exec();
-
-        if (lastList && lastList.length === 1) ***REMOVED***
-            return lastList[0];
-        ***REMOVED*** else ***REMOVED***
-            return null
-        ***REMOVED***
-    ***REMOVED*** catch (error) ***REMOVED***
-        return null
-    ***REMOVED***
-***REMOVED***
-
-/**
- * fetch all chatrooms where user is recipient
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
- */
-export const fetchChatRoomIdByUserId = async (req, res, next) => ***REMOVED***
+export const fetchChatWithRecipient = async (req, res, next) => ***REMOVED***
     try ***REMOVED***
 
         const authUser = await User.findOne(***REMOVED*** userId: req.authUser ***REMOVED***);
@@ -172,8 +126,6 @@ export const fetchUserChatRooms = async (req, res, next) => ***REMOVED***
     ***REMOVED*** catch (err) ***REMOVED***
         next(err);
     ***REMOVED***
-
-
 ***REMOVED***
 
 /**
@@ -433,27 +385,46 @@ export const createImageMessage = async (req, res, next) => ***REMOVED***
  * @param ***REMOVED*******REMOVED*** next
  */
 export const fetchChatRoomMessages = async (req, res, next) => ***REMOVED***
-
-    const chatRoomId = req.params.id;
     try ***REMOVED***
+
+        const chatRoomId = req.params.id;
+        let ***REMOVED*** page, size ***REMOVED*** = req.query;
+
+        if (!page) ***REMOVED***
+            page = 1;
+        ***REMOVED***
+
+        if (!size) ***REMOVED***
+            size = 10;
+        ***REMOVED***
+
+        const limit = parseInt(size);
+        let options = ***REMOVED***
+            sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+            lean: true,
+            page: page,
+            limit: limit,
+        ***REMOVED***;
+
         const doesExist = await ChatRoom.findOne(***REMOVED*** _id: chatRoomId ***REMOVED***);
         if (!doesExist) ***REMOVED***
             throw createHttpError.NotFound('ChatRoom does not exist');
         ***REMOVED***
 
-        const messages = await fetchMessagesHelperFn(chatRoomId);
+        const data = await Message.paginate(***REMOVED*** chatRoomId: chatRoomId ***REMOVED***, options);
+        const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
 
-        res.status(200).send(messages);
-    ***REMOVED*** catch (error) ***REMOVED***
-        next(error);
-    ***REMOVED***
-***REMOVED***
+        const results = ***REMOVED***
+            page,
+            hasNextPage,
+            nextPage,
+            size,
+            totalDocs,
+            data: docs
+        ***REMOVED***
 
-const fetchMessagesHelperFn = async (chatRoomId) => ***REMOVED***
-    try ***REMOVED***
-        const messages = await Message.find(***REMOVED*** chatRoomId: chatRoomId ***REMOVED***);
+        res.status(200).send(results);
 
-        return messages;
     ***REMOVED*** catch (error) ***REMOVED***
         next(error);
     ***REMOVED***

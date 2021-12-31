@@ -25,9 +25,40 @@ export const home = async (req, res, next) => ***REMOVED***
  */
 export const fetchFeed = async (req, res, next) => ***REMOVED***
   try ***REMOVED***
-    const posts = await Post.find(***REMOVED******REMOVED***);
+    let ***REMOVED*** page, size ***REMOVED*** = req.query;
 
-    res.status(200).send(posts);
+    if (!page) ***REMOVED***
+      page = 1;
+    ***REMOVED***
+
+    if (!size) ***REMOVED***
+      size = 12;
+    ***REMOVED***
+
+    const limit = parseInt(size);
+
+    let options = ***REMOVED***
+      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+      lean: true,
+      page: page,
+      limit: limit,
+    ***REMOVED***;
+
+    const data = await Post.paginate(***REMOVED******REMOVED***, options);
+    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+
+    const postIds = docs.map(post => post._id);
+
+    const results = ***REMOVED***
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: postIds
+    ***REMOVED***
+
+    res.status(200).send(results);
   ***REMOVED*** catch (error) ***REMOVED***
     next(error);
   ***REMOVED***
@@ -45,21 +76,24 @@ export const fetchPost = async (req, res, next) => ***REMOVED***
     httpError.BadRequest();
   ***REMOVED***
   try ***REMOVED***
-    const post = await Post.findOne(***REMOVED*** _id: postId ***REMOVED***);
+    let post = await Post.findOne(***REMOVED*** _id: postId ***REMOVED***);
     if (!post) ***REMOVED***
       httpError.NotFound();
     ***REMOVED***
 
-    const comments = await getCommentsForPostHelperFn(postId, next);
-    const likes = await fetchLikesHelperFn(postId, next);
+    const comments = await Comment.countDocuments(***REMOVED*** postId: postId ***REMOVED***).exec();
+    const likes = await Like.countDocuments(***REMOVED*** postId: postId ***REMOVED***).exec();
 
-    const postObj = ***REMOVED***
-      post: post,
-      comments: comments,
-      likes: likes
+    const data = ***REMOVED***
+      _id: post._id,
+      createdAt: post.createdAt,
+      userId: post.userId,
+      caption: post.caption,
+      imageUri: post.imageUri,
+      likes,
+      comments
     ***REMOVED***
-
-    res.status(200).send(postObj);
+    res.status(200).send(***REMOVED*** data ***REMOVED***);
   ***REMOVED*** catch (error) ***REMOVED***
     next(error);
   ***REMOVED***
@@ -72,21 +106,53 @@ export const fetchPost = async (req, res, next) => ***REMOVED***
  * @param ***REMOVED*******REMOVED*** next
  */
 export const fetchUserPosts = async (req, res, next) => ***REMOVED***
-  const userId = req.params.id;
-  if (!userId) ***REMOVED***
-    throw httpError.BadRequest();
-  ***REMOVED***
 
   try ***REMOVED***
+    let ***REMOVED*** page, size ***REMOVED*** = req.query;
+
+    if (!page) ***REMOVED***
+      page = 1;
+    ***REMOVED***
+
+    if (!size) ***REMOVED***
+      size = 12;
+    ***REMOVED***
+
+    const limit = parseInt(size);
+
+    let options = ***REMOVED***
+      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+      lean: true,
+      page: page,
+      limit: limit,
+    ***REMOVED***;
+
+    const userId = req.params.id;
+    if (!userId) ***REMOVED***
+      throw httpError.BadRequest('Payload is missing userId');
+    ***REMOVED***
+
     const doesExist = await User.findOne(***REMOVED*** userId: userId ***REMOVED***);
 
     if (!doesExist) ***REMOVED***
       throw httpError.NotFound();
     ***REMOVED***
 
-    const posts = await Post.find(***REMOVED*** userId: userId ***REMOVED***);
+    const data = await Post.paginate(***REMOVED*** userId: userId ***REMOVED***, options);
+    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
 
-    res.status(200).send(posts);
+    const posts = docs.map((post) => post._id);
+
+    const results = ***REMOVED***
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: posts
+    ***REMOVED***
+
+    res.status(200).send(results);
   ***REMOVED*** catch (error) ***REMOVED***
     next(error);
   ***REMOVED***
@@ -99,19 +165,50 @@ export const fetchUserPosts = async (req, res, next) => ***REMOVED***
  * @param ***REMOVED*******REMOVED*** next 
  */
 export const fetchPostComments = async (req, res, next) => ***REMOVED***
-  const postId = req.params.id;
-  if (!postId) ***REMOVED***
-    httpError.BadRequest();
-  ***REMOVED***
   try ***REMOVED***
-    const post = await Post.findOne(***REMOVED*** _id: postId ***REMOVED***);
+    let ***REMOVED*** page, size ***REMOVED*** = req.query;
+    if (!page) ***REMOVED***
+      page = 1;
+    ***REMOVED***
+
+    if (!size) ***REMOVED***
+      size = 10;
+    ***REMOVED***
+
+    const limit = parseInt(size);
+
+    let options = ***REMOVED***
+      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+      lean: true,
+      page: page,
+      limit: limit,
+    ***REMOVED***;
+
+    let ***REMOVED*** id ***REMOVED*** = req.params;
+
+    if (!id) ***REMOVED***
+      httpError.BadRequest();
+    ***REMOVED***
+    const post = await Post.findOne(***REMOVED*** _id: id ***REMOVED***);
+
     if (!post) ***REMOVED***
       httpError.NotFound();
     ***REMOVED***
 
-    const comments = await getCommentsForPostHelperFn(postId, next);
+    const data = await Comment.paginate(***REMOVED*** postId: id ***REMOVED***, options);
 
-    res.status(200).send(comments);
+    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+
+    const results = ***REMOVED***
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: docs
+    ***REMOVED***
+
+    res.status(200).send(results);
   ***REMOVED*** catch (error) ***REMOVED***
     next(error);
   ***REMOVED***
@@ -143,10 +240,16 @@ export const createComment = async (req, res, next) => ***REMOVED***
       postId: postId,
       userId: userId,
       comment: comment,
+      createdAt: new Date().toISOString()
     ***REMOVED***);
 
-    await commentObj.save();
-    res.status(201).send("Comment created");
+    const savedComment = await commentObj.save();
+
+    if (!savedComment) ***REMOVED***
+      throw httpError.InternalServerError();
+    ***REMOVED***
+
+    res.status(201).send(savedComment);
   ***REMOVED*** catch (error) ***REMOVED***
     next(error);
   ***REMOVED***
@@ -173,6 +276,7 @@ export const createPost = async (req, res, next) => ***REMOVED***
       userId: userId,
       caption: caption,
       imageUri: imageUri,
+      createdAt: new Date().toISOString()
     ***REMOVED***);
 
     const savedPost = await post.save();
@@ -180,7 +284,7 @@ export const createPost = async (req, res, next) => ***REMOVED***
     if (!savedPost) ***REMOVED***
       throw httpError.InternalServerError();
     ***REMOVED***
-    res.status(201).send();
+    res.status(201).send(savedPost);
   ***REMOVED*** catch (error) ***REMOVED***
     next(error);
   ***REMOVED***
@@ -279,23 +383,50 @@ export const unLikePost = async (req, res, next) => ***REMOVED***
 ***REMOVED***;
 
 /**
- * fetch posts liked by user
+ * fetch posts liked by authUser
  * @param ***REMOVED*******REMOVED*** req
  * @param ***REMOVED*******REMOVED*** res
  * @param ***REMOVED*******REMOVED*** next
  */
 export const fetchLikedPosts = async (req, res, next) => ***REMOVED***
-  const userId = req.params.id;
 
   try ***REMOVED***
-    if (!userId) ***REMOVED***
-      throw httpError.BadRequest();
-    ***REMOVED***
-    const likedPosts = await Like.find(***REMOVED*** userId: userId ***REMOVED***);
-    const postIds = likedPosts.map(likedPost => likedPost.postId);
-    const likes = await Post.find(***REMOVED*** _id: ***REMOVED*** $in: postIds ***REMOVED*** ***REMOVED***);
+    let ***REMOVED*** page, size ***REMOVED*** = req.query;
 
-    res.status(200).send(likes);
+    if (!page) ***REMOVED***
+      page = 1;
+    ***REMOVED***
+
+    if (!size) ***REMOVED***
+      size = 12;
+    ***REMOVED***
+
+    const limit = parseInt(size);
+    let options = ***REMOVED***
+      sort: ***REMOVED*** _id: -1 ***REMOVED***,
+      lean: true,
+      page: page,
+      limit: limit,
+    ***REMOVED***;
+
+    const userId = req.authUser;
+
+    const data = await Like.paginate(***REMOVED*** userId: userId ***REMOVED***, options);
+    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+
+    const postIds = docs.map(post => post._id);
+
+    const results = ***REMOVED***
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: postIds
+    ***REMOVED***
+
+
+    res.status(200).send(results);
   ***REMOVED*** catch (error) ***REMOVED***
     next(error);
   ***REMOVED***
@@ -308,56 +439,117 @@ export const fetchLikedPosts = async (req, res, next) => ***REMOVED***
  * @param ***REMOVED*******REMOVED*** next
  */
 export const fetchLikes = async (req, res, next) => ***REMOVED***
-  const postId = req.params.id;
-  if (!postId) ***REMOVED***
-    throw httpError.BadRequest();
-  ***REMOVED***
 
   try ***REMOVED***
-    const exist = await Post.findOne(***REMOVED*** _id: postId ***REMOVED***);
+    let ***REMOVED*** page, size ***REMOVED*** = req.query;
+
+    if (!page) ***REMOVED***
+      page = 1;
+    ***REMOVED***
+
+    if (!size) ***REMOVED***
+      size = 12;
+    ***REMOVED***
+
+    const limit = parseInt(size);
+    let options = ***REMOVED***
+      sort: ***REMOVED*** _id: -1 ***REMOVED***,
+      lean: true,
+      page: page,
+      limit: limit,
+    ***REMOVED***;
+
+    const ***REMOVED*** id ***REMOVED*** = req.params;
+
+    if (!id) ***REMOVED***
+      throw httpError.BadRequest(`Request missing post id (:id) as a parameter`);
+    ***REMOVED***
+
+    const exist = await Post.findOne(***REMOVED*** _id: id ***REMOVED***);
     if (!exist) ***REMOVED***
       throw httpError.NotFound();
     ***REMOVED***
 
-    const likes = await fetchLikesHelperFn(postId, next);
+    const data = await Like.paginate(***REMOVED*** postId: id ***REMOVED***, options);
+    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+    const likes = docs.map(likedPost => (***REMOVED*** _id: likedPost._id, userId: likedPost.userId ***REMOVED***));
 
-    res.status(200).send(likes);
+    const result = ***REMOVED***
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: likes
+    ***REMOVED***
+
+    res.status(200).send(result);
   ***REMOVED*** catch (error) ***REMOVED***
     next(error);
   ***REMOVED***
 ***REMOVED***;
 
 /**
- *helper function to get comments for post 
- * @param ***REMOVED*******REMOVED*** postId 
+ * check if auth user likes a specific post
+ * @param ***REMOVED*******REMOVED*** req
+ * @param ***REMOVED*******REMOVED*** res
  * @param ***REMOVED*******REMOVED*** next
  */
-const getCommentsForPostHelperFn = async (postId, next) => ***REMOVED***
+export const isLiked = async (req, res, next) => ***REMOVED***
   try ***REMOVED***
-    const postComments = await Comment.find(***REMOVED*** postId: postId ***REMOVED***);
-    return postComments;
+    const userId = req.authUser;
+    const postId = req.params.id;
+
+    if (!postId) ***REMOVED***
+      throw httpError.BadRequest();
+    ***REMOVED***
+
+    const exist = await Post.findOne(***REMOVED*** _id: postId ***REMOVED***);
+    if (!exist) ***REMOVED***
+      throw httpError.NotFound(`Post $***REMOVED***postId***REMOVED*** not found`);
+    ***REMOVED***
+
+    const likedPosts = await Like.find(***REMOVED*** postId: postId, userId: userId ***REMOVED***);
+
+    if (likedPosts && likedPosts.length > 0)
+      res.status(200).send(true);
+    else
+      res.status(200).send(false);
   ***REMOVED*** catch (error) ***REMOVED***
     next(error);
   ***REMOVED***
 ***REMOVED***;
 
 /**
- * helper function to retreive likes for post
- * @param ***REMOVED*******REMOVED*** postId
+ * check if auth user bookmarked a specific post
+ * @param ***REMOVED*******REMOVED*** req
+ * @param ***REMOVED*******REMOVED*** res
  * @param ***REMOVED*******REMOVED*** next
  */
-const fetchLikesHelperFn = async (postId, next) => ***REMOVED***
+export const isBookmarked = async (req, res, next) => ***REMOVED***
   try ***REMOVED***
+    const userId = req.authUser;
+    const postId = req.params.id;
 
-    const likes = await Like.find(***REMOVED*** postId: postId ***REMOVED***);
-    const result = likes.map(likedPost => (***REMOVED*** _id: likedPost._id, userId: likedPost.userId ***REMOVED***));
+    if (!postId) ***REMOVED***
+      throw httpError.BadRequest();
+    ***REMOVED***
 
-    return result;
+    const exist = await Post.findOne(***REMOVED*** _id: postId ***REMOVED***);
+    if (!exist) ***REMOVED***
+      throw httpError.NotFound(`Post $***REMOVED***postId***REMOVED*** not found`);
+    ***REMOVED***
+
+    const bookmarkedPosts = await Bookmark.find(***REMOVED*** postId: postId, userId: userId ***REMOVED***);
+
+    if (bookmarkedPosts && bookmarkedPosts.length > 0)
+      res.status(200).send(true);
+    else
+      res.status(200).send(false);
   ***REMOVED*** catch (error) ***REMOVED***
     next(error);
   ***REMOVED***
 ***REMOVED***;
-
 
 /** 
  * bookmark post
@@ -378,9 +570,9 @@ export const bookmarkPost = async (req, res, next) => ***REMOVED***
       throw httpError.Conflict();
     ***REMOVED***
     const bookmarks = new Bookmark(***REMOVED*** postId: postId, userId: userId ***REMOVED***);
-    await bookmarks.save();
+    const savedBookmark = await bookmarks.save();
 
-    res.status(201).send('Post bookmarked');
+    res.status(201).send(savedBookmark);
   ***REMOVED*** catch (error) ***REMOVED***
     next(error);
   ***REMOVED***
@@ -420,18 +612,46 @@ export const unBookmarkPost = async (req, res, next) => ***REMOVED***
  * @param ***REMOVED*******REMOVED*** next
  */
 export const fetchBookmarkedPosts = async (req, res, next) => ***REMOVED***
-  const userId = req.authUser;
 
   try ***REMOVED***
+    let ***REMOVED*** page, size ***REMOVED*** = req.query;
+
+    if (!page) ***REMOVED***
+      page = 1;
+    ***REMOVED***
+
+    if (!size) ***REMOVED***
+      size = 12;
+    ***REMOVED***
+
+    const limit = parseInt(size);
+    let options = ***REMOVED***
+      sort: ***REMOVED*** _id: -1 ***REMOVED***,
+      lean: true,
+      page: page,
+      limit: limit,
+    ***REMOVED***;
+
+    const userId = req.authUser;
     if (!userId) ***REMOVED***
       throw httpError.BadRequest();
     ***REMOVED***
-    const bookmarkedPosts = await Bookmark.find(***REMOVED*** userId: userId ***REMOVED***);
-    const postIds = bookmarkedPosts.map(bookmarkedPost => bookmarkedPost.postId);
-    console.log(postIds)
-    const bookmarks = await Bookmark.find(***REMOVED*** postId: ***REMOVED*** $in: postIds ***REMOVED*** ***REMOVED***);
 
-    res.status(200).send(bookmarks);
+    const data = await Bookmark.paginate(***REMOVED*** userId: userId ***REMOVED***, options);
+    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+
+    const postIds = docs.map(bookmarkedPost => bookmarkedPost.postId);
+
+    const results = ***REMOVED***
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: postIds
+    ***REMOVED***
+
+    res.status(200).send(results);
   ***REMOVED*** catch (error) ***REMOVED***
     next(error);
   ***REMOVED***
