@@ -25,9 +25,40 @@ export const home = async (req, res, next) => {
  */
 export const fetchFeed = async (req, res, next) => {
   try {
-    const posts = await Post.find({});
+    let { page, size } = req.query;
 
-    res.status(200).send(posts);
+    if (!page) {
+      page = 1;
+    }
+
+    if (!size) {
+      size = 12;
+    }
+
+    const limit = parseInt(size);
+
+    let options = {
+      sort: { createdAt: -1 },
+      lean: true,
+      page: page,
+      limit: limit,
+    };
+
+    const data = await Post.paginate({}, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
+
+    const postIds = docs.map(post => post._id);
+
+    const results = {
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: postIds
+    }
+
+    res.status(200).send(results);
   } catch (error) {
     next(error);
   }
@@ -45,21 +76,24 @@ export const fetchPost = async (req, res, next) => {
     httpError.BadRequest();
   }
   try {
-    const post = await Post.findOne({ _id: postId });
+    let post = await Post.findOne({ _id: postId });
     if (!post) {
       httpError.NotFound();
     }
 
-    const comments = await getCommentsForPostHelperFn(postId, next);
-    const likes = await fetchLikesHelperFn(postId, next);
+    const comments = await Comment.countDocuments({ postId: postId }).exec();
+    const likes = await Like.countDocuments({ postId: postId }).exec();
 
-    const postObj = {
-      post: post,
-      comments: comments,
-      likes: likes
+    const data = {
+      _id: post._id,
+      createdAt: post.createdAt,
+      userId: post.userId,
+      caption: post.caption,
+      imageUri: post.imageUri,
+      likes,
+      comments
     }
-
-    res.status(200).send(postObj);
+    res.status(200).send({ data });
   } catch (error) {
     next(error);
   }
@@ -72,21 +106,53 @@ export const fetchPost = async (req, res, next) => {
  * @param {*} next
  */
 export const fetchUserPosts = async (req, res, next) => {
-  const userId = req.params.id;
-  if (!userId) {
-    throw httpError.BadRequest();
-  }
 
   try {
+    let { page, size } = req.query;
+
+    if (!page) {
+      page = 1;
+    }
+
+    if (!size) {
+      size = 12;
+    }
+
+    const limit = parseInt(size);
+
+    let options = {
+      sort: { createdAt: -1 },
+      lean: true,
+      page: page,
+      limit: limit,
+    };
+
+    const userId = req.params.id;
+    if (!userId) {
+      throw httpError.BadRequest('Payload is missing userId');
+    }
+
     const doesExist = await User.findOne({ userId: userId });
 
     if (!doesExist) {
       throw httpError.NotFound();
     }
 
-    const posts = await Post.find({ userId: userId });
+    const data = await Post.paginate({ userId: userId }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
 
-    res.status(200).send(posts);
+    const posts = docs.map((post) => post._id);
+
+    const results = {
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: posts
+    }
+
+    res.status(200).send(results);
   } catch (error) {
     next(error);
   }
@@ -99,19 +165,50 @@ export const fetchUserPosts = async (req, res, next) => {
  * @param {*} next 
  */
 export const fetchPostComments = async (req, res, next) => {
-  const postId = req.params.id;
-  if (!postId) {
-    httpError.BadRequest();
-  }
   try {
-    const post = await Post.findOne({ _id: postId });
+    let { page, size } = req.query;
+    if (!page) {
+      page = 1;
+    }
+
+    if (!size) {
+      size = 10;
+    }
+
+    const limit = parseInt(size);
+
+    let options = {
+      sort: { createdAt: -1 },
+      lean: true,
+      page: page,
+      limit: limit,
+    };
+
+    let { id } = req.params;
+
+    if (!id) {
+      httpError.BadRequest();
+    }
+    const post = await Post.findOne({ _id: id });
+
     if (!post) {
       httpError.NotFound();
     }
 
-    const comments = await getCommentsForPostHelperFn(postId, next);
+    const data = await Comment.paginate({ postId: id }, options);
 
-    res.status(200).send(comments);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
+
+    const results = {
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: docs
+    }
+
+    res.status(200).send(results);
   } catch (error) {
     next(error);
   }
@@ -143,10 +240,16 @@ export const createComment = async (req, res, next) => {
       postId: postId,
       userId: userId,
       comment: comment,
+      createdAt: new Date().toISOString()
     });
 
-    await commentObj.save();
-    res.status(201).send("Comment created");
+    const savedComment = await commentObj.save();
+
+    if (!savedComment) {
+      throw httpError.InternalServerError();
+    }
+
+    res.status(201).send(savedComment);
   } catch (error) {
     next(error);
   }
@@ -173,6 +276,7 @@ export const createPost = async (req, res, next) => {
       userId: userId,
       caption: caption,
       imageUri: imageUri,
+      createdAt: new Date().toISOString()
     });
 
     const savedPost = await post.save();
@@ -180,7 +284,7 @@ export const createPost = async (req, res, next) => {
     if (!savedPost) {
       throw httpError.InternalServerError();
     }
-    res.status(201).send();
+    res.status(201).send(savedPost);
   } catch (error) {
     next(error);
   }
@@ -279,23 +383,50 @@ export const unLikePost = async (req, res, next) => {
 };
 
 /**
- * fetch posts liked by user
+ * fetch posts liked by authUser
  * @param {*} req
  * @param {*} res
  * @param {*} next
  */
 export const fetchLikedPosts = async (req, res, next) => {
-  const userId = req.params.id;
 
   try {
-    if (!userId) {
-      throw httpError.BadRequest();
-    }
-    const likedPosts = await Like.find({ userId: userId });
-    const postIds = likedPosts.map(likedPost => likedPost.postId);
-    const likes = await Post.find({ _id: { $in: postIds } });
+    let { page, size } = req.query;
 
-    res.status(200).send(likes);
+    if (!page) {
+      page = 1;
+    }
+
+    if (!size) {
+      size = 12;
+    }
+
+    const limit = parseInt(size);
+    let options = {
+      sort: { _id: -1 },
+      lean: true,
+      page: page,
+      limit: limit,
+    };
+
+    const userId = req.authUser;
+
+    const data = await Like.paginate({ userId: userId }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
+
+    const postIds = docs.map(post => post._id);
+
+    const results = {
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: postIds
+    }
+
+
+    res.status(200).send(results);
   } catch (error) {
     next(error);
   }
@@ -308,56 +439,117 @@ export const fetchLikedPosts = async (req, res, next) => {
  * @param {*} next
  */
 export const fetchLikes = async (req, res, next) => {
-  const postId = req.params.id;
-  if (!postId) {
-    throw httpError.BadRequest();
-  }
 
   try {
-    const exist = await Post.findOne({ _id: postId });
+    let { page, size } = req.query;
+
+    if (!page) {
+      page = 1;
+    }
+
+    if (!size) {
+      size = 12;
+    }
+
+    const limit = parseInt(size);
+    let options = {
+      sort: { _id: -1 },
+      lean: true,
+      page: page,
+      limit: limit,
+    };
+
+    const { id } = req.params;
+
+    if (!id) {
+      throw httpError.BadRequest(`Request missing post id (:id) as a parameter`);
+    }
+
+    const exist = await Post.findOne({ _id: id });
     if (!exist) {
       throw httpError.NotFound();
     }
 
-    const likes = await fetchLikesHelperFn(postId, next);
+    const data = await Like.paginate({ postId: id }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
+    const likes = docs.map(likedPost => ({ _id: likedPost._id, userId: likedPost.userId }));
 
-    res.status(200).send(likes);
+    const result = {
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: likes
+    }
+
+    res.status(200).send(result);
   } catch (error) {
     next(error);
   }
 };
 
 /**
- *helper function to get comments for post 
- * @param {*} postId 
+ * check if auth user likes a specific post
+ * @param {*} req
+ * @param {*} res
  * @param {*} next
  */
-const getCommentsForPostHelperFn = async (postId, next) => {
+export const isLiked = async (req, res, next) => {
   try {
-    const postComments = await Comment.find({ postId: postId });
-    return postComments;
+    const userId = req.authUser;
+    const postId = req.params.id;
+
+    if (!postId) {
+      throw httpError.BadRequest();
+    }
+
+    const exist = await Post.findOne({ _id: postId });
+    if (!exist) {
+      throw httpError.NotFound(`Post ${postId} not found`);
+    }
+
+    const likedPosts = await Like.find({ postId: postId, userId: userId });
+
+    if (likedPosts && likedPosts.length > 0)
+      res.status(200).send(true);
+    else
+      res.status(200).send(false);
   } catch (error) {
     next(error);
   }
 };
 
 /**
- * helper function to retreive likes for post
- * @param {*} postId
+ * check if auth user bookmarked a specific post
+ * @param {*} req
+ * @param {*} res
  * @param {*} next
  */
-const fetchLikesHelperFn = async (postId, next) => {
+export const isBookmarked = async (req, res, next) => {
   try {
+    const userId = req.authUser;
+    const postId = req.params.id;
 
-    const likes = await Like.find({ postId: postId });
-    const result = likes.map(likedPost => ({ _id: likedPost._id, userId: likedPost.userId }));
+    if (!postId) {
+      throw httpError.BadRequest();
+    }
 
-    return result;
+    const exist = await Post.findOne({ _id: postId });
+    if (!exist) {
+      throw httpError.NotFound(`Post ${postId} not found`);
+    }
+
+    const bookmarkedPosts = await Bookmark.find({ postId: postId, userId: userId });
+
+    if (bookmarkedPosts && bookmarkedPosts.length > 0)
+      res.status(200).send(true);
+    else
+      res.status(200).send(false);
   } catch (error) {
     next(error);
   }
 };
-
 
 /** 
  * bookmark post
@@ -378,9 +570,9 @@ export const bookmarkPost = async (req, res, next) => {
       throw httpError.Conflict();
     }
     const bookmarks = new Bookmark({ postId: postId, userId: userId });
-    await bookmarks.save();
+    const savedBookmark = await bookmarks.save();
 
-    res.status(201).send('Post bookmarked');
+    res.status(201).send(savedBookmark);
   } catch (error) {
     next(error);
   }
@@ -420,18 +612,46 @@ export const unBookmarkPost = async (req, res, next) => {
  * @param {*} next
  */
 export const fetchBookmarkedPosts = async (req, res, next) => {
-  const userId = req.authUser;
 
   try {
+    let { page, size } = req.query;
+
+    if (!page) {
+      page = 1;
+    }
+
+    if (!size) {
+      size = 12;
+    }
+
+    const limit = parseInt(size);
+    let options = {
+      sort: { _id: -1 },
+      lean: true,
+      page: page,
+      limit: limit,
+    };
+
+    const userId = req.authUser;
     if (!userId) {
       throw httpError.BadRequest();
     }
-    const bookmarkedPosts = await Bookmark.find({ userId: userId });
-    const postIds = bookmarkedPosts.map(bookmarkedPost => bookmarkedPost.postId);
-    console.log(postIds)
-    const bookmarks = await Bookmark.find({ postId: { $in: postIds } });
 
-    res.status(200).send(bookmarks);
+    const data = await Bookmark.paginate({ userId: userId }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
+
+    const postIds = docs.map(bookmarkedPost => bookmarkedPost.postId);
+
+    const results = {
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: postIds
+    }
+
+    res.status(200).send(results);
   } catch (error) {
     next(error);
   }

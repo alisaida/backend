@@ -17,7 +17,7 @@ export const home = async (req, res, next) => {
 }
 
 /**
- * fetch entire chatroom data, recipients and messages
+ * fetch chatroom data, recipients and last message
  * @param {*} req
  * @param {*} res
  * @param {*} next
@@ -35,17 +35,18 @@ export const fetchChatroom = async (req, res, next) => {
         }
 
         const recipients = await getRecipientsHelperFn(chatRoomId);
-        const messages = await fetchMessagesHelperFn(chatRoomId);
-        const lastMessage = (messages && messages.length > 0) ? messages[messages.length - 1] : null;
+
+        const lastList = await Message.find({ chatRoomId: chatRoomId }).sort({ createdAt: -1 }).limit(1).exec();
+        const lastMessage = (lastList && lastList.length === 1) ? lastList[0] : null;
 
         const chatRoom = {
+            chatRoomId: chatRoomObj._id,
             name: chatRoomObj.name || '',
             isGroupChat: chatRoomObj.isGroupChat,
             createdAt: chatRoomObj.createdAt,
             updatedAt: chatRoomObj.updatedAt || '',
             lastMessage: lastMessage,
-            recipients: recipients,
-            messages: messages
+            recipients: recipients
         }
 
         res.status(200).send(chatRoom);
@@ -55,59 +56,12 @@ export const fetchChatroom = async (req, res, next) => {
 }
 
 /**
- * fetch all chatrooms where current authenticated user is recipient
+ * fetch chatroom between me is recipient userId
  * @param {*} req
  * @param {*} res
  * @param {*} next
  */
-export const me = async (req, res, next) => {
-
-    try {
-        const user = await User.findOne({ userId: req.authUser });
-        let chatRooms = await fetchChatsByUserId(user.userId);
-
-        const data = await Promise.all(chatRooms.map(async (chatRoom, index) => {
-            const lastMessage = await fetchLastMessageInChatRoom(chatRoom._id);
-
-            return {
-                isGroupChat: chatRoom.isGroupChat,
-                createdAt: chatRoom.createdAt,
-                _id: chatRoom._id,
-                lastMessage: lastMessage
-            }
-        }));
-
-        if (data) {
-            res.status(200).send({ chatRooms: data });
-        } else {
-            throw createHttpError.InternalServerError();
-        }
-    } catch (err) {
-        next(err);
-    }
-}
-
-const fetchLastMessageInChatRoom = async (chatRoomId) => {
-    try {
-        const lastList = await Message.find({ chatRoomId: chatRoomId }).sort({ _id: -1 }).limit(1).exec();
-
-        if (lastList && lastList.length === 1) {
-            return lastList[0];
-        } else {
-            return null
-        }
-    } catch (error) {
-        return null
-    }
-}
-
-/**
- * fetch all chatrooms where user is recipient
- * @param {*} req
- * @param {*} res
- * @param {*} next
- */
-export const fetchChatRoomIdByUserId = async (req, res, next) => {
+export const fetchChatWithRecipient = async (req, res, next) => {
     try {
 
         const authUser = await User.findOne({ userId: req.authUser });
@@ -172,8 +126,6 @@ export const fetchUserChatRooms = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-
-
 }
 
 /**
@@ -433,27 +385,46 @@ export const createImageMessage = async (req, res, next) => {
  * @param {*} next
  */
 export const fetchChatRoomMessages = async (req, res, next) => {
-
-    const chatRoomId = req.params.id;
     try {
+
+        const chatRoomId = req.params.id;
+        let { page, size } = req.query;
+
+        if (!page) {
+            page = 1;
+        }
+
+        if (!size) {
+            size = 10;
+        }
+
+        const limit = parseInt(size);
+        let options = {
+            sort: { createdAt: -1 },
+            lean: true,
+            page: page,
+            limit: limit,
+        };
+
         const doesExist = await ChatRoom.findOne({ _id: chatRoomId });
         if (!doesExist) {
             throw createHttpError.NotFound('ChatRoom does not exist');
         }
 
-        const messages = await fetchMessagesHelperFn(chatRoomId);
+        const data = await Message.paginate({ chatRoomId: chatRoomId }, options);
+        const { docs, hasNextPage, nextPage, totalDocs } = data;
 
-        res.status(200).send(messages);
-    } catch (error) {
-        next(error);
-    }
-}
+        const results = {
+            page,
+            hasNextPage,
+            nextPage,
+            size,
+            totalDocs,
+            data: docs
+        }
 
-const fetchMessagesHelperFn = async (chatRoomId) => {
-    try {
-        const messages = await Message.find({ chatRoomId: chatRoomId });
+        res.status(200).send(results);
 
-        return messages;
     } catch (error) {
         next(error);
     }

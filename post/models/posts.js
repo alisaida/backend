@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const postSchema = mongoose.Schema({
   userId: {
@@ -15,13 +16,13 @@ const postSchema = mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: new Date(),
   },
   updatedAt: {
     type: Date,
   },
 });
 
-const Post = mongoose.model("Post", postSchema);
+postSchema.plugin(mongoosePaginate);
 
+const Post = mongoose.model("Post", postSchema);
 export default Post;
