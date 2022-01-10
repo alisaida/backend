@@ -378,6 +378,100 @@ export const createImageMessage = async (req, res, next) => {
     }
 }
 
+export const createMessagePost = async (req, res, next) => {
+    const chatRoomId = req.params.id;
+
+    const { postId } = req.body;
+    const userId = req.authUser;
+
+    const session = await mongoose.startSession();
+
+    try {
+        if (!chatRoomId) {
+            throw createHttpError.BadRequest();
+        }
+        if (!postId) {
+            throw createHttpError.BadRequest('Payload missing postId');
+        }
+        session.startTransaction();
+
+        const doesExist = await ChatRoom.findOne({ _id: chatRoomId });
+
+        if (!doesExist) {
+            throw createHttpError.NotFound('Chatroom does not exist');
+        }
+
+        const message = new Message({
+            chatRoomId: chatRoomId,
+            userId: userId,
+            postId: postId,
+            type: 'post',
+            createdAt: new Date().toISOString()
+        });
+
+        await message.save({ session });
+
+        await session.commitTransaction();
+
+        res.status(201).send(message);
+
+    } catch (error) {
+        session.abortTransaction();
+        next(error);
+    } finally {
+        session.endSession();
+    }
+}
+
+export const createMessageCall = async (req, res, next) => {
+    const chatRoomId = req.params.id;
+
+    const { type, duration } = req.body;
+    const userId = req.authUser;
+
+    const session = await mongoose.startSession();
+
+    try {
+        if (!chatRoomId) {
+            throw createHttpError.BadRequest();
+        }
+        if (!type) {
+            throw createHttpError.BadRequest('Payload missing call type');
+        }
+        if (!duration) {
+            throw createHttpError.BadRequest('Payload missing call duration');
+        }
+        session.startTransaction();
+
+        const doesExist = await ChatRoom.findOne({ _id: chatRoomId });
+
+        if (!doesExist) {
+            throw createHttpError.NotFound('Chatroom does not exist');
+        }
+
+        const message = new Message({
+            chatRoomId: chatRoomId,
+            userId: userId,
+            type: 'call',
+            callType: type,
+            callDuration: duration,
+            createdAt: new Date().toISOString()
+        });
+
+        await message.save({ session });
+
+        await session.commitTransaction();
+
+        res.status(201).send(message);
+
+    } catch (error) {
+        session.abortTransaction();
+        next(error);
+    } finally {
+        session.endSession();
+    }
+}
+
 /**
  * retreive chat messages
  * @param {*} req
@@ -424,6 +518,31 @@ export const fetchChatRoomMessages = async (req, res, next) => {
         }
 
         res.status(200).send(results);
+
+    } catch (error) {
+        next(error);
+    }
+}
+/**
+ * retreive last message in the chat
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+export const fetchChatRoomLastMessage = async (req, res, next) => {
+    try {
+
+        const chatRoomId = req.params.id;
+
+        const doesExist = await ChatRoom.findOne({ _id: chatRoomId });
+        if (!doesExist) {
+            throw createHttpError.NotFound('ChatRoom does not exist');
+        }
+
+        const lastList = await Message.find({ chatRoomId: chatRoomId }).sort({ createdAt: -1 }).limit(1).exec();
+        const lastMessage = (lastList && lastList.length === 1) ? lastList[0] : null;
+
+        res.status(200).send(lastMessage);
 
     } catch (error) {
         next(error);

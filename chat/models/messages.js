@@ -18,6 +18,22 @@ const messageSchema = mongoose.Schema({
         type: 'string',
         required: false,
     },
+    postId: {
+        type: 'string',
+        required: false,
+    },
+    callType: {
+        type: 'string',
+        required: false,
+    },
+    callDuration: {
+        type: 'string',
+        required: false,
+    },
+    type: {
+        type: 'string',
+        default: 'default'
+    },
     createdAt: {
         type: Date
     },

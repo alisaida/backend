@@ -74,6 +74,25 @@ io.on("connection", (socket) => {
 		socket.broadcast.emit("call-ended", callData);
 	});
 
+	socket.on("send-message", (messageData) => {
+		console.log('sending message to user...', messageData.to.name);
+
+		if (userSocketIdMap.has(messageData.to.userId)) {
+			const recipientSocketId = getUserSocketId(messageData.to.userId);
+
+			const data = { ...messageData, sockets: { from: socket.id, to: recipientSocketId } };
+
+			console.log('with socket id...', recipientSocketId);
+			console.log(data);
+			io.to(recipientSocketId).emit("send-message", data);
+		}
+		// else {
+		// 	console.log(`${messageData.to.name} is offline`)
+		// 	io.to(socket.id).emit("user-offline", messageData);
+		// 	console.log(socket.id);
+		// }
+	});
+
 	socket.on("call-user", (callData) => {
 		console.log('calling user...', callData.callId.to.name);
 
@@ -95,9 +114,12 @@ io.on("connection", (socket) => {
 
 	socket.on("accept-call", (callData) => {
 		// console.log('accepted call: ', callData)
-		const socketIdToCall = getUserSocketId(callData.callId.from.userId);
-		if (socketIdToCall)
-			io.to(socketIdToCall).emit("call-connected", callData);
+		if (callData && callData.callId && callData.callId.from && callData.callId.to) {
+			const socketIdToCall = getUserSocketId(callData.callId.from.userId);
+			if (socketIdToCall) {
+				io.to(socketIdToCall).emit("call-connected", callData);
+			}
+		}
 	});
 });
 
