@@ -378,6 +378,100 @@ export const createImageMessage = async (req, res, next) => ***REMOVED***
     ***REMOVED***
 ***REMOVED***
 
+export const createMessagePost = async (req, res, next) => ***REMOVED***
+    const chatRoomId = req.params.id;
+
+    const ***REMOVED*** postId ***REMOVED*** = req.body;
+    const userId = req.authUser;
+
+    const session = await mongoose.startSession();
+
+    try ***REMOVED***
+        if (!chatRoomId) ***REMOVED***
+            throw createHttpError.BadRequest();
+        ***REMOVED***
+        if (!postId) ***REMOVED***
+            throw createHttpError.BadRequest('Payload missing postId');
+        ***REMOVED***
+        session.startTransaction();
+
+        const doesExist = await ChatRoom.findOne(***REMOVED*** _id: chatRoomId ***REMOVED***);
+
+        if (!doesExist) ***REMOVED***
+            throw createHttpError.NotFound('Chatroom does not exist');
+        ***REMOVED***
+
+        const message = new Message(***REMOVED***
+            chatRoomId: chatRoomId,
+            userId: userId,
+            postId: postId,
+            type: 'post',
+            createdAt: new Date().toISOString()
+        ***REMOVED***);
+
+        await message.save(***REMOVED*** session ***REMOVED***);
+
+        await session.commitTransaction();
+
+        res.status(201).send(message);
+
+    ***REMOVED*** catch (error) ***REMOVED***
+        session.abortTransaction();
+        next(error);
+    ***REMOVED*** finally ***REMOVED***
+        session.endSession();
+    ***REMOVED***
+***REMOVED***
+
+export const createMessageCall = async (req, res, next) => ***REMOVED***
+    const chatRoomId = req.params.id;
+
+    const ***REMOVED*** type, duration ***REMOVED*** = req.body;
+    const userId = req.authUser;
+
+    const session = await mongoose.startSession();
+
+    try ***REMOVED***
+        if (!chatRoomId) ***REMOVED***
+            throw createHttpError.BadRequest();
+        ***REMOVED***
+        if (!type) ***REMOVED***
+            throw createHttpError.BadRequest('Payload missing call type');
+        ***REMOVED***
+        if (!duration) ***REMOVED***
+            throw createHttpError.BadRequest('Payload missing call duration');
+        ***REMOVED***
+        session.startTransaction();
+
+        const doesExist = await ChatRoom.findOne(***REMOVED*** _id: chatRoomId ***REMOVED***);
+
+        if (!doesExist) ***REMOVED***
+            throw createHttpError.NotFound('Chatroom does not exist');
+        ***REMOVED***
+
+        const message = new Message(***REMOVED***
+            chatRoomId: chatRoomId,
+            userId: userId,
+            type: 'call',
+            callType: type,
+            callDuration: duration,
+            createdAt: new Date().toISOString()
+        ***REMOVED***);
+
+        await message.save(***REMOVED*** session ***REMOVED***);
+
+        await session.commitTransaction();
+
+        res.status(201).send(message);
+
+    ***REMOVED*** catch (error) ***REMOVED***
+        session.abortTransaction();
+        next(error);
+    ***REMOVED*** finally ***REMOVED***
+        session.endSession();
+    ***REMOVED***
+***REMOVED***
+
 /**
  * retreive chat messages
  * @param ***REMOVED*******REMOVED*** req
@@ -424,6 +518,31 @@ export const fetchChatRoomMessages = async (req, res, next) => ***REMOVED***
         ***REMOVED***
 
         res.status(200).send(results);
+
+    ***REMOVED*** catch (error) ***REMOVED***
+        next(error);
+    ***REMOVED***
+***REMOVED***
+/**
+ * retreive last message in the chat
+ * @param ***REMOVED*******REMOVED*** req
+ * @param ***REMOVED*******REMOVED*** res
+ * @param ***REMOVED*******REMOVED*** next
+ */
+export const fetchChatRoomLastMessage = async (req, res, next) => ***REMOVED***
+    try ***REMOVED***
+
+        const chatRoomId = req.params.id;
+
+        const doesExist = await ChatRoom.findOne(***REMOVED*** _id: chatRoomId ***REMOVED***);
+        if (!doesExist) ***REMOVED***
+            throw createHttpError.NotFound('ChatRoom does not exist');
+        ***REMOVED***
+
+        const lastList = await Message.find(***REMOVED*** chatRoomId: chatRoomId ***REMOVED***).sort(***REMOVED*** createdAt: -1 ***REMOVED***).limit(1).exec();
+        const lastMessage = (lastList && lastList.length === 1) ? lastList[0] : null;
+
+        res.status(200).send(lastMessage);
 
     ***REMOVED*** catch (error) ***REMOVED***
         next(error);

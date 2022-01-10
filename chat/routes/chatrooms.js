@@ -1,7 +1,7 @@
 import express from 'express';
 
 import ***REMOVED*** verifyAccessToken ***REMOVED*** from '../utils/jwt.js';
-import ***REMOVED*** createChatroom, fetchChatroom, updateChatroom, fetchUserChatRooms, fetchChatRoomRecipients, createMessage, createImageMessage, fetchChatRoomMessages, fetchChatWithRecipient, home, ***REMOVED*** from '../controllers/chatrooms.js';
+import ***REMOVED*** createChatroom, fetchChatroom, updateChatroom, fetchUserChatRooms, fetchChatRoomRecipients, createMessage, createImageMessage, createMessageCall, createMessagePost, fetchChatRoomMessages, fetchChatRoomLastMessage, fetchChatWithRecipient, home, ***REMOVED*** from '../controllers/chatrooms.js';
 
 const chatroomRoute = express.Router();
 
@@ -13,9 +13,12 @@ chatroomRoute.post('/api/chats/new', verifyAccessToken, createChatroom); //push 
 chatroomRoute.get('/api/chats/:id/users', verifyAccessToken, fetchChatRoomRecipients);
 chatroomRoute.get('/api/chats/users/:id/chatrooms', verifyAccessToken, fetchUserChatRooms);
 
-chatroomRoute.post('/api/chats/:id/messages/newMessage', verifyAccessToken, createMessage); //push new message data to rabbitmq
+chatroomRoute.post('/api/chats/:id/messages/newMessage', verifyAccessToken, createMessage);
 chatroomRoute.post('/api/chats/:id/messages/newMessageImage', verifyAccessToken, createImageMessage);
+chatroomRoute.post('/api/chats/:id/messages/newMessagePost', verifyAccessToken, createMessagePost);
+chatroomRoute.post('/api/chats/:id/messages/newMessageCall', verifyAccessToken, createMessageCall);
 chatroomRoute.get('/api/chats/:id/messages', verifyAccessToken, fetchChatRoomMessages);
+chatroomRoute.get('/api/chats/:id/lastMessage', verifyAccessToken, fetchChatRoomLastMessage);
 chatroomRoute.get('/api/chats/users/:id/me/', verifyAccessToken, fetchChatWithRecipient);
 
 export default chatroomRoute;
