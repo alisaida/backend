@@ -23,6 +23,10 @@ const profileSchema = mongoose.Schema(***REMOVED***
         type: Date,
         default: new Date()
     ***REMOVED***,
+    isPublic: ***REMOVED***
+        type: Boolean,
+        default: false
+    ***REMOVED***,
     updatedAt: ***REMOVED***
         type: Date
     ***REMOVED***

@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 
 import Profile from '../models/profiles.js';
 import User from '../models/users.js';
+import Follow from '../models/follow.js';
 
 
 /**
@@ -106,7 +107,7 @@ export const fetchProfileByQueryParams = async (req, res, next) => ***REMOVED***
 
   const ***REMOVED*** name, username ***REMOVED*** = req.query;
   if (!name && !username) ***REMOVED***
-    httpError.BadRequest('Empty search params');
+    throw httpError.BadRequest('Empty search params');
   ***REMOVED***
 
   try ***REMOVED***
@@ -231,4 +232,277 @@ export const updateProfile = async (req, res, next) => ***REMOVED***
   ***REMOVED***
 ***REMOVED***
 
+/**
+ * fetch following between two profiles
+ * @param req
+ * @param res
+ * @param next
+ */
+export const fetchFollow = async (req, res, next) => ***REMOVED***
 
+  try ***REMOVED***
+    const follower = req.params.id1;
+    const following = req.params.id2;
+
+    const follow = await Follow.findOne(***REMOVED*** follower: follower, following: following ***REMOVED***);
+    if (!follow) ***REMOVED***
+      throw httpError.NotFound();
+    ***REMOVED***
+
+    res.status(200).send(***REMOVED*** follow ***REMOVED***);
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error);
+  ***REMOVED***
+***REMOVED***
+
+/**
+ * create following between two profiles
+ * @param req
+ * @param res
+ * @param next
+ */
+export const createFollow = async (req, res, next) => ***REMOVED***
+
+  try ***REMOVED***
+    const follower = req.authUser;
+    const following = req.params.id;
+
+    const profile = await Profile.findOne(***REMOVED*** userId: following ***REMOVED***);
+
+    if (!profile) ***REMOVED***
+      throw httpError.NotFound(`Profile you're trying to follow does not exist`);
+    ***REMOVED***
+
+    const ***REMOVED*** isPublic ***REMOVED*** = profile;
+
+    const status = isPublic ? 'accepted' : 'pending';
+
+    const follow = new Follow(***REMOVED***
+      follower: follower,
+      following: following,
+      status: status,
+      createdAt: new Date().toISOString()
+    ***REMOVED***);
+
+    const followingSaved = await follow.save();
+
+    res.status(201).send(followingSaved);
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error)
+  ***REMOVED***
+***REMOVED***
+
+/** 
+ * unfollow profile
+ * @param ***REMOVED*******REMOVED*** req 
+ * @param ***REMOVED*******REMOVED*** res 
+ * @param ***REMOVED*******REMOVED*** next 
+ */
+export const unFollow = async (req, res, next) => ***REMOVED***
+  try ***REMOVED***
+    const follower = req.authUser;
+    const following = req.params.id;
+    const ***REMOVED*** relation ***REMOVED*** = req.body;
+
+    if (!relation) ***REMOVED***
+      throw httpError.BadRequest('Payload missing relation');
+    ***REMOVED***
+
+    let follow;
+    if (relation === 'follower') ***REMOVED***
+      follow = await Follow.findOne(***REMOVED*** follower: follower, following: following ***REMOVED***);
+    ***REMOVED*** else if (relation === 'following') ***REMOVED***
+      follow = await Follow.findOne(***REMOVED*** following: follower, follower: following ***REMOVED***);
+    ***REMOVED***
+
+    if (!follow) ***REMOVED***
+      throw httpError.NotFound();
+    ***REMOVED***
+
+    await follow.delete();
+
+    res.status(202).send('Profile unfollowed');
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error);
+  ***REMOVED***
+***REMOVED***;
+
+/**
+ * fetch followings by userId
+ * @param ***REMOVED*******REMOVED*** req 
+ * @param ***REMOVED*******REMOVED*** res 
+ * @param ***REMOVED*******REMOVED*** next 
+ */
+export const fetchFollowings = async (req, res, next) => ***REMOVED***
+  try ***REMOVED***
+    const ***REMOVED*** status ***REMOVED*** = req.body;
+    let ***REMOVED*** page, size ***REMOVED*** = req.query;
+    if (!page) ***REMOVED***
+      page = 1;
+    ***REMOVED***
+
+    if (!size) ***REMOVED***
+      size = 10;
+    ***REMOVED***
+
+    const limit = parseInt(size);
+
+    let options = ***REMOVED***
+      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+      lean: true,
+      page: page,
+      limit: limit,
+    ***REMOVED***;
+
+    let ***REMOVED*** id ***REMOVED*** = req.params;
+
+    if (!id) ***REMOVED***
+      throw httpError.BadRequest();
+    ***REMOVED***
+    const profile = await Profile.findOne(***REMOVED*** userId: id ***REMOVED***);
+
+    if (!profile) ***REMOVED***
+      throw httpError.NotFound();
+    ***REMOVED***
+
+    let data;
+    if (status)
+      data = await Follow.paginate(***REMOVED*** follower: id, status: status ***REMOVED***, options);
+    else
+      data = await Follow.paginate(***REMOVED*** follower: id ***REMOVED***, options);
+
+    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+
+    const results = ***REMOVED***
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: docs
+    ***REMOVED***
+
+    res.status(200).send(results);
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error);
+  ***REMOVED***
+***REMOVED***
+
+/**
+ * fetch followings by userId
+ * @param ***REMOVED*******REMOVED*** req 
+ * @param ***REMOVED*******REMOVED*** res 
+ * @param ***REMOVED*******REMOVED*** next 
+ */
+export const fetchFollowers = async (req, res, next) => ***REMOVED***
+  try ***REMOVED***
+    const ***REMOVED*** status ***REMOVED*** = req.body;
+    let ***REMOVED*** page, size ***REMOVED*** = req.query;
+    if (!page) ***REMOVED***
+      page = 1;
+    ***REMOVED***
+
+    if (!size) ***REMOVED***
+      size = 10;
+    ***REMOVED***
+
+    const limit = parseInt(size);
+
+    let options = ***REMOVED***
+      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+      lean: true,
+      page: page,
+      limit: limit,
+    ***REMOVED***;
+
+    let ***REMOVED*** id ***REMOVED*** = req.params;
+
+    if (!id) ***REMOVED***
+      throw httpError.BadRequest();
+    ***REMOVED***
+    const profile = await Profile.findOne(***REMOVED*** userId: id ***REMOVED***);
+
+    if (!profile) ***REMOVED***
+      throw httpError.NotFound();
+    ***REMOVED***
+
+    let data;
+    if (status)
+      data = await Follow.paginate(***REMOVED*** following: id, status: status ***REMOVED***, options);
+    else
+      data = await Follow.paginate(***REMOVED*** following: id ***REMOVED***, options);
+
+    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+
+    const results = ***REMOVED***
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: docs
+    ***REMOVED***
+
+    res.status(200).send(results);
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error);
+  ***REMOVED***
+***REMOVED***
+
+/**
+ * accept pending following
+ * @param req
+ * @param res
+ * @param next
+ */
+export const acceptFollowing = async (req, res, next) => ***REMOVED***
+  try ***REMOVED***
+    const userId = req.authUser;
+
+    let ***REMOVED*** id ***REMOVED*** = req.params;
+
+    if (!id) ***REMOVED***
+      throw httpError.BadRequest();
+    ***REMOVED***
+
+    await Follow.findOneAndUpdate(
+      ***REMOVED*** following: userId, _id: id ***REMOVED***,
+      ***REMOVED***
+        $set: ***REMOVED***
+          status: 'accepted'
+        ***REMOVED***
+      ***REMOVED***
+      , ***REMOVED***
+        upsert: true
+      ***REMOVED***
+    );
+
+    res.status(201).send('Following accepted');
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error)
+  ***REMOVED***
+***REMOVED***
+
+/**
+ * reject pending following
+ * @param req
+ * @param res
+ * @param next
+ */
+export const rejectFollowing = async (req, res, next) => ***REMOVED***
+  try ***REMOVED***
+    const userId = req.authUser;
+    let ***REMOVED*** id ***REMOVED*** = req.params;
+
+    const follow = await Follow.findOne(***REMOVED*** following: userId, _id: id ***REMOVED***);
+    if (!follow) ***REMOVED***
+      throw httpError.NotFound();
+    ***REMOVED***
+
+    await follow.delete();
+
+    res.status(202).send('Follow request deleted');
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error);
+  ***REMOVED***
+***REMOVED***

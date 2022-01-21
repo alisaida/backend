@@ -73,12 +73,12 @@ export const fetchFeed = async (req, res, next) => ***REMOVED***
 export const fetchPost = async (req, res, next) => ***REMOVED***
   const postId = req.params.id;
   if (!postId) ***REMOVED***
-    httpError.BadRequest();
+    throw httpError.BadRequest();
   ***REMOVED***
   try ***REMOVED***
     let post = await Post.findOne(***REMOVED*** _id: postId ***REMOVED***);
     if (!post) ***REMOVED***
-      httpError.NotFound();
+      throw httpError.NotFound();
     ***REMOVED***
 
     const comments = await Comment.countDocuments(***REMOVED*** postId: postId ***REMOVED***).exec();
@@ -187,12 +187,12 @@ export const fetchPostComments = async (req, res, next) => ***REMOVED***
     let ***REMOVED*** id ***REMOVED*** = req.params;
 
     if (!id) ***REMOVED***
-      httpError.BadRequest();
+      throw httpError.BadRequest();
     ***REMOVED***
     const post = await Post.findOne(***REMOVED*** _id: id ***REMOVED***);
 
     if (!post) ***REMOVED***
-      httpError.NotFound();
+      throw httpError.NotFound();
     ***REMOVED***
 
     const data = await Comment.paginate(***REMOVED*** postId: id ***REMOVED***, options);
