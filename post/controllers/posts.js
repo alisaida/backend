@@ -73,12 +73,12 @@ export const fetchFeed = async (req, res, next) => {
 export const fetchPost = async (req, res, next) => {
   const postId = req.params.id;
   if (!postId) {
-    httpError.BadRequest();
+    throw httpError.BadRequest();
   }
   try {
     let post = await Post.findOne({ _id: postId });
     if (!post) {
-      httpError.NotFound();
+      throw httpError.NotFound();
     }
 
     const comments = await Comment.countDocuments({ postId: postId }).exec();
@@ -187,12 +187,12 @@ export const fetchPostComments = async (req, res, next) => {
     let { id } = req.params;
 
     if (!id) {
-      httpError.BadRequest();
+      throw httpError.BadRequest();
     }
     const post = await Post.findOne({ _id: id });
 
     if (!post) {
-      httpError.NotFound();
+      throw httpError.NotFound();
     }
 
     const data = await Comment.paginate({ postId: id }, options);

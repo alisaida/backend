@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 
 import Profile from '../models/profiles.js';
 import User from '../models/users.js';
+import Follow from '../models/follow.js';
 
 
 /**
@@ -106,7 +107,7 @@ export const fetchProfileByQueryParams = async (req, res, next) => {
 
   const { name, username } = req.query;
   if (!name && !username) {
-    httpError.BadRequest('Empty search params');
+    throw httpError.BadRequest('Empty search params');
   }
 
   try {
@@ -231,4 +232,277 @@ export const updateProfile = async (req, res, next) => {
   }
 }
 
+/**
+ * fetch following between two profiles
+ * @param req
+ * @param res
+ * @param next
+ */
+export const fetchFollow = async (req, res, next) => {
 
+  try {
+    const follower = req.params.id1;
+    const following = req.params.id2;
+
+    const follow = await Follow.findOne({ follower: follower, following: following });
+    if (!follow) {
+      throw httpError.NotFound();
+    }
+
+    res.status(200).send({ follow });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * create following between two profiles
+ * @param req
+ * @param res
+ * @param next
+ */
+export const createFollow = async (req, res, next) => {
+
+  try {
+    const follower = req.authUser;
+    const following = req.params.id;
+
+    const profile = await Profile.findOne({ userId: following });
+
+    if (!profile) {
+      throw httpError.NotFound(`Profile you're trying to follow does not exist`);
+    }
+
+    const { isPublic } = profile;
+
+    const status = isPublic ? 'accepted' : 'pending';
+
+    const follow = new Follow({
+      follower: follower,
+      following: following,
+      status: status,
+      createdAt: new Date().toISOString()
+    });
+
+    const followingSaved = await follow.save();
+
+    res.status(201).send(followingSaved);
+  } catch (error) {
+    next(error)
+  }
+}
+
+/** 
+ * unfollow profile
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const unFollow = async (req, res, next) => {
+  try {
+    const follower = req.authUser;
+    const following = req.params.id;
+    const { relation } = req.body;
+
+    if (!relation) {
+      throw httpError.BadRequest('Payload missing relation');
+    }
+
+    let follow;
+    if (relation === 'follower') {
+      follow = await Follow.findOne({ follower: follower, following: following });
+    } else if (relation === 'following') {
+      follow = await Follow.findOne({ following: follower, follower: following });
+    }
+
+    if (!follow) {
+      throw httpError.NotFound();
+    }
+
+    await follow.delete();
+
+    res.status(202).send('Profile unfollowed');
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * fetch followings by userId
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const fetchFollowings = async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    let { page, size } = req.query;
+    if (!page) {
+      page = 1;
+    }
+
+    if (!size) {
+      size = 10;
+    }
+
+    const limit = parseInt(size);
+
+    let options = {
+      sort: { createdAt: -1 },
+      lean: true,
+      page: page,
+      limit: limit,
+    };
+
+    let { id } = req.params;
+
+    if (!id) {
+      throw httpError.BadRequest();
+    }
+    const profile = await Profile.findOne({ userId: id });
+
+    if (!profile) {
+      throw httpError.NotFound();
+    }
+
+    let data;
+    if (status)
+      data = await Follow.paginate({ follower: id, status: status }, options);
+    else
+      data = await Follow.paginate({ follower: id }, options);
+
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
+
+    const results = {
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: docs
+    }
+
+    res.status(200).send(results);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * fetch followings by userId
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const fetchFollowers = async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    let { page, size } = req.query;
+    if (!page) {
+      page = 1;
+    }
+
+    if (!size) {
+      size = 10;
+    }
+
+    const limit = parseInt(size);
+
+    let options = {
+      sort: { createdAt: -1 },
+      lean: true,
+      page: page,
+      limit: limit,
+    };
+
+    let { id } = req.params;
+
+    if (!id) {
+      throw httpError.BadRequest();
+    }
+    const profile = await Profile.findOne({ userId: id });
+
+    if (!profile) {
+      throw httpError.NotFound();
+    }
+
+    let data;
+    if (status)
+      data = await Follow.paginate({ following: id, status: status }, options);
+    else
+      data = await Follow.paginate({ following: id }, options);
+
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
+
+    const results = {
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: docs
+    }
+
+    res.status(200).send(results);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * accept pending following
+ * @param req
+ * @param res
+ * @param next
+ */
+export const acceptFollowing = async (req, res, next) => {
+  try {
+    const userId = req.authUser;
+
+    let { id } = req.params;
+
+    if (!id) {
+      throw httpError.BadRequest();
+    }
+
+    await Follow.findOneAndUpdate(
+      { following: userId, _id: id },
+      {
+        $set: {
+          status: 'accepted'
+        }
+      }
+      , {
+        upsert: true
+      }
+    );
+
+    res.status(201).send('Following accepted');
+  } catch (error) {
+    next(error)
+  }
+}
+
+/**
+ * reject pending following
+ * @param req
+ * @param res
+ * @param next
+ */
+export const rejectFollowing = async (req, res, next) => {
+  try {
+    const userId = req.authUser;
+    let { id } = req.params;
+
+    const follow = await Follow.findOne({ following: userId, _id: id });
+    if (!follow) {
+      throw httpError.NotFound();
+    }
+
+    await follow.delete();
+
+    res.status(202).send('Follow request deleted');
+  } catch (error) {
+    next(error);
+  }
+}

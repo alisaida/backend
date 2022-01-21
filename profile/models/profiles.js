@@ -23,6 +23,10 @@ const profileSchema = mongoose.Schema({
         type: Date,
         default: new Date()
     },
+    isPublic: {
+        type: Boolean,
+        default: false
+    },
     updatedAt: {
         type: Date
     }
