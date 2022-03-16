@@ -21,6 +21,10 @@ export const consumeUsersQueue = async () => {
     }
 }
 
+export const publishToQueue = async (queueName, data) => {
+    amqpChannel.sendToQueue(queueName, Buffer.from(JSON.stringify(data)), { persistent: true });
+}
+
 const saveUser = async (message) => {
     const user = JSON.parse(message.content.toString());
     if (user) {

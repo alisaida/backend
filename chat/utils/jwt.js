@@ -18,7 +18,7 @@ export const signAccessToken = (userId) => {
         const options = {
             expiresIn: expiresIn,
             audience: userId,
-            issuer: 'https://www.mywebsite.com'
+            issuer: 'https://www.saida.dev'
         }
 
         JWT.sign(payload, secret, options, (error, token) => {
@@ -45,7 +45,7 @@ export const signRefreshToken = (userId) => {
         const options = {
             expiresIn: '7',
             audience: userId,
-            issuer: 'https://www.mywebsite.com'
+            issuer: 'https://www.saida.dev'
         }
 
         JWT.sign(payload, secret, options, (error, token) => {
@@ -145,7 +145,7 @@ export const signPasswordResetToken = (user) => {
         const options = {
             expiresIn: '10m',
             audience: user._id + '',
-            issuer: 'https://www.mywebsite.com'
+            issuer: 'https://www.saida.dev'
         }
 
         JWT.sign(payload, secret, options, (error, token) => {
@@ -206,7 +206,7 @@ export const signAccountConfirmationToken = (user) => {
         const options = {
             expiresIn: '10m',
             audience: user._id + '',
-            issuer: 'https://www.mywebsite.com'
+            issuer: 'https://www.saida.dev'
         }
 
         JWT.sign(payload, secret, options, (error, token) => {
