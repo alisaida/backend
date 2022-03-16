@@ -18,7 +18,7 @@ export const signAccessToken = (userId) => ***REMOVED***
         const options = ***REMOVED***
             expiresIn: expiresIn,
             audience: userId,
-            issuer: 'https://www.mywebsite.com'
+            issuer: 'https://www.saida.dev'
         ***REMOVED***
 
         JWT.sign(payload, secret, options, (error, token) => ***REMOVED***
@@ -45,7 +45,7 @@ export const signRefreshToken = (userId) => ***REMOVED***
         const options = ***REMOVED***
             expiresIn: '7d',
             audience: userId,
-            issuer: 'https://www.mywebsite.com'
+            issuer: 'https://www.saida.dev'
         ***REMOVED***
 
         JWT.sign(payload, secret, options, (error, token) => ***REMOVED***
@@ -145,7 +145,7 @@ export const signPasswordResetToken = (user) => ***REMOVED***
         const options = ***REMOVED***
             expiresIn: '10m',
             audience: user._id + '',
-            issuer: 'https://www.mywebsite.com'
+            issuer: 'https://www.saida.dev'
         ***REMOVED***
 
         JWT.sign(payload, secret, options, (error, token) => ***REMOVED***
@@ -206,7 +206,7 @@ export const signAccountConfirmationToken = (user) => ***REMOVED***
         const options = ***REMOVED***
             expiresIn: '10m',
             audience: user._id + '',
-            issuer: 'https://www.mywebsite.com'
+            issuer: 'https://www.saida.dev'
         ***REMOVED***
 
         JWT.sign(payload, secret, options, (error, token) => ***REMOVED***

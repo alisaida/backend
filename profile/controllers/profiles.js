@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import Profile from '../models/profiles.js';
 import User from '../models/users.js';
 import Follow from '../models/follow.js';
-
+import ***REMOVED*** publishToQueue ***REMOVED*** from '../utils/rabbitmq.js'
 
 /**
  * home
@@ -203,11 +203,11 @@ export const updateProfileBio = async (req, res, next) => ***REMOVED***
  */
 export const updateProfile = async (req, res, next) => ***REMOVED***
   const userId = req.authUser;
-  const ***REMOVED*** bio, name, profilePicture, username ***REMOVED*** = req.body;
+  const ***REMOVED*** bio, name, profilePicture, username, isPublic ***REMOVED*** = req.body;
 
   try ***REMOVED***
-    if (!bio && !name && !profilePicture && !username) ***REMOVED***
-      throw httpError.BadRequest('nothing to update');
+    if (!name && !username) ***REMOVED***
+      throw httpError.BadRequest('Payload missing name or username');
     ***REMOVED***
 
     await Profile.findOneAndUpdate(
@@ -218,6 +218,7 @@ export const updateProfile = async (req, res, next) => ***REMOVED***
           name: name,
           profilePicture: profilePicture,
           username: username,
+          isPublic: isPublic,
           updatedAt: new Date().toISOString()
         ***REMOVED***
       ***REMOVED***
@@ -225,6 +226,22 @@ export const updateProfile = async (req, res, next) => ***REMOVED***
         upsert: true
       ***REMOVED***
     );
+
+    //payload for other microservices
+    let data = ***REMOVED***
+      userId: userId,
+      name: name,
+      profilePicture: profilePicture,
+      username: username,
+      isPublic: isPublic,
+      bio: bio
+    ***REMOVED***
+
+    console.log('publish events to rabbitmq UPDATE_USER_AUTH, UPDATE_USER_CHAT and UPDATE_USER_POST')
+
+    publishToQueue('UPDATE_USER_AUTH', data);
+    publishToQueue('UPDATE_USER_CHAT', data);
+    publishToQueue('UPDATE_USER_POST', data);
 
     res.status(200).send('Profile updated successfully');
   ***REMOVED*** catch (error) ***REMOVED***

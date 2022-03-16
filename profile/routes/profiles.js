@@ -1,7 +1,7 @@
 import express from 'express';
 
 import ***REMOVED*** verifyAccessToken ***REMOVED*** from '../utils/jwt.js';
-import ***REMOVED*** createProfile, fetchProfileByUserId, fetchProfileByQueryParams, updateProfilePicture, updateProfileBio, home, me, fetchFollow, createFollow, unFollow, fetchFollowings, fetchFollowers, acceptFollowing, rejectFollowing ***REMOVED*** from '../controllers/profiles.js';
+import ***REMOVED*** createProfile, fetchProfileByUserId, fetchProfileByQueryParams, updateProfile, updateProfilePicture, updateProfileBio, home, me, fetchFollow, createFollow, unFollow, fetchFollowings, fetchFollowers, acceptFollowing, rejectFollowing ***REMOVED*** from '../controllers/profiles.js';
 
 const profileRoute = express.Router();
 
@@ -11,6 +11,7 @@ profileRoute.post('/api/profiles/new', verifyAccessToken, createProfile);
 profileRoute.get('/api/profiles/users/:id/', verifyAccessToken, fetchProfileByUserId);
 profileRoute.get('/api/profiles/user', verifyAccessToken, fetchProfileByQueryParams);
 profileRoute.patch('/api/profiles/profilePicture', verifyAccessToken, updateProfilePicture);
+profileRoute.post('/api/profiles/update', verifyAccessToken, updateProfile);
 profileRoute.patch('/api/profiles/bio', verifyAccessToken, updateProfileBio);
 
 profileRoute.get('/api/profiles/:id1/follow/:id2', verifyAccessToken, fetchFollow);
