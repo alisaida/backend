@@ -204,7 +204,7 @@ export const signAccountConfirmationToken = (user) => ***REMOVED***
         const payload = ***REMOVED******REMOVED***
         const secret = process.env.ACCOUNT_VERIFICATION_SECRET;
         const options = ***REMOVED***
-            expiresIn: '10m',
+            expiresIn: '24h',
             audience: user._id + '',
             issuer: 'https://www.saida.dev'
         ***REMOVED***

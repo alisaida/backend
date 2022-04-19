@@ -6,6 +6,9 @@ import User from "../models/users.js";
 import Like from "../models/likes.js";
 import Bookmark from "../models/bookmarks.js";
 import Comment from "../models/comments.js";
+import Tag from "../models/tags.js";
+import Location from '../models/locations.js';
+import Person from "../models/person.js";
 
 /**
  * home
@@ -90,6 +93,8 @@ export const fetchPost = async (req, res, next) => ***REMOVED***
       userId: post.userId,
       caption: post.caption,
       imageUri: post.imageUri,
+      location: post.location,
+      tags: post.tags,
       likes,
       comments
     ***REMOVED***
@@ -264,7 +269,7 @@ export const createComment = async (req, res, next) => ***REMOVED***
 export const createPost = async (req, res, next) => ***REMOVED***
   const userId = req.authUser;
 
-  const ***REMOVED*** caption, imageUri ***REMOVED*** = req.body;
+  const ***REMOVED*** caption, imageUri, location, people ***REMOVED*** = req.body;
 
   try ***REMOVED***
 
@@ -272,11 +277,34 @@ export const createPost = async (req, res, next) => ***REMOVED***
       throw httpError.BadRequest('Image uri missing from the payload');
     ***REMOVED***
 
+    //hash tags
+    const hashtags = !!caption ? caption.match(/(?:^|\W)#(\w+)(?!\w)/g) : [];
+    const tagIds = [];
+    if (hashtags) ***REMOVED***
+      for (let i = 0; i < hashtags.length; i++) ***REMOVED***
+        const tag = hashtags[i].trim();
+        if (!!tag && tag.length > 1) ***REMOVED***
+          let savedTag = await saveTag(tag.substring(1));
+          tagIds.push(savedTag._id);
+        ***REMOVED***
+      ***REMOVED***
+    ***REMOVED***
+
+    //location
+    let locationId = null;
+    if (location) ***REMOVED***
+      const savedLocation = await saveLocation(location);
+      locationId = savedLocation._id;
+    ***REMOVED***
+
     const post = new Post(***REMOVED***
       userId: userId,
       caption: caption,
       imageUri: imageUri,
-      createdAt: new Date().toISOString()
+      location: locationId,
+      createdAt: new Date().toISOString(),
+      people: people,
+      tags: tagIds
     ***REMOVED***);
 
     const savedPost = await post.save();
@@ -289,6 +317,324 @@ export const createPost = async (req, res, next) => ***REMOVED***
     next(error);
   ***REMOVED***
 ***REMOVED***;
+
+const saveLocation = async (location) => ***REMOVED***
+  try ***REMOVED***
+    const exists = await Location.findOne(***REMOVED*** location: location ***REMOVED***);
+    if (exists) ***REMOVED***
+      return exists;
+    ***REMOVED***
+
+    const locationObj = new Location(***REMOVED***
+      location: location
+    ***REMOVED***);
+    const savedLocation = await locationObj.save();
+
+    if (!savedLocation) ***REMOVED***
+      throw httpError.InternalServerError();
+    ***REMOVED***
+
+    return savedLocation;
+  ***REMOVED*** catch (error) ***REMOVED***
+    throw httpError.InternalServerError();
+  ***REMOVED***
+***REMOVED***
+
+const saveTag = async (tag) => ***REMOVED***
+  try ***REMOVED***
+    const exists = await Tag.findOne(***REMOVED*** tag: tag ***REMOVED***);
+    if (exists) ***REMOVED***
+      return exists;
+    ***REMOVED***
+
+    const tagObj = new Tag(***REMOVED***
+      tag: tag
+    ***REMOVED***);
+    const savedTag = await tagObj.save();
+
+    if (!savedTag) ***REMOVED***
+      throw httpError.InternalServerError();
+    ***REMOVED***
+
+    return savedTag;
+  ***REMOVED*** catch (error) ***REMOVED***
+    throw httpError.InternalServerError();
+  ***REMOVED***
+***REMOVED***
+
+/**
+ * fetch posts by tag
+ * @param ***REMOVED*******REMOVED*** req 
+ * @param ***REMOVED*******REMOVED*** res 
+ * @param ***REMOVED*******REMOVED*** next 
+ */
+
+export const getPostsByTagId = async (req, res, next) => ***REMOVED***
+
+  const tagId = req.params.id;
+  if (!tagId) ***REMOVED***
+    throw httpError.BadRequest();
+  ***REMOVED***
+
+  try ***REMOVED***
+    let ***REMOVED*** page, size ***REMOVED*** = req.query;
+
+    if (!page) ***REMOVED***
+      page = 1;
+    ***REMOVED***
+
+    if (!size) ***REMOVED***
+      size = 10;
+    ***REMOVED***
+
+    const limit = parseInt(size);
+
+    let options = ***REMOVED***
+      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+      lean: true,
+      page: page,
+      limit: limit,
+    ***REMOVED***;
+
+    const tagObj = await Tag.findOne(***REMOVED*** _id: tagId ***REMOVED***);
+
+    if (!tagObj) ***REMOVED***
+      throw httpError.NotFound();
+    ***REMOVED***
+
+    const data = await Post.paginate(***REMOVED*** tags: tagObj._id ***REMOVED***, options);
+    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+
+    const posts = docs.map((post) => post._id);
+
+    const results = ***REMOVED***
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: posts
+    ***REMOVED***
+
+    res.status(200).send(results);
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error);
+  ***REMOVED***
+***REMOVED***
+
+export const getTagByName = async (req, res, next) => ***REMOVED***
+  try ***REMOVED***
+    let ***REMOVED*** page, size, name ***REMOVED*** = req.query;
+    if (!page) ***REMOVED***
+      page = 1;
+    ***REMOVED***
+
+    if (!size) ***REMOVED***
+      size = 10;
+    ***REMOVED***
+
+    const limit = parseInt(size);
+
+    let options = ***REMOVED***
+      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+      lean: true,
+      page: page,
+      limit: limit,
+    ***REMOVED***;
+
+    if (!name) ***REMOVED***
+      throw httpError.BadRequest();
+    ***REMOVED***
+    const tag = await Tag.findOne(***REMOVED*** tag: name ***REMOVED***);
+
+    res.status(200).send(tag);
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error);
+  ***REMOVED***
+***REMOVED***
+
+/**
+ * get location by id
+ * @param ***REMOVED*******REMOVED*** req
+ * @param ***REMOVED*******REMOVED*** res
+ * @param ***REMOVED*******REMOVED*** next
+ */
+export const fetchLocationById = async (req, res, next) => ***REMOVED***
+  const locationId = req.params.id;
+  if (!locationId) ***REMOVED***
+    throw httpError.BadRequest();
+  ***REMOVED***
+  try ***REMOVED***
+    const location = await Location.findOne(***REMOVED*** _id: locationId ***REMOVED***);
+    if (!location) ***REMOVED***
+      throw httpError.NotFound();
+    ***REMOVED***
+
+    res.status(200).send(location);
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error);
+  ***REMOVED***
+***REMOVED***;
+
+/**
+ * getTagsByNameLike
+ * @param ***REMOVED*******REMOVED*** req 
+ * @param ***REMOVED*******REMOVED*** res 
+ * @param ***REMOVED*******REMOVED*** next 
+ */
+export const getTagsByNameLike = async (req, res, next) => ***REMOVED***
+
+  try ***REMOVED***
+    let ***REMOVED*** name, page, size ***REMOVED*** = req.query;
+    if (!page) ***REMOVED***
+      page = 1;
+    ***REMOVED***
+
+    if (!size) ***REMOVED***
+      size = 10;
+    ***REMOVED***
+
+    const limit = parseInt(size);
+
+    let options = ***REMOVED***
+      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+      lean: true,
+      page: page,
+      limit: limit,
+    ***REMOVED***;
+
+
+    if (!name) ***REMOVED***
+      throw httpError.BadRequest('Empty search params');
+    ***REMOVED***
+
+    const data = await Tag.paginate(***REMOVED*** tag: ***REMOVED*** $regex: name, $options: 'i' ***REMOVED*** ***REMOVED***, options);
+    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+
+    const results = ***REMOVED***
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: docs
+    ***REMOVED***
+
+    res.status(200).send(results);
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error);
+  ***REMOVED***
+***REMOVED***
+
+/**
+ * getLocationsByNameLike
+ * @param ***REMOVED*******REMOVED*** req 
+ * @param ***REMOVED*******REMOVED*** res 
+ * @param ***REMOVED*******REMOVED*** next 
+ */
+export const getLocationsByNameLike = async (req, res, next) => ***REMOVED***
+
+  try ***REMOVED***
+    let ***REMOVED*** name, page, size ***REMOVED*** = req.query;
+    if (!page) ***REMOVED***
+      page = 1;
+    ***REMOVED***
+
+    if (!size) ***REMOVED***
+      size = 10;
+    ***REMOVED***
+
+    const limit = parseInt(size);
+
+    let options = ***REMOVED***
+      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+      lean: true,
+      page: page,
+      limit: limit,
+    ***REMOVED***;
+
+
+    if (!name) ***REMOVED***
+      throw httpError.BadRequest('Empty search params');
+    ***REMOVED***
+
+    const data = await Location.paginate(***REMOVED*** location: ***REMOVED*** $regex: name, $options: 'i' ***REMOVED*** ***REMOVED***, options);
+    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+
+    const results = ***REMOVED***
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: docs
+    ***REMOVED***
+
+    res.status(200).send(results);
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error);
+  ***REMOVED***
+***REMOVED***
+
+/**
+ * fetch posts by tag
+ * @param ***REMOVED*******REMOVED*** req 
+ * @param ***REMOVED*******REMOVED*** res 
+ * @param ***REMOVED*******REMOVED*** next 
+ */
+
+export const getPostsByLocationId = async (req, res, next) => ***REMOVED***
+
+  const locationId = req.params.id;
+  if (!locationId) ***REMOVED***
+    throw httpError.BadRequest();
+  ***REMOVED***
+
+  try ***REMOVED***
+    let ***REMOVED*** page, size ***REMOVED*** = req.query;
+
+    if (!page) ***REMOVED***
+      page = 1;
+    ***REMOVED***
+
+    if (!size) ***REMOVED***
+      size = 10;
+    ***REMOVED***
+
+    const limit = parseInt(size);
+
+    let options = ***REMOVED***
+      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+      lean: true,
+      page: page,
+      limit: limit,
+    ***REMOVED***;
+
+    const locationObj = await Location.findOne(***REMOVED*** _id: locationId ***REMOVED***);
+
+    if (!locationObj) ***REMOVED***
+      throw httpError.NotFound();
+    ***REMOVED***
+
+    const data = await Post.paginate(***REMOVED*** location: locationObj._id ***REMOVED***, options);
+    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+
+    const posts = docs.map((post) => post._id);
+
+    const results = ***REMOVED***
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: posts
+    ***REMOVED***
+
+    res.status(200).send(results);
+  ***REMOVED*** catch (error) ***REMOVED***
+    next(error);
+  ***REMOVED***
+***REMOVED***
 
 /**
  * update post

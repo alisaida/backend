@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import createError from 'http-errors';
 import ***REMOVED*** validateLogin, validateRegister ***REMOVED*** from '../utils/validator.js';
 import lodash from 'lodash';
+import moment from 'moment';
 
 
 import User from '../models/users.js'
@@ -99,9 +100,11 @@ export const register = async (req, res, next) => ***REMOVED***
         const savedUser = await user.save();
         const accessToken = await signAccessToken(savedUser.id)
         const refreshToken = await signRefreshToken(savedUser.id);
-        const verifyAccountToken = await signAccountConfirmationToken(savedUser.id);
 
-        const uri = `http://localhost:4000/auth/verify-account/$***REMOVED***savedUser._id***REMOVED***/$***REMOVED***verifyAccountToken***REMOVED***`;
+
+        const verifyAccountToken = await signAccountConfirmationToken(savedUser.id);
+        const expiry = moment().add(24, 'hours').valueOf();
+        const uri = await buildUri(savedUser, expiry, verifyAccountToken, 'verify-account');
 
         if (savedUser && savedUser._id) ***REMOVED***
             //prepare payload for user table in other microservices
@@ -121,13 +124,52 @@ export const register = async (req, res, next) => ***REMOVED***
                 email: savedUser.email,
                 username: savedUser.username,
                 subject: 'Welcome!',
-                uri: uri // verify your account
+                uri: uri
             ***REMOVED***
             publishToQueue('SIGN_UP', data);
         ***REMOVED***
 
         res.status(201).send(***REMOVED*** accessToken, refreshToken ***REMOVED***);
 
+    ***REMOVED*** catch (error) ***REMOVED***
+        next(error)
+    ***REMOVED***
+***REMOVED***
+
+/**
+ * sends user email with a unique token to verify account
+ * @param ***REMOVED*******REMOVED*** req 
+ * @param ***REMOVED*******REMOVED*** res 
+ * @param ***REMOVED*******REMOVED*** next 
+ */
+export const verifyByUserId = async (req, res, next) => ***REMOVED***
+    try ***REMOVED***
+        const ***REMOVED*** userId ***REMOVED*** = req.body;
+
+        if (!userId) ***REMOVED***
+            throw createError.BadRequest();
+        ***REMOVED***
+
+        const user = await User.findOne(***REMOVED*** '_id': userId ***REMOVED***);
+        if (!user) ***REMOVED***
+            //if user is not registered, just send successful response, and avoid having a security hole
+            res.status(200).send();
+        ***REMOVED***
+
+        const verifyAccountToken = await signAccountConfirmationToken(user.id);
+        const expiry = moment().add(24, 'hours').valueOf();
+        const uri = await buildUri(user, expiry, verifyAccountToken, 'verify-account');
+
+        // prepare payload for queue
+        const data = ***REMOVED***
+            name: user.name,
+            email: user.email,
+            subject: 'Welcome!',
+            uri: uri
+        ***REMOVED***
+        publishToQueue('SIGN_UP', data);
+
+        res.status(200).send();
     ***REMOVED*** catch (error) ***REMOVED***
         next(error)
     ***REMOVED***
@@ -148,8 +190,6 @@ export const logout = async (req, res, next) => ***REMOVED***
         ***REMOVED***
         const userId = await verifyRefreshToken(refreshToken);
         await deleteRefreshToken(userId);
-
-        console.log(`logged out user $***REMOVED***userId***REMOVED***`);
 
         res.status(204).send();
     ***REMOVED*** catch (error) ***REMOVED***
@@ -203,7 +243,8 @@ export const forgotPassword = async (req, res, next) => ***REMOVED***
         ***REMOVED***
 
         const accessToken = await signPasswordResetToken(user);
-        const uri = `http://localhost:4000/auth/forgot-password/$***REMOVED***user._id***REMOVED***/$***REMOVED***accessToken***REMOVED***`;
+        const expiry = moment().add(10, 'minutes').valueOf();
+        const uri = await buildUri(user, expiry, accessToken, 'reset-password');
 
         // prepare payload for queue
         const data = ***REMOVED***
@@ -218,6 +259,53 @@ export const forgotPassword = async (req, res, next) => ***REMOVED***
     ***REMOVED*** catch (error) ***REMOVED***
         next(error)
     ***REMOVED***
+***REMOVED***
+
+/**
+ * sends user email with a unique token to reset password
+ * @param ***REMOVED*******REMOVED*** req 
+ * @param ***REMOVED*******REMOVED*** res 
+ * @param ***REMOVED*******REMOVED*** next 
+ */
+export const forgotPasswordWithUserId = async (req, res, next) => ***REMOVED***
+    try ***REMOVED***
+        const ***REMOVED*** userId ***REMOVED*** = req.body;
+
+        if (!userId) ***REMOVED***
+            throw createError.BadRequest();
+        ***REMOVED***
+
+        const user = await User.findOne(***REMOVED*** '_id': userId ***REMOVED***);
+        if (!user) ***REMOVED***
+            //if user is not registered, just send successful response, and avoid having a security hole
+            res.status(200).send();
+        ***REMOVED***
+
+        const accessToken = await signPasswordResetToken(user);
+        const expiry = moment().add(10, 'minutes').valueOf();
+        const uri = await buildUri(user, expiry, accessToken, 'reset-password');
+
+        // prepare payload for queue
+        const data = ***REMOVED***
+            name: user.name,
+            email: user.email,
+            subject: 'Forgot your password?',
+            uri: uri
+        ***REMOVED***
+        publishToQueue('RESET_PASSWORD', data);
+
+        res.status(200).send();
+    ***REMOVED*** catch (error) ***REMOVED***
+        next(error)
+    ***REMOVED***
+***REMOVED***
+
+const buildUri = async (user, expiry, token, path) => ***REMOVED***
+    const PORT = process.env.PORT;
+    const params = 'userId=' + user._id + '&code=' + token + '&expiry=' + expiry;
+    const uri = 'instagramclone://' + path + '?' + params;
+
+    return uri;
 ***REMOVED***
 
 /**

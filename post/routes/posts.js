@@ -1,7 +1,7 @@
 import express from "express";
 
 import ***REMOVED*** verifyAccessToken ***REMOVED*** from "../utils/jwt.js";
-import ***REMOVED*** home, fetchFeed, fetchPost, fetchUserPosts, createPost, updatePost, fetchPostComments, createComment, fetchLikes, fetchLikedPosts, likePost, unLikePost, isLiked, fetchBookmarkedPosts, bookmarkPost, unBookmarkPost, isBookmarked ***REMOVED*** from "../controllers/posts.js";
+import ***REMOVED*** home, fetchFeed, fetchPost, fetchUserPosts, createPost, updatePost, fetchPostComments, createComment, fetchLikes, fetchLikedPosts, likePost, unLikePost, isLiked, fetchBookmarkedPosts, bookmarkPost, unBookmarkPost, isBookmarked, getPostsByTagId, getTagsByNameLike, getTagByName, getLocationsByNameLike, getPostsByLocationId, fetchLocationById ***REMOVED*** from "../controllers/posts.js";
 
 const postsRoute = express.Router();
 
@@ -22,6 +22,12 @@ postsRoute.get("/api/posts/bookmarks/me", verifyAccessToken, fetchBookmarkedPost
 postsRoute.post("/api/posts/:id/bookmark", verifyAccessToken, bookmarkPost);
 postsRoute.delete("/api/posts/:id/bookmark", verifyAccessToken, unBookmarkPost);
 postsRoute.get("/api/posts/:id/bookmarks/me", verifyAccessToken, isBookmarked);
+postsRoute.post("/api/posts/tags/:id/", verifyAccessToken, getPostsByTagId);
+postsRoute.post("/api/posts/getTagByName/", verifyAccessToken, getTagByName);
+postsRoute.post("/api/posts/getTagsByNameLike/", verifyAccessToken, getTagsByNameLike);
+postsRoute.post("/api/posts/getLocationsById/:id/", verifyAccessToken, getPostsByLocationId);
+postsRoute.post("/api/posts/getLocationsByNameLike/", verifyAccessToken, getLocationsByNameLike);
+postsRoute.get("/api/posts/locations/:id", verifyAccessToken, fetchLocationById);
 
 export default postsRoute;
 
