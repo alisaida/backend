@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import createError from 'http-errors';
 import { validateLogin, validateRegister } from '../utils/validator.js';
 import lodash from 'lodash';
+import moment from 'moment';
 
 
 import User from '../models/users.js'
@@ -99,9 +100,11 @@ export const register = async (req, res, next) => {
         const savedUser = await user.save();
         const accessToken = await signAccessToken(savedUser.id)
         const refreshToken = await signRefreshToken(savedUser.id);
-        const verifyAccountToken = await signAccountConfirmationToken(savedUser.id);
 
-        const uri = `http://localhost:4000/auth/verify-account/${savedUser._id}/${verifyAccountToken}`;
+
+        const verifyAccountToken = await signAccountConfirmationToken(savedUser.id);
+        const expiry = moment().add(24, 'hours').valueOf();
+        const uri = await buildUri(savedUser, expiry, verifyAccountToken, 'verify-account');
 
         if (savedUser && savedUser._id) {
             //prepare payload for user table in other microservices
@@ -121,13 +124,52 @@ export const register = async (req, res, next) => {
                 email: savedUser.email,
                 username: savedUser.username,
                 subject: 'Welcome!',
-                uri: uri // verify your account
+                uri: uri
             }
             publishToQueue('SIGN_UP', data);
         }
 
         res.status(201).send({ accessToken, refreshToken });
 
+    } catch (error) {
+        next(error)
+    }
+}
+
+/**
+ * sends user email with a unique token to verify account
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const verifyByUserId = async (req, res, next) => {
+    try {
+        const { userId } = req.body;
+
+        if (!userId) {
+            throw createError.BadRequest();
+        }
+
+        const user = await User.findOne({ '_id': userId });
+        if (!user) {
+            //if user is not registered, just send successful response, and avoid having a security hole
+            res.status(200).send();
+        }
+
+        const verifyAccountToken = await signAccountConfirmationToken(user.id);
+        const expiry = moment().add(24, 'hours').valueOf();
+        const uri = await buildUri(user, expiry, verifyAccountToken, 'verify-account');
+
+        // prepare payload for queue
+        const data = {
+            name: user.name,
+            email: user.email,
+            subject: 'Welcome!',
+            uri: uri
+        }
+        publishToQueue('SIGN_UP', data);
+
+        res.status(200).send();
     } catch (error) {
         next(error)
     }
@@ -148,8 +190,6 @@ export const logout = async (req, res, next) => {
         }
         const userId = await verifyRefreshToken(refreshToken);
         await deleteRefreshToken(userId);
-
-        console.log(`logged out user ${userId}`);
 
         res.status(204).send();
     } catch (error) {
@@ -203,7 +243,8 @@ export const forgotPassword = async (req, res, next) => {
         }
 
         const accessToken = await signPasswordResetToken(user);
-        const uri = `http://localhost:4000/auth/forgot-password/${user._id}/${accessToken}`;
+        const expiry = moment().add(10, 'minutes').valueOf();
+        const uri = await buildUri(user, expiry, accessToken, 'reset-password');
 
         // prepare payload for queue
         const data = {
@@ -218,6 +259,53 @@ export const forgotPassword = async (req, res, next) => {
     } catch (error) {
         next(error)
     }
+}
+
+/**
+ * sends user email with a unique token to reset password
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const forgotPasswordWithUserId = async (req, res, next) => {
+    try {
+        const { userId } = req.body;
+
+        if (!userId) {
+            throw createError.BadRequest();
+        }
+
+        const user = await User.findOne({ '_id': userId });
+        if (!user) {
+            //if user is not registered, just send successful response, and avoid having a security hole
+            res.status(200).send();
+        }
+
+        const accessToken = await signPasswordResetToken(user);
+        const expiry = moment().add(10, 'minutes').valueOf();
+        const uri = await buildUri(user, expiry, accessToken, 'reset-password');
+
+        // prepare payload for queue
+        const data = {
+            name: user.name,
+            email: user.email,
+            subject: 'Forgot your password?',
+            uri: uri
+        }
+        publishToQueue('RESET_PASSWORD', data);
+
+        res.status(200).send();
+    } catch (error) {
+        next(error)
+    }
+}
+
+const buildUri = async (user, expiry, token, path) => {
+    const PORT = process.env.PORT;
+    const params = 'userId=' + user._id + '&code=' + token + '&expiry=' + expiry;
+    const uri = 'instagramclone://' + path + '?' + params;
+
+    return uri;
 }
 
 /**

@@ -6,6 +6,9 @@ import User from "../models/users.js";
 import Like from "../models/likes.js";
 import Bookmark from "../models/bookmarks.js";
 import Comment from "../models/comments.js";
+import Tag from "../models/tags.js";
+import Location from '../models/locations.js';
+import Person from "../models/person.js";
 
 /**
  * home
@@ -90,6 +93,8 @@ export const fetchPost = async (req, res, next) => {
       userId: post.userId,
       caption: post.caption,
       imageUri: post.imageUri,
+      location: post.location,
+      tags: post.tags,
       likes,
       comments
     }
@@ -264,7 +269,7 @@ export const createComment = async (req, res, next) => {
 export const createPost = async (req, res, next) => {
   const userId = req.authUser;
 
-  const { caption, imageUri } = req.body;
+  const { caption, imageUri, location, people } = req.body;
 
   try {
 
@@ -272,11 +277,34 @@ export const createPost = async (req, res, next) => {
       throw httpError.BadRequest('Image uri missing from the payload');
     }
 
+    //hash tags
+    const hashtags = !!caption ? caption.match(/(?:^|\W)#(\w+)(?!\w)/g) : [];
+    const tagIds = [];
+    if (hashtags) {
+      for (let i = 0; i < hashtags.length; i++) {
+        const tag = hashtags[i].trim();
+        if (!!tag && tag.length > 1) {
+          let savedTag = await saveTag(tag.substring(1));
+          tagIds.push(savedTag._id);
+        }
+      }
+    }
+
+    //location
+    let locationId = null;
+    if (location) {
+      const savedLocation = await saveLocation(location);
+      locationId = savedLocation._id;
+    }
+
     const post = new Post({
       userId: userId,
       caption: caption,
       imageUri: imageUri,
-      createdAt: new Date().toISOString()
+      location: locationId,
+      createdAt: new Date().toISOString(),
+      people: people,
+      tags: tagIds
     });
 
     const savedPost = await post.save();
@@ -289,6 +317,324 @@ export const createPost = async (req, res, next) => {
     next(error);
   }
 };
+
+const saveLocation = async (location) => {
+  try {
+    const exists = await Location.findOne({ location: location });
+    if (exists) {
+      return exists;
+    }
+
+    const locationObj = new Location({
+      location: location
+    });
+    const savedLocation = await locationObj.save();
+
+    if (!savedLocation) {
+      throw httpError.InternalServerError();
+    }
+
+    return savedLocation;
+  } catch (error) {
+    throw httpError.InternalServerError();
+  }
+}
+
+const saveTag = async (tag) => {
+  try {
+    const exists = await Tag.findOne({ tag: tag });
+    if (exists) {
+      return exists;
+    }
+
+    const tagObj = new Tag({
+      tag: tag
+    });
+    const savedTag = await tagObj.save();
+
+    if (!savedTag) {
+      throw httpError.InternalServerError();
+    }
+
+    return savedTag;
+  } catch (error) {
+    throw httpError.InternalServerError();
+  }
+}
+
+/**
+ * fetch posts by tag
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+
+export const getPostsByTagId = async (req, res, next) => {
+
+  const tagId = req.params.id;
+  if (!tagId) {
+    throw httpError.BadRequest();
+  }
+
+  try {
+    let { page, size } = req.query;
+
+    if (!page) {
+      page = 1;
+    }
+
+    if (!size) {
+      size = 10;
+    }
+
+    const limit = parseInt(size);
+
+    let options = {
+      sort: { createdAt: -1 },
+      lean: true,
+      page: page,
+      limit: limit,
+    };
+
+    const tagObj = await Tag.findOne({ _id: tagId });
+
+    if (!tagObj) {
+      throw httpError.NotFound();
+    }
+
+    const data = await Post.paginate({ tags: tagObj._id }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
+
+    const posts = docs.map((post) => post._id);
+
+    const results = {
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: posts
+    }
+
+    res.status(200).send(results);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const getTagByName = async (req, res, next) => {
+  try {
+    let { page, size, name } = req.query;
+    if (!page) {
+      page = 1;
+    }
+
+    if (!size) {
+      size = 10;
+    }
+
+    const limit = parseInt(size);
+
+    let options = {
+      sort: { createdAt: -1 },
+      lean: true,
+      page: page,
+      limit: limit,
+    };
+
+    if (!name) {
+      throw httpError.BadRequest();
+    }
+    const tag = await Tag.findOne({ tag: name });
+
+    res.status(200).send(tag);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * get location by id
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+export const fetchLocationById = async (req, res, next) => {
+  const locationId = req.params.id;
+  if (!locationId) {
+    throw httpError.BadRequest();
+  }
+  try {
+    const location = await Location.findOne({ _id: locationId });
+    if (!location) {
+      throw httpError.NotFound();
+    }
+
+    res.status(200).send(location);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * getTagsByNameLike
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const getTagsByNameLike = async (req, res, next) => {
+
+  try {
+    let { name, page, size } = req.query;
+    if (!page) {
+      page = 1;
+    }
+
+    if (!size) {
+      size = 10;
+    }
+
+    const limit = parseInt(size);
+
+    let options = {
+      sort: { createdAt: -1 },
+      lean: true,
+      page: page,
+      limit: limit,
+    };
+
+
+    if (!name) {
+      throw httpError.BadRequest('Empty search params');
+    }
+
+    const data = await Tag.paginate({ tag: { $regex: name, $options: 'i' } }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
+
+    const results = {
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: docs
+    }
+
+    res.status(200).send(results);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * getLocationsByNameLike
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+export const getLocationsByNameLike = async (req, res, next) => {
+
+  try {
+    let { name, page, size } = req.query;
+    if (!page) {
+      page = 1;
+    }
+
+    if (!size) {
+      size = 10;
+    }
+
+    const limit = parseInt(size);
+
+    let options = {
+      sort: { createdAt: -1 },
+      lean: true,
+      page: page,
+      limit: limit,
+    };
+
+
+    if (!name) {
+      throw httpError.BadRequest('Empty search params');
+    }
+
+    const data = await Location.paginate({ location: { $regex: name, $options: 'i' } }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
+
+    const results = {
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: docs
+    }
+
+    res.status(200).send(results);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * fetch posts by tag
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+
+export const getPostsByLocationId = async (req, res, next) => {
+
+  const locationId = req.params.id;
+  if (!locationId) {
+    throw httpError.BadRequest();
+  }
+
+  try {
+    let { page, size } = req.query;
+
+    if (!page) {
+      page = 1;
+    }
+
+    if (!size) {
+      size = 10;
+    }
+
+    const limit = parseInt(size);
+
+    let options = {
+      sort: { createdAt: -1 },
+      lean: true,
+      page: page,
+      limit: limit,
+    };
+
+    const locationObj = await Location.findOne({ _id: locationId });
+
+    if (!locationObj) {
+      throw httpError.NotFound();
+    }
+
+    const data = await Post.paginate({ location: locationObj._id }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
+
+    const posts = docs.map((post) => post._id);
+
+    const results = {
+      page,
+      hasNextPage,
+      nextPage,
+      size,
+      totalDocs,
+      data: posts
+    }
+
+    res.status(200).send(results);
+  } catch (error) {
+    next(error);
+  }
+}
 
 /**
  * update post

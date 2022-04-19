@@ -20,6 +20,16 @@ const postSchema = mongoose.Schema({
   updatedAt: {
     type: Date,
   },
+  location: {
+    type: "string",
+    required: false,
+  },
+  tags: [{
+    type: String
+  }],
+  people: [{
+    type: String
+  }]
 });
 
 postSchema.plugin(mongoosePaginate);
