@@ -1,126 +1,126 @@
 const app = require('express')();
 const server = require('http').createServer(app);
 const cors = require('cors');
-const ***REMOVED*** ExpressPeerServer ***REMOVED*** = require('peer');
+const { ExpressPeerServer } = require('peer');
 
-const io = require('socket.io')(server, ***REMOVED***
-	cors: ***REMOVED***
+const io = require('socket.io')(server, {
+	cors: {
 		origin: '*',
 		method: ['GET', 'POST']
-	***REMOVED***
-***REMOVED***);
+	}
+});
 
 app.use(cors());
 
-const peerServer = ExpressPeerServer(server, ***REMOVED***
+const peerServer = ExpressPeerServer(server, {
 	debug: true,
 	path: '/'
-***REMOVED***);
+});
 
 app.use('/peerjs', peerServer);
 
 const PORT = 5053;
 
-app.get('/', (req, res) => ***REMOVED***
+app.get('/', (req, res) => {
 	res.send('server is running');
-***REMOVED***);
+});
 
 
 
 const userSocketIdMap = new Map(); //a map of online userIds and their clients
 
-const addClientToSocketMap = (userId, socketId) => ***REMOVED***
-	if (!userSocketIdMap.has(userId)) ***REMOVED***
+const addClientToSocketMap = (userId, socketId) => {
+	if (!userSocketIdMap.has(userId)) {
 		//when user is joining first time
 		userSocketIdMap.set(userId, new Set([socketId]));
-	***REMOVED*** else ***REMOVED***
+	} else {
 		//user had already joined from one client and now joining using another	client
 		userSocketIdMap.get(userId).add(socketId);
-	***REMOVED***
-***REMOVED***
+	}
+}
 
-const removeClientFromSocketMap = (userId, socketId) => ***REMOVED***
-	if (userSocketIdMap.has(userId)) ***REMOVED***
+const removeClientFromSocketMap = (userId, socketId) => {
+	if (userSocketIdMap.has(userId)) {
 		let userSocketIdSet = userSocketIdMap.get(userId);
 		userSocketIdSet.delete(socketId);
 		//if there are no clients for a user, remove that user from online list (map)
-		if (userSocketIdSet.size == 0) ***REMOVED***
+		if (userSocketIdSet.size == 0) {
 			userSocketIdMap.delete(userId);
-		***REMOVED***
-	***REMOVED***
-***REMOVED***
+		}
+	}
+}
 
-const getUserSocketId = (userId) => ***REMOVED***
+const getUserSocketId = (userId) => {
 	const userSocketIdSet = userSocketIdMap.get(userId);
 	const socketId = [...userSocketIdSet][0];
 	return socketId;
-***REMOVED***
+}
 
-io.on("connection", (socket) => ***REMOVED***
+io.on("connection", (socket) => {
 	console.log('socket id: ', socket.id)
 	let userId = socket.handshake.query.userId;
 	addClientToSocketMap(userId, socket.id);
-	console.log(`userId $***REMOVED***userId***REMOVED*** connected`);
+	console.log(`userId ${userId} connected`);
 
-	socket.on("disconnect", () => ***REMOVED***
+	socket.on("disconnect", () => {
 		console.log('disconnected...')
 		socket.broadcast.emit("callEnded");
 		// remove this client from online list
 		removeClientFromSocketMap(userId, socket.id);
-	***REMOVED***);
+	});
 
-	socket.on("end-call", (callData) => ***REMOVED***
+	socket.on("end-call", (callData) => {
 		console.log('ending call', callData);
 		socket.broadcast.emit("call-ended", callData);
-	***REMOVED***);
+	});
 
-	socket.on("send-message", (messageData) => ***REMOVED***
+	socket.on("send-message", (messageData) => {
 		console.log('sending message to user...', messageData.to.name);
 
-		if (userSocketIdMap.has(messageData.to.userId)) ***REMOVED***
+		if (userSocketIdMap.has(messageData.to.userId)) {
 			const recipientSocketId = getUserSocketId(messageData.to.userId);
 
-			const data = ***REMOVED*** ...messageData, sockets: ***REMOVED*** from: socket.id, to: recipientSocketId ***REMOVED*** ***REMOVED***;
+			const data = { ...messageData, sockets: { from: socket.id, to: recipientSocketId } };
 
 			console.log('with socket id...', recipientSocketId);
 			console.log(data);
 			io.to(recipientSocketId).emit("send-message", data);
-		***REMOVED***
-		// else ***REMOVED***
-		// 	console.log(`$***REMOVED***messageData.to.name***REMOVED*** is offline`)
+		}
+		// else {
+		// 	console.log(`${messageData.to.name} is offline`)
 		// 	io.to(socket.id).emit("user-offline", messageData);
 		// 	console.log(socket.id);
-		// ***REMOVED***
-	***REMOVED***);
+		// }
+	});
 
-	socket.on("call-user", (callData) => ***REMOVED***
+	socket.on("call-user", (callData) => {
 		console.log('calling user...', callData.callId.to.name);
 
-		if (userSocketIdMap.has(callData.callId.to.userId)) ***REMOVED***
+		if (userSocketIdMap.has(callData.callId.to.userId)) {
 			const socketIdToCall = getUserSocketId(callData.callId.to.userId);
 
-			const data = ***REMOVED*** ...callData, sockets: ***REMOVED*** from: socket.id, to: socketIdToCall ***REMOVED*** ***REMOVED***;
+			const data = { ...callData, sockets: { from: socket.id, to: socketIdToCall } };
 
 			// console.log('with socket id...', socketIdToCall);
 			console.log(data);
 			// socket.join(socketIdToCall);
 			io.to(socketIdToCall).emit("call-user", data);
-		***REMOVED*** else ***REMOVED***
-			console.log(`$***REMOVED***callData.callId.to.name***REMOVED*** is offline`)
+		} else {
+			console.log(`${callData.callId.to.name} is offline`)
 			io.to(socket.id).emit("user-offline", callData);
 			console.log(socket.id);
-		***REMOVED***
-	***REMOVED***);
+		}
+	});
 
-	socket.on("accept-call", (callData) => ***REMOVED***
+	socket.on("accept-call", (callData) => {
 		// console.log('accepted call: ', callData)
-		if (callData && callData.callId && callData.callId.from && callData.callId.to) ***REMOVED***
+		if (callData && callData.callId && callData.callId.from && callData.callId.to) {
 			const socketIdToCall = getUserSocketId(callData.callId.from.userId);
-			if (socketIdToCall) ***REMOVED***
+			if (socketIdToCall) {
 				io.to(socketIdToCall).emit("call-connected", callData);
-			***REMOVED***
-		***REMOVED***
-	***REMOVED***);
-***REMOVED***);
+			}
+		}
+	});
+});
 
-server.listen(PORT, () => console.log(`server running on port $***REMOVED***PORT***REMOVED***`));
+server.listen(PORT, () => console.log(`server running on port ${PORT}`));

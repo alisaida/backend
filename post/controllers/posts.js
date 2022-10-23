@@ -12,82 +12,82 @@ import Person from "../models/person.js";
 
 /**
  * home
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
-export const home = async (req, res, next) => ***REMOVED***
+export const home = async (req, res, next) => {
   res.send('Welcome!');
-***REMOVED***
+}
 
 /**
  * fetch all posts
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const fetchFeed = async (req, res, next) => ***REMOVED***
-  try ***REMOVED***
-    let ***REMOVED*** page, size ***REMOVED*** = req.query;
+export const fetchFeed = async (req, res, next) => {
+  try {
+    let { page, size } = req.query;
 
-    if (!page) ***REMOVED***
+    if (!page) {
       page = 1;
-    ***REMOVED***
+    }
 
-    if (!size) ***REMOVED***
+    if (!size) {
       size = 12;
-    ***REMOVED***
+    }
 
     const limit = parseInt(size);
 
-    let options = ***REMOVED***
-      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+    let options = {
+      sort: { createdAt: -1 },
       lean: true,
       page: page,
       limit: limit,
-    ***REMOVED***;
+    };
 
-    const data = await Post.paginate(***REMOVED******REMOVED***, options);
-    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+    const data = await Post.paginate({}, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
 
     const postIds = docs.map(post => post._id);
 
-    const results = ***REMOVED***
+    const results = {
       page,
       hasNextPage,
       nextPage,
       size,
       totalDocs,
       data: postIds
-    ***REMOVED***
+    }
 
     res.status(200).send(results);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};
 
 /**
  * fetch post by id, with comments and likes
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const fetchPost = async (req, res, next) => ***REMOVED***
+export const fetchPost = async (req, res, next) => {
   const postId = req.params.id;
-  if (!postId) ***REMOVED***
+  if (!postId) {
     throw httpError.BadRequest();
-  ***REMOVED***
-  try ***REMOVED***
-    let post = await Post.findOne(***REMOVED*** _id: postId ***REMOVED***);
-    if (!post) ***REMOVED***
+  }
+  try {
+    let post = await Post.findOne({ _id: postId });
+    if (!post) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
-    const comments = await Comment.countDocuments(***REMOVED*** postId: postId ***REMOVED***).exec();
-    const likes = await Like.countDocuments(***REMOVED*** postId: postId ***REMOVED***).exec();
+    const comments = await Comment.countDocuments({ postId: postId }).exec();
+    const likes = await Like.countDocuments({ postId: postId }).exec();
 
-    const data = ***REMOVED***
+    const data = {
       _id: post._id,
       createdAt: post.createdAt,
       userId: post.userId,
@@ -97,207 +97,241 @@ export const fetchPost = async (req, res, next) => ***REMOVED***
       tags: post.tags,
       likes,
       comments
-    ***REMOVED***
-    res.status(200).send(***REMOVED*** data ***REMOVED***);
-  ***REMOVED*** catch (error) ***REMOVED***
+    }
+    res.status(200).send({ data });
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};
+
+/**
+ * delete post by id
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+export const deletePost = async (req, res, next) => {
+  const postId = req.params.id;
+  const userId = req.authUser;
+  if (!postId) {
+    throw httpError.BadRequest();
+  }
+  try {
+    let post = await Post.findOne({ _id: postId });
+    if (!post) {
+      throw httpError.NotFound();
+    }
+
+    if (post.userId !== userId) {
+      throw httpError.Unauthorized();
+    }
+
+    //asynchronously delete post all related comments, likes and people who bookmark
+    await Post.deleteOne({ _id: postId });
+    await Like.deleteMany({ postId: postId });
+    await Comment.deleteMany({ postId: postId });
+    await Bookmark.deleteMany({ postId: postId });
+
+    res.status(200).send({ message: 'Post delete successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
 
 /**
  * fetch all posts by user
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const fetchUserPosts = async (req, res, next) => ***REMOVED***
+export const fetchUserPosts = async (req, res, next) => {
 
-  try ***REMOVED***
-    let ***REMOVED*** page, size ***REMOVED*** = req.query;
+  try {
+    let { page, size } = req.query;
 
-    if (!page) ***REMOVED***
+    if (!page) {
       page = 1;
-    ***REMOVED***
+    }
 
-    if (!size) ***REMOVED***
+    if (!size) {
       size = 12;
-    ***REMOVED***
+    }
 
     const limit = parseInt(size);
 
-    let options = ***REMOVED***
-      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+    let options = {
+      sort: { createdAt: -1 },
       lean: true,
       page: page,
       limit: limit,
-    ***REMOVED***;
+    };
 
     const userId = req.params.id;
-    if (!userId) ***REMOVED***
+    if (!userId) {
       throw httpError.BadRequest('Payload is missing userId');
-    ***REMOVED***
+    }
 
-    const doesExist = await User.findOne(***REMOVED*** userId: userId ***REMOVED***);
+    const doesExist = await User.findOne({ userId: userId });
 
-    if (!doesExist) ***REMOVED***
+    if (!doesExist) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
-    const data = await Post.paginate(***REMOVED*** userId: userId ***REMOVED***, options);
-    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+    const data = await Post.paginate({ userId: userId }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
 
     const posts = docs.map((post) => post._id);
 
-    const results = ***REMOVED***
+    const results = {
       page,
       hasNextPage,
       nextPage,
       size,
       totalDocs,
       data: posts
-    ***REMOVED***
+    }
 
     res.status(200).send(results);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};
 
 /**
  * fetch comments by postId
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
-export const fetchPostComments = async (req, res, next) => ***REMOVED***
-  try ***REMOVED***
-    let ***REMOVED*** page, size ***REMOVED*** = req.query;
-    if (!page) ***REMOVED***
+export const fetchPostComments = async (req, res, next) => {
+  try {
+    let { page, size } = req.query;
+    if (!page) {
       page = 1;
-    ***REMOVED***
+    }
 
-    if (!size) ***REMOVED***
+    if (!size) {
       size = 10;
-    ***REMOVED***
+    }
 
     const limit = parseInt(size);
 
-    let options = ***REMOVED***
-      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+    let options = {
+      sort: { createdAt: -1 },
       lean: true,
       page: page,
       limit: limit,
-    ***REMOVED***;
+    };
 
-    let ***REMOVED*** id ***REMOVED*** = req.params;
+    let { id } = req.params;
 
-    if (!id) ***REMOVED***
+    if (!id) {
       throw httpError.BadRequest();
-    ***REMOVED***
-    const post = await Post.findOne(***REMOVED*** _id: id ***REMOVED***);
+    }
+    const post = await Post.findOne({ _id: id });
 
-    if (!post) ***REMOVED***
+    if (!post) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
-    const data = await Comment.paginate(***REMOVED*** postId: id ***REMOVED***, options);
+    const data = await Comment.paginate({ postId: id }, options);
 
-    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
 
-    const results = ***REMOVED***
+    const results = {
       page,
       hasNextPage,
       nextPage,
       size,
       totalDocs,
       data: docs
-    ***REMOVED***
+    }
 
     res.status(200).send(results);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /**
  * create new comment
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
-export const createComment = async (req, res, next) => ***REMOVED***
+export const createComment = async (req, res, next) => {
   const postId = req.params.id;
   const userId = req.authUser;
-  const ***REMOVED*** comment ***REMOVED*** = req.body;
+  const { comment } = req.body;
 
-  if (!postId || !comment) ***REMOVED***
+  if (!postId || !comment) {
     throw httpError.BadRequest();
-  ***REMOVED***
+  }
 
-  try ***REMOVED***
-    const doesExist = await Post.find(***REMOVED*** _id: postId ***REMOVED***);
-    if (!doesExist) ***REMOVED***
+  try {
+    const doesExist = await Post.find({ _id: postId });
+    if (!doesExist) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
     //comment obj
-    const commentObj = new Comment(***REMOVED***
+    const commentObj = new Comment({
       postId: postId,
       userId: userId,
       comment: comment,
       createdAt: new Date().toISOString()
-    ***REMOVED***);
+    });
 
     const savedComment = await commentObj.save();
 
-    if (!savedComment) ***REMOVED***
+    if (!savedComment) {
       throw httpError.InternalServerError();
-    ***REMOVED***
+    }
 
     res.status(201).send(savedComment);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};
 
 /**
  * creates a new post
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const createPost = async (req, res, next) => ***REMOVED***
+export const createPost = async (req, res, next) => {
   const userId = req.authUser;
 
-  const ***REMOVED*** caption, imageUri, location, people ***REMOVED*** = req.body;
+  const { caption, imageUri, location, people } = req.body;
 
-  try ***REMOVED***
+  try {
 
-    if (!imageUri || imageUri === '') ***REMOVED***
+    if (!imageUri || imageUri === '') {
       throw httpError.BadRequest('Image uri missing from the payload');
-    ***REMOVED***
+    }
 
     //hash tags
     const hashtags = !!caption ? caption.match(/(?:^|\W)#(\w+)(?!\w)/g) : [];
     const tagIds = [];
-    if (hashtags) ***REMOVED***
-      for (let i = 0; i < hashtags.length; i++) ***REMOVED***
+    if (hashtags) {
+      for (let i = 0; i < hashtags.length; i++) {
         const tag = hashtags[i].trim();
-        if (!!tag && tag.length > 1) ***REMOVED***
+        if (!!tag && tag.length > 1) {
           let savedTag = await saveTag(tag.substring(1));
           tagIds.push(savedTag._id);
-        ***REMOVED***
-      ***REMOVED***
-    ***REMOVED***
+        }
+      }
+    }
 
     //location
     let locationId = null;
-    if (location) ***REMOVED***
+    if (location) {
       const savedLocation = await saveLocation(location);
       locationId = savedLocation._id;
-    ***REMOVED***
+    }
 
-    const post = new Post(***REMOVED***
+    const post = new Post({
       userId: userId,
       caption: caption,
       imageUri: imageUri,
@@ -305,700 +339,700 @@ export const createPost = async (req, res, next) => ***REMOVED***
       createdAt: new Date().toISOString(),
       people: people,
       tags: tagIds
-    ***REMOVED***);
+    });
 
     const savedPost = await post.save();
 
-    if (!savedPost) ***REMOVED***
+    if (!savedPost) {
       throw httpError.InternalServerError();
-    ***REMOVED***
+    }
     res.status(201).send(savedPost);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};
 
-const saveLocation = async (location) => ***REMOVED***
-  try ***REMOVED***
-    const exists = await Location.findOne(***REMOVED*** location: location ***REMOVED***);
-    if (exists) ***REMOVED***
+const saveLocation = async (location) => {
+  try {
+    const exists = await Location.findOne({ location: location });
+    if (exists) {
       return exists;
-    ***REMOVED***
+    }
 
-    const locationObj = new Location(***REMOVED***
+    const locationObj = new Location({
       location: location
-    ***REMOVED***);
+    });
     const savedLocation = await locationObj.save();
 
-    if (!savedLocation) ***REMOVED***
+    if (!savedLocation) {
       throw httpError.InternalServerError();
-    ***REMOVED***
+    }
 
     return savedLocation;
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     throw httpError.InternalServerError();
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
-const saveTag = async (tag) => ***REMOVED***
-  try ***REMOVED***
-    const exists = await Tag.findOne(***REMOVED*** tag: tag ***REMOVED***);
-    if (exists) ***REMOVED***
+const saveTag = async (tag) => {
+  try {
+    const exists = await Tag.findOne({ tag: tag });
+    if (exists) {
       return exists;
-    ***REMOVED***
+    }
 
-    const tagObj = new Tag(***REMOVED***
+    const tagObj = new Tag({
       tag: tag
-    ***REMOVED***);
+    });
     const savedTag = await tagObj.save();
 
-    if (!savedTag) ***REMOVED***
+    if (!savedTag) {
       throw httpError.InternalServerError();
-    ***REMOVED***
+    }
 
     return savedTag;
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     throw httpError.InternalServerError();
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /**
  * fetch posts by tag
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
 
-export const getPostsByTagId = async (req, res, next) => ***REMOVED***
+export const getPostsByTagId = async (req, res, next) => {
 
   const tagId = req.params.id;
-  if (!tagId) ***REMOVED***
+  if (!tagId) {
     throw httpError.BadRequest();
-  ***REMOVED***
+  }
 
-  try ***REMOVED***
-    let ***REMOVED*** page, size ***REMOVED*** = req.query;
+  try {
+    let { page, size } = req.query;
 
-    if (!page) ***REMOVED***
+    if (!page) {
       page = 1;
-    ***REMOVED***
+    }
 
-    if (!size) ***REMOVED***
+    if (!size) {
       size = 10;
-    ***REMOVED***
+    }
 
     const limit = parseInt(size);
 
-    let options = ***REMOVED***
-      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+    let options = {
+      sort: { createdAt: -1 },
       lean: true,
       page: page,
       limit: limit,
-    ***REMOVED***;
+    };
 
-    const tagObj = await Tag.findOne(***REMOVED*** _id: tagId ***REMOVED***);
+    const tagObj = await Tag.findOne({ _id: tagId });
 
-    if (!tagObj) ***REMOVED***
+    if (!tagObj) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
-    const data = await Post.paginate(***REMOVED*** tags: tagObj._id ***REMOVED***, options);
-    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+    const data = await Post.paginate({ tags: tagObj._id }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
 
     const posts = docs.map((post) => post._id);
 
-    const results = ***REMOVED***
+    const results = {
       page,
       hasNextPage,
       nextPage,
       size,
       totalDocs,
       data: posts
-    ***REMOVED***
+    }
 
     res.status(200).send(results);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
-export const getTagByName = async (req, res, next) => ***REMOVED***
-  try ***REMOVED***
-    let ***REMOVED*** page, size, name ***REMOVED*** = req.query;
-    if (!page) ***REMOVED***
+export const getTagByName = async (req, res, next) => {
+  try {
+    let { page, size, name } = req.query;
+    if (!page) {
       page = 1;
-    ***REMOVED***
+    }
 
-    if (!size) ***REMOVED***
+    if (!size) {
       size = 10;
-    ***REMOVED***
+    }
 
     const limit = parseInt(size);
 
-    let options = ***REMOVED***
-      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+    let options = {
+      sort: { createdAt: -1 },
       lean: true,
       page: page,
       limit: limit,
-    ***REMOVED***;
+    };
 
-    if (!name) ***REMOVED***
+    if (!name) {
       throw httpError.BadRequest();
-    ***REMOVED***
-    const tag = await Tag.findOne(***REMOVED*** tag: name ***REMOVED***);
+    }
+    const tag = await Tag.findOne({ tag: name });
 
     res.status(200).send(tag);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /**
  * get location by id
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const fetchLocationById = async (req, res, next) => ***REMOVED***
+export const fetchLocationById = async (req, res, next) => {
   const locationId = req.params.id;
-  if (!locationId) ***REMOVED***
+  if (!locationId) {
     throw httpError.BadRequest();
-  ***REMOVED***
-  try ***REMOVED***
-    const location = await Location.findOne(***REMOVED*** _id: locationId ***REMOVED***);
-    if (!location) ***REMOVED***
+  }
+  try {
+    const location = await Location.findOne({ _id: locationId });
+    if (!location) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
     res.status(200).send(location);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};
 
 /**
  * getTagsByNameLike
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
-export const getTagsByNameLike = async (req, res, next) => ***REMOVED***
+export const getTagsByNameLike = async (req, res, next) => {
 
-  try ***REMOVED***
-    let ***REMOVED*** name, page, size ***REMOVED*** = req.query;
-    if (!page) ***REMOVED***
+  try {
+    let { name, page, size } = req.query;
+    if (!page) {
       page = 1;
-    ***REMOVED***
+    }
 
-    if (!size) ***REMOVED***
+    if (!size) {
       size = 10;
-    ***REMOVED***
+    }
 
     const limit = parseInt(size);
 
-    let options = ***REMOVED***
-      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+    let options = {
+      sort: { createdAt: -1 },
       lean: true,
       page: page,
       limit: limit,
-    ***REMOVED***;
+    };
 
 
-    if (!name) ***REMOVED***
+    if (!name) {
       throw httpError.BadRequest('Empty search params');
-    ***REMOVED***
+    }
 
-    const data = await Tag.paginate(***REMOVED*** tag: ***REMOVED*** $regex: name, $options: 'i' ***REMOVED*** ***REMOVED***, options);
-    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+    const data = await Tag.paginate({ tag: { $regex: name, $options: 'i' } }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
 
-    const results = ***REMOVED***
+    const results = {
       page,
       hasNextPage,
       nextPage,
       size,
       totalDocs,
       data: docs
-    ***REMOVED***
+    }
 
     res.status(200).send(results);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /**
  * getLocationsByNameLike
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
-export const getLocationsByNameLike = async (req, res, next) => ***REMOVED***
+export const getLocationsByNameLike = async (req, res, next) => {
 
-  try ***REMOVED***
-    let ***REMOVED*** name, page, size ***REMOVED*** = req.query;
-    if (!page) ***REMOVED***
+  try {
+    let { name, page, size } = req.query;
+    if (!page) {
       page = 1;
-    ***REMOVED***
+    }
 
-    if (!size) ***REMOVED***
+    if (!size) {
       size = 10;
-    ***REMOVED***
+    }
 
     const limit = parseInt(size);
 
-    let options = ***REMOVED***
-      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+    let options = {
+      sort: { createdAt: -1 },
       lean: true,
       page: page,
       limit: limit,
-    ***REMOVED***;
+    };
 
 
-    if (!name) ***REMOVED***
+    if (!name) {
       throw httpError.BadRequest('Empty search params');
-    ***REMOVED***
+    }
 
-    const data = await Location.paginate(***REMOVED*** location: ***REMOVED*** $regex: name, $options: 'i' ***REMOVED*** ***REMOVED***, options);
-    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+    const data = await Location.paginate({ location: { $regex: name, $options: 'i' } }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
 
-    const results = ***REMOVED***
+    const results = {
       page,
       hasNextPage,
       nextPage,
       size,
       totalDocs,
       data: docs
-    ***REMOVED***
+    }
 
     res.status(200).send(results);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /**
  * fetch posts by tag
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
 
-export const getPostsByLocationId = async (req, res, next) => ***REMOVED***
+export const getPostsByLocationId = async (req, res, next) => {
 
   const locationId = req.params.id;
-  if (!locationId) ***REMOVED***
+  if (!locationId) {
     throw httpError.BadRequest();
-  ***REMOVED***
+  }
 
-  try ***REMOVED***
-    let ***REMOVED*** page, size ***REMOVED*** = req.query;
+  try {
+    let { page, size } = req.query;
 
-    if (!page) ***REMOVED***
+    if (!page) {
       page = 1;
-    ***REMOVED***
+    }
 
-    if (!size) ***REMOVED***
+    if (!size) {
       size = 10;
-    ***REMOVED***
+    }
 
     const limit = parseInt(size);
 
-    let options = ***REMOVED***
-      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+    let options = {
+      sort: { createdAt: -1 },
       lean: true,
       page: page,
       limit: limit,
-    ***REMOVED***;
+    };
 
-    const locationObj = await Location.findOne(***REMOVED*** _id: locationId ***REMOVED***);
+    const locationObj = await Location.findOne({ _id: locationId });
 
-    if (!locationObj) ***REMOVED***
+    if (!locationObj) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
-    const data = await Post.paginate(***REMOVED*** location: locationObj._id ***REMOVED***, options);
-    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+    const data = await Post.paginate({ location: locationObj._id }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
 
     const posts = docs.map((post) => post._id);
 
-    const results = ***REMOVED***
+    const results = {
       page,
       hasNextPage,
       nextPage,
       size,
       totalDocs,
       data: posts
-    ***REMOVED***
+    }
 
     res.status(200).send(results);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /**
  * update post
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const updatePost = async (req, res, next) => ***REMOVED***
+export const updatePost = async (req, res, next) => {
   const postId = req.params.id;
-  const ***REMOVED*** caption, imageUri ***REMOVED*** = req.body;
+  const { caption, imageUri } = req.body;
 
-  try ***REMOVED***
-    if (!postId) ***REMOVED***
+  try {
+    if (!postId) {
       throw httpError.BadRequest();
-    ***REMOVED***
-    else if (!caption && !imageUri) ***REMOVED***
+    }
+    else if (!caption && !imageUri) {
       throw httpError.BadRequest('nothing to update');
-    ***REMOVED***
+    }
 
     await Post.findOneAndUpdate(
-      ***REMOVED*** _id: postId ***REMOVED***,
-      ***REMOVED***
-        $set: ***REMOVED***
+      { _id: postId },
+      {
+        $set: {
           caption: caption,
           imageUri: imageUri,
           updatedAt: new Date().toISOString()
-        ***REMOVED***
-      ***REMOVED***
-      , ***REMOVED***
+        }
+      }
+      , {
         upsert: true
-      ***REMOVED***
+      }
     );
 
     res.status(200).send('Post updated successfully');
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error)
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /** 
  * like post
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
-export const likePost = async (req, res, next) => ***REMOVED***
+export const likePost = async (req, res, next) => {
   const postId = req.params.id;
   const userId = req.authUser;
-  if (!postId) ***REMOVED***
+  if (!postId) {
     throw httpError.BadRequest();
-  ***REMOVED***
-  try ***REMOVED***
+  }
+  try {
 
-    const exists = await Like.findOne(***REMOVED*** postId: postId, userId: userId ***REMOVED***);
-    if (exists) ***REMOVED***
+    const exists = await Like.findOne({ postId: postId, userId: userId });
+    if (exists) {
       throw httpError.Conflict();
-    ***REMOVED***
-    const likes = new Like(***REMOVED*** postId: postId, userId: userId ***REMOVED***);
+    }
+    const likes = new Like({ postId: postId, userId: userId });
     await likes.save();
 
     res.status(201).send('Post liked');
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};
 
 /** 
  * unlike post
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
-export const unLikePost = async (req, res, next) => ***REMOVED***
+export const unLikePost = async (req, res, next) => {
   const postId = req.params.id;
   const userId = req.authUser;
-  if (!postId) ***REMOVED***
+  if (!postId) {
     throw httpError.BadRequest();
-  ***REMOVED***
-  try ***REMOVED***
+  }
+  try {
 
-    const like = await Like.findOne(***REMOVED*** postId: postId, userId: userId ***REMOVED***);
-    if (!like) ***REMOVED***
+    const like = await Like.findOne({ postId: postId, userId: userId });
+    if (!like) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
     await like.delete();
 
     res.status(200).send('Post unliked');
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};
 
 /**
  * fetch posts liked by authUser
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const fetchLikedPosts = async (req, res, next) => ***REMOVED***
+export const fetchLikedPosts = async (req, res, next) => {
 
-  try ***REMOVED***
-    let ***REMOVED*** page, size ***REMOVED*** = req.query;
+  try {
+    let { page, size } = req.query;
 
-    if (!page) ***REMOVED***
+    if (!page) {
       page = 1;
-    ***REMOVED***
+    }
 
-    if (!size) ***REMOVED***
+    if (!size) {
       size = 12;
-    ***REMOVED***
+    }
 
     const limit = parseInt(size);
-    let options = ***REMOVED***
-      sort: ***REMOVED*** _id: -1 ***REMOVED***,
+    let options = {
+      sort: { _id: -1 },
       lean: true,
       page: page,
       limit: limit,
-    ***REMOVED***;
+    };
 
     const userId = req.authUser;
 
-    const data = await Like.paginate(***REMOVED*** userId: userId ***REMOVED***, options);
-    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+    const data = await Like.paginate({ userId: userId }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
 
     const postIds = docs.map(post => post._id);
 
-    const results = ***REMOVED***
+    const results = {
       page,
       hasNextPage,
       nextPage,
       size,
       totalDocs,
       data: postIds
-    ***REMOVED***
+    }
 
 
     res.status(200).send(results);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};
 
 /**
  * fetch likes for a specific post
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const fetchLikes = async (req, res, next) => ***REMOVED***
+export const fetchLikes = async (req, res, next) => {
 
-  try ***REMOVED***
-    let ***REMOVED*** page, size ***REMOVED*** = req.query;
+  try {
+    let { page, size } = req.query;
 
-    if (!page) ***REMOVED***
+    if (!page) {
       page = 1;
-    ***REMOVED***
+    }
 
-    if (!size) ***REMOVED***
+    if (!size) {
       size = 12;
-    ***REMOVED***
+    }
 
     const limit = parseInt(size);
-    let options = ***REMOVED***
-      sort: ***REMOVED*** _id: -1 ***REMOVED***,
+    let options = {
+      sort: { _id: -1 },
       lean: true,
       page: page,
       limit: limit,
-    ***REMOVED***;
+    };
 
-    const ***REMOVED*** id ***REMOVED*** = req.params;
+    const { id } = req.params;
 
-    if (!id) ***REMOVED***
+    if (!id) {
       throw httpError.BadRequest(`Request missing post id (:id) as a parameter`);
-    ***REMOVED***
+    }
 
-    const exist = await Post.findOne(***REMOVED*** _id: id ***REMOVED***);
-    if (!exist) ***REMOVED***
+    const exist = await Post.findOne({ _id: id });
+    if (!exist) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
-    const data = await Like.paginate(***REMOVED*** postId: id ***REMOVED***, options);
-    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
-    const likes = docs.map(likedPost => (***REMOVED*** _id: likedPost._id, userId: likedPost.userId ***REMOVED***));
+    const data = await Like.paginate({ postId: id }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
+    const likes = docs.map(likedPost => ({ _id: likedPost._id, userId: likedPost.userId }));
 
-    const result = ***REMOVED***
+    const result = {
       page,
       hasNextPage,
       nextPage,
       size,
       totalDocs,
       data: likes
-    ***REMOVED***
+    }
 
     res.status(200).send(result);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};
 
 /**
  * check if auth user likes a specific post
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const isLiked = async (req, res, next) => ***REMOVED***
-  try ***REMOVED***
+export const isLiked = async (req, res, next) => {
+  try {
     const userId = req.authUser;
     const postId = req.params.id;
 
-    if (!postId) ***REMOVED***
+    if (!postId) {
       throw httpError.BadRequest();
-    ***REMOVED***
+    }
 
-    const exist = await Post.findOne(***REMOVED*** _id: postId ***REMOVED***);
-    if (!exist) ***REMOVED***
-      throw httpError.NotFound(`Post $***REMOVED***postId***REMOVED*** not found`);
-    ***REMOVED***
+    const exist = await Post.findOne({ _id: postId });
+    if (!exist) {
+      throw httpError.NotFound(`Post ${postId} not found`);
+    }
 
-    const likedPosts = await Like.find(***REMOVED*** postId: postId, userId: userId ***REMOVED***);
+    const likedPosts = await Like.find({ postId: postId, userId: userId });
 
     if (likedPosts && likedPosts.length > 0)
       res.status(200).send(true);
     else
       res.status(200).send(false);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};
 
 /**
  * check if auth user bookmarked a specific post
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const isBookmarked = async (req, res, next) => ***REMOVED***
-  try ***REMOVED***
+export const isBookmarked = async (req, res, next) => {
+  try {
     const userId = req.authUser;
     const postId = req.params.id;
 
-    if (!postId) ***REMOVED***
+    if (!postId) {
       throw httpError.BadRequest();
-    ***REMOVED***
+    }
 
-    const exist = await Post.findOne(***REMOVED*** _id: postId ***REMOVED***);
-    if (!exist) ***REMOVED***
-      throw httpError.NotFound(`Post $***REMOVED***postId***REMOVED*** not found`);
-    ***REMOVED***
+    const exist = await Post.findOne({ _id: postId });
+    if (!exist) {
+      throw httpError.NotFound(`Post ${postId} not found`);
+    }
 
-    const bookmarkedPosts = await Bookmark.find(***REMOVED*** postId: postId, userId: userId ***REMOVED***);
+    const bookmarkedPosts = await Bookmark.find({ postId: postId, userId: userId });
 
     if (bookmarkedPosts && bookmarkedPosts.length > 0)
       res.status(200).send(true);
     else
       res.status(200).send(false);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};
 
 /** 
  * bookmark post
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
-export const bookmarkPost = async (req, res, next) => ***REMOVED***
+export const bookmarkPost = async (req, res, next) => {
   const postId = req.params.id;
   const userId = req.authUser;
-  if (!postId) ***REMOVED***
+  if (!postId) {
     throw httpError.BadRequest();
-  ***REMOVED***
-  try ***REMOVED***
+  }
+  try {
 
-    const exists = await Bookmark.findOne(***REMOVED*** postId: postId, userId: userId ***REMOVED***);
-    if (exists) ***REMOVED***
+    const exists = await Bookmark.findOne({ postId: postId, userId: userId });
+    if (exists) {
       throw httpError.Conflict();
-    ***REMOVED***
-    const bookmarks = new Bookmark(***REMOVED*** postId: postId, userId: userId ***REMOVED***);
+    }
+    const bookmarks = new Bookmark({ postId: postId, userId: userId });
     const savedBookmark = await bookmarks.save();
 
     res.status(201).send(savedBookmark);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};
 
 /** 
  * un-bookmark post
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
-export const unBookmarkPost = async (req, res, next) => ***REMOVED***
+export const unBookmarkPost = async (req, res, next) => {
   const postId = req.params.id;
   const userId = req.authUser;
-  if (!postId) ***REMOVED***
+  if (!postId) {
     throw httpError.BadRequest();
-  ***REMOVED***
-  try ***REMOVED***
+  }
+  try {
 
-    const bookmark = await Bookmark.findOne(***REMOVED*** postId: postId, userId: userId ***REMOVED***);
-    if (!bookmark) ***REMOVED***
+    const bookmark = await Bookmark.findOne({ postId: postId, userId: userId });
+    if (!bookmark) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
     await bookmark.delete();
 
     res.status(200).send('Post bookmarked removed');
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};
 
 /**
  * fetch posts bookmarked by user
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const fetchBookmarkedPosts = async (req, res, next) => ***REMOVED***
+export const fetchBookmarkedPosts = async (req, res, next) => {
 
-  try ***REMOVED***
-    let ***REMOVED*** page, size ***REMOVED*** = req.query;
+  try {
+    let { page, size } = req.query;
 
-    if (!page) ***REMOVED***
+    if (!page) {
       page = 1;
-    ***REMOVED***
+    }
 
-    if (!size) ***REMOVED***
+    if (!size) {
       size = 12;
-    ***REMOVED***
+    }
 
     const limit = parseInt(size);
-    let options = ***REMOVED***
-      sort: ***REMOVED*** _id: -1 ***REMOVED***,
+    let options = {
+      sort: { _id: -1 },
       lean: true,
       page: page,
       limit: limit,
-    ***REMOVED***;
+    };
 
     const userId = req.authUser;
-    if (!userId) ***REMOVED***
+    if (!userId) {
       throw httpError.BadRequest();
-    ***REMOVED***
+    }
 
-    const data = await Bookmark.paginate(***REMOVED*** userId: userId ***REMOVED***, options);
-    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+    const data = await Bookmark.paginate({ userId: userId }, options);
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
 
     const postIds = docs.map(bookmarkedPost => bookmarkedPost.postId);
 
-    const results = ***REMOVED***
+    const results = {
       page,
       hasNextPage,
       nextPage,
       size,
       totalDocs,
       data: postIds
-    ***REMOVED***
+    }
 
     res.status(200).send(results);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};

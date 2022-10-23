@@ -1,23 +1,23 @@
 import mongoose from 'mongoose';
 import mongoosePaginate from "mongoose-paginate-v2";
-const followSchema = mongoose.Schema(***REMOVED***
-    follower: ***REMOVED***
+const followSchema = mongoose.Schema({
+    follower: {
         type: String,
         required: true,
-    ***REMOVED***,
-    following: ***REMOVED***
+    },
+    following: {
         type: String,
         required: true,
-    ***REMOVED***,
-    createdAt: ***REMOVED***
+    },
+    createdAt: {
         type: Date,
         default: new Date()
-    ***REMOVED***,
-    status: ***REMOVED***
+    },
+    status: {
         type: String,
         default: 'pending'
-    ***REMOVED***,
-***REMOVED***)
+    },
+})
 
 followSchema.plugin(mongoosePaginate);
 

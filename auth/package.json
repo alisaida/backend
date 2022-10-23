@@ -1,17 +1,17 @@
-***REMOVED***
+{
   "name": "auth",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
   "type": "module",
-  "scripts": ***REMOVED***
+  "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
-  ***REMOVED***,
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": ***REMOVED***
+  "dependencies": {
     "amqplib": "^0.8.0",
     "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
@@ -27,8 +27,8 @@
     "morgan": "^1.10.0",
     "redis": "^3.1.2",
     "validator": "^13.6.0"
-  ***REMOVED***,
-  "devDependencies": ***REMOVED***
+  },
+  "devDependencies": {
     "nodemon": "^2.0.12"
-  ***REMOVED***
-***REMOVED***
+  }
+}

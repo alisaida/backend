@@ -1,24 +1,24 @@
 import redis from 'redis';
 
-export const redisClient = redis.createClient(***REMOVED***
+export const redisClient = redis.createClient({
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT
-***REMOVED***);
+});
 
-redisClient.on('connect', () => ***REMOVED***
+redisClient.on('connect', () => {
     console.log('client connected');
-***REMOVED***)
+})
 
-redisClient.on('ready', (error) => ***REMOVED***
+redisClient.on('ready', (error) => {
     console.log('client ready');
-***REMOVED***)
+})
 
-redisClient.on('error', (error) => ***REMOVED***
+redisClient.on('error', (error) => {
     console.log(error.message);
-***REMOVED***)
+})
 
-redisClient.on('end', () => ***REMOVED***
+redisClient.on('end', () => {
     console.log('client disconnected');
-***REMOVED***)
+})
 
 export default redisClient;

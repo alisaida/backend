@@ -1,26 +1,26 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
-const commentSchema = mongoose.Schema(***REMOVED***
-  postId: ***REMOVED***
+const commentSchema = mongoose.Schema({
+  postId: {
     type: "string",
     required: true,
-  ***REMOVED***,
-  userId: ***REMOVED***
+  },
+  userId: {
     type: "string",
     required: true,
-  ***REMOVED***,
-  comment: ***REMOVED***
+  },
+  comment: {
     type: "string",
     required: true,
-  ***REMOVED***,
-  createdAt: ***REMOVED***
+  },
+  createdAt: {
     type: Date,
-  ***REMOVED***,
-  updateAt: ***REMOVED***
+  },
+  updateAt: {
     type: Date,
-  ***REMOVED***,
-***REMOVED***);
+  },
+});
 
 commentSchema.plugin(mongoosePaginate);
 const Comment = mongoose.model("Comment", commentSchema);

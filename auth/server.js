@@ -16,37 +16,37 @@ const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
 const DB_URI = process.env.DB_URI;
 
-const dbConnectionUrl = `mongodb+srv://$***REMOVED***DB_USER***REMOVED***:$***REMOVED***DB_PASSWORD***REMOVED***@$***REMOVED***DB_URI***REMOVED***/$***REMOVED***DB_NAME***REMOVED***?retryWrites=true&w=majority`;
+const dbConnectionUrl = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_URI}/${DB_NAME}?retryWrites=true&w=majority`;
 
 const app = express();
 app.use(express.json());
-app.use(express.urlencoded(***REMOVED*** extended: false ***REMOVED***));
+app.use(express.urlencoded({ extended: false }));
 app.use(morgan('dev'));
 app.use('/', authRouter);
 
-app.use(cors(***REMOVED***
+app.use(cors({
     // allow requests from react 
     origin: ['http://localhost:3000']
-***REMOVED***));
+}));
 
-app.use(async (req, res, next) => ***REMOVED***
+app.use(async (req, res, next) => {
     next(createError.NotFound());
-***REMOVED***)
+})
 
-app.use((err, req, res, next) => ***REMOVED***
+app.use((err, req, res, next) => {
     res.status(err.status || 500);
-    res.send(***REMOVED***
-        error: ***REMOVED***
+    res.send({
+        error: {
             status: err.status || 500,
             message: err.message
-        ***REMOVED***
-    ***REMOVED***)
-***REMOVED***)
+        }
+    })
+})
 
-mongoose.connect(dbConnectionUrl, ***REMOVED*** useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false ***REMOVED***)
-    .then(() => app.listen(PORT, () => ***REMOVED***
-        console.log(`$***REMOVED***SERVICE_NAME***REMOVED***.$***REMOVED***NODE_ENV***REMOVED*** running on http://localhost:$***REMOVED***PORT***REMOVED***`);
-        console.log(`database connection successful: $***REMOVED***dbConnectionUrl***REMOVED***`);
-    ***REMOVED***))
-    .catch((error) => console.log(`$***REMOVED***error***REMOVED*** failed to connect to database`));
+mongoose.connect(dbConnectionUrl, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false })
+    .then(() => app.listen(PORT, () => {
+        console.log(`${SERVICE_NAME}.${NODE_ENV} running on http://localhost:${PORT}`);
+        console.log(`database connection successful: ${dbConnectionUrl}`);
+    }))
+    .catch((error) => console.log(`${error} failed to connect to database`));
 

@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
-const locationSchema = mongoose.Schema(***REMOVED***
-    location: ***REMOVED***
+const locationSchema = mongoose.Schema({
+    location: {
         type: String,
         required: true,
-    ***REMOVED***
-***REMOVED***);
+    }
+});
 
 locationSchema.plugin(mongoosePaginate);
 

@@ -1,6 +1,6 @@
 import express from 'express';
-import ***REMOVED*** home, login, logout, register, refreshToken, forgotPassword, resetPassword, verifyAccount, me, forgotPasswordWithUserId, verifyByUserId ***REMOVED*** from '../controllers/auth.js';
-import ***REMOVED*** verifyAccessToken ***REMOVED*** from '../utils/jwt.js';
+import { home, login, logout, register, refreshToken, forgotPassword, resetPassword, verifyAccount, me, forgotPasswordWithUserId, verifyByUserId } from '../controllers/auth.js';
+import { verifyAccessToken } from '../utils/jwt.js';
 
 const authRoute = express.Router();
 authRoute.get('/api/auth/', home);

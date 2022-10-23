@@ -1,36 +1,36 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
-const postSchema = mongoose.Schema(***REMOVED***
-  userId: ***REMOVED***
+const postSchema = mongoose.Schema({
+  userId: {
     type: "string",
     required: true,
-  ***REMOVED***,
-  caption: ***REMOVED***
+  },
+  caption: {
     type: "string",
     required: false,
-  ***REMOVED***,
-  imageUri: ***REMOVED***
+  },
+  imageUri: {
     type: "string",
     required: false,
-  ***REMOVED***,
-  createdAt: ***REMOVED***
+  },
+  createdAt: {
     type: Date,
-  ***REMOVED***,
-  updatedAt: ***REMOVED***
+  },
+  updatedAt: {
     type: Date,
-  ***REMOVED***,
-  location: ***REMOVED***
+  },
+  location: {
     type: "string",
     required: false,
-  ***REMOVED***,
-  tags: [***REMOVED***
+  },
+  tags: [{
     type: String
-  ***REMOVED***],
-  people: [***REMOVED***
+  }],
+  people: [{
     type: String
-  ***REMOVED***]
-***REMOVED***);
+  }]
+});
 
 postSchema.plugin(mongoosePaginate);
 

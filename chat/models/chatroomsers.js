@@ -1,22 +1,22 @@
 import mongoose from 'mongoose';
 
-const chatRoomUserSchema = mongoose.Schema(***REMOVED***
-    userId: ***REMOVED***
+const chatRoomUserSchema = mongoose.Schema({
+    userId: {
         type: String,
         required: true
-    ***REMOVED***,
-    chatRoomId: ***REMOVED***
+    },
+    chatRoomId: {
         type: String,
         required: true
-    ***REMOVED***,
-    createdAt: ***REMOVED***
+    },
+    createdAt: {
         type: Date,
-    ***REMOVED***,
-    updatedAt: ***REMOVED***
+    },
+    updatedAt: {
         type: Date,
         required: false
-    ***REMOVED***
-***REMOVED***);
+    }
+});
 
 const ChatRoomUser = mongoose.model('ChatRoomUser', chatRoomUserSchema);
 export default ChatRoomUser;

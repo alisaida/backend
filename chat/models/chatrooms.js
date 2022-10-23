@@ -1,22 +1,22 @@
 import mongoose from 'mongoose';
 import mongoosePaginate from "mongoose-paginate-v2";
 
-const chatRoomSchema = mongoose.Schema(***REMOVED***
-    name: ***REMOVED***
+const chatRoomSchema = mongoose.Schema({
+    name: {
         type: 'string',
         required: false
-    ***REMOVED***,
-    isGroupChat: ***REMOVED***
+    },
+    isGroupChat: {
         type: 'boolean',
         default: false
-    ***REMOVED***,
-    createdAt: ***REMOVED***
+    },
+    createdAt: {
         type: Date
-    ***REMOVED***,
-    updatedAt: ***REMOVED***
+    },
+    updatedAt: {
         type: Date
-    ***REMOVED***
-***REMOVED***)
+    }
+})
 
 chatRoomSchema.plugin(mongoosePaginate);
 const ChatRoom = mongoose.model('ChatRoom', chatRoomSchema);

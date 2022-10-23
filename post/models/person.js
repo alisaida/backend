@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
-const personSchema = mongoose.Schema(***REMOVED***
-    person: ***REMOVED***
+const personSchema = mongoose.Schema({
+    person: {
         type: String,
         required: true,
-    ***REMOVED***
-***REMOVED***);
+    }
+});
 
 personSchema.plugin(mongoosePaginate);
 

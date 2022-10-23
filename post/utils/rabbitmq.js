@@ -5,81 +5,81 @@ import User from '../models/users.js'
 
 let amqpChannel;
 
-export const consumeUsersQueue = async () => ***REMOVED***
-    try ***REMOVED***
+export const consumeUsersQueue = async () => {
+    try {
         const conn = await amqp.connect(process.env.AMQP_URL);
         amqpChannel = await conn.createChannel();
         await amqpChannel.assertQueue('USER_POST');
         await amqpChannel.assertQueue('UPDATE_USER_POST');
-        console.log(`rabbitmq connection successful: $***REMOVED***process.env.AMQP_URL***REMOVED***`);
+        console.log(`rabbitmq connection successful: ${process.env.AMQP_URL}`);
 
-        amqpChannel.consume('USER_POST', message => ***REMOVED***
+        amqpChannel.consume('USER_POST', message => {
             saveUser(message);
-        ***REMOVED***)
+        })
 
-        amqpChannel.consume('UPDATE_USER_POST', message => ***REMOVED***
+        amqpChannel.consume('UPDATE_USER_POST', message => {
             updateUserProfile(message);
-        ***REMOVED***)
-    ***REMOVED*** catch (err) ***REMOVED***
-        console.log(`$***REMOVED***err***REMOVED*** failed to connect to amqp`);
-    ***REMOVED***
-***REMOVED***
+        })
+    } catch (err) {
+        console.log(`${err} failed to connect to amqp`);
+    }
+}
 
-const saveUser = async (message) => ***REMOVED***
+const saveUser = async (message) => {
     const user = JSON.parse(message.content.toString());
-    if (user) ***REMOVED***
+    if (user) {
         console.log(`New asynchronous message received`);
 
-        const ***REMOVED*** userId, email, username, name ***REMOVED*** = user;
+        const { userId, email, username, name } = user;
 
-        const doesExist = await User.findOne(***REMOVED*** email ***REMOVED***);
-        if (!doesExist) ***REMOVED***
-            const userData = new User(***REMOVED*** userId, email, username, name ***REMOVED***);
+        const doesExist = await User.findOne({ email });
+        if (!doesExist) {
+            const userData = new User({ userId, email, username, name });
             const savedUser = await userData.save();
-            if (savedUser && savedUser._id) ***REMOVED***
-                console.log(`persisted event data for _id: $***REMOVED***userId***REMOVED***`);
+            if (savedUser && savedUser._id) {
+                console.log(`persisted event data for _id: ${userId}`);
                 amqpChannel.ack(message);
-            ***REMOVED***
-        ***REMOVED***
-    ***REMOVED***
+            }
+        }
+    }
 
-***REMOVED***
+}
 
-const updateUserProfile = async (message) => ***REMOVED***
+const updateUserProfile = async (message) => {
     const user = JSON.parse(message.content.toString());
-    if (user) ***REMOVED***
+    if (user) {
         console.log(`New asynchronous message received`);
         console.log('new data', user)
 
         const session = await mongoose.startSession();
         session.startTransaction();
-        try ***REMOVED***
+        try {
 
-            const ***REMOVED*** userId, username, name ***REMOVED*** = user;
+            const { userId, username, name } = user;
 
-            const doesExist = await User.findOne(***REMOVED*** userId: userId ***REMOVED***);
-            if (doesExist) ***REMOVED***
+            const doesExist = await User.findOne({ userId: userId });
+            if (doesExist) {
                 await User.findOneAndUpdate(
-                    ***REMOVED*** userId: userId ***REMOVED***,
-                    ***REMOVED***
-                        $set: ***REMOVED***
+                    { userId: userId },
+                    {
+                        $set: {
                             name: name,
                             username: username,
                             updatedAt: new Date().toISOString()
-                        ***REMOVED***
-                    ***REMOVED***
-                    , ***REMOVED***
+                        }
+                    }
+                    , {
                         upsert: true
-                    ***REMOVED***
+                    }
                 );
 
-                console.log(`persist event for update user profile data for _id: $***REMOVED***userId***REMOVED***`);
+                console.log(`persist event for update user profile data for _id: ${userId}`);
 
                 amqpChannel.ack(message);
-            ***REMOVED***
-        ***REMOVED*** catch (err) ***REMOVED***
-            console.log(`failed to persist event for update user profile data: $***REMOVED***err***REMOVED***`)
+            }
+        } catch (err) {
+            console.log(`failed to persist event for update user profile data: ${err}`)
             await session.abortTransaction();
-        ***REMOVED***
-    ***REMOVED***
-***REMOVED***
+        }
+    }
+}

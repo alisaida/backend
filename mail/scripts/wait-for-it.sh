@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Use this script to test if a given TCP host/port are available
 
-WAITFORIT_cmdname=$***REMOVED***0##*/***REMOVED***
+WAITFORIT_cmdname=${0##*/}
 
-echoerr() ***REMOVED*** if [[ $WAITFORIT_QUIET -ne 1 ]]; then echo "$@" 1>&2; fi ***REMOVED***
+echoerr() { if [[ $WAITFORIT_QUIET -ne 1 ]]; then echo "$@" 1>&2; fi }
 
 usage()
-***REMOVED***
+{
     cat << USAGE >&2
 Usage:
     $WAITFORIT_cmdname host:port [-s] [-t timeout] [-- command args]
@@ -20,10 +20,10 @@ Usage:
     -- COMMAND ARGS             Execute command with args after the test finishes
 USAGE
     exit 1
-***REMOVED***
+}
 
 wait_for()
-***REMOVED***
+{
     if [[ $WAITFORIT_TIMEOUT -gt 0 ]]; then
         echoerr "$WAITFORIT_cmdname: waiting $WAITFORIT_TIMEOUT seconds for $WAITFORIT_HOST:$WAITFORIT_PORT"
     else
@@ -47,10 +47,10 @@ wait_for()
         sleep 1
     done
     return $WAITFORIT_result
-***REMOVED***
+}
 
 wait_for_wrapper()
-***REMOVED***
+{
     # In order to support SIGINT during timeout: http://unix.stackexchange.com/a/57692
     if [[ $WAITFORIT_QUIET -eq 1 ]]; then
         timeout $WAITFORIT_BUSYTIMEFLAG $WAITFORIT_TIMEOUT $0 --quiet --child --host=$WAITFORIT_HOST --port=$WAITFORIT_PORT --timeout=$WAITFORIT_TIMEOUT &
@@ -65,16 +65,16 @@ wait_for_wrapper()
         echoerr "$WAITFORIT_cmdname: timeout occurred after waiting $WAITFORIT_TIMEOUT seconds for $WAITFORIT_HOST:$WAITFORIT_PORT"
     fi
     return $WAITFORIT_RESULT
-***REMOVED***
+}
 
 # process arguments
 while [[ $# -gt 0 ]]
 do
     case "$1" in
         *:* )
-        WAITFORIT_hostport=($***REMOVED***1//:/ ***REMOVED***)
-        WAITFORIT_HOST=$***REMOVED***WAITFORIT_hostport[0]***REMOVED***
-        WAITFORIT_PORT=$***REMOVED***WAITFORIT_hostport[1]***REMOVED***
+        WAITFORIT_hostport=(${1//:/ })
+        WAITFORIT_HOST=${WAITFORIT_hostport[0]}
+        WAITFORIT_PORT=${WAITFORIT_hostport[1]}
         shift 1
         ;;
         --child)
@@ -95,7 +95,7 @@ do
         shift 2
         ;;
         --host=*)
-        WAITFORIT_HOST="$***REMOVED***1#*=***REMOVED***"
+        WAITFORIT_HOST="${1#*=}"
         shift 1
         ;;
         -p)
@@ -104,7 +104,7 @@ do
         shift 2
         ;;
         --port=*)
-        WAITFORIT_PORT="$***REMOVED***1#*=***REMOVED***"
+        WAITFORIT_PORT="${1#*=}"
         shift 1
         ;;
         -t)
@@ -113,7 +113,7 @@ do
         shift 2
         ;;
         --timeout=*)
-        WAITFORIT_TIMEOUT="$***REMOVED***1#*=***REMOVED***"
+        WAITFORIT_TIMEOUT="${1#*=}"
         shift 1
         ;;
         --)
@@ -136,10 +136,10 @@ if [[ "$WAITFORIT_HOST" == "" || "$WAITFORIT_PORT" == "" ]]; then
     usage
 fi
 
-WAITFORIT_TIMEOUT=$***REMOVED***WAITFORIT_TIMEOUT:-15***REMOVED***
-WAITFORIT_STRICT=$***REMOVED***WAITFORIT_STRICT:-0***REMOVED***
-WAITFORIT_CHILD=$***REMOVED***WAITFORIT_CHILD:-0***REMOVED***
-WAITFORIT_QUIET=$***REMOVED***WAITFORIT_QUIET:-0***REMOVED***
+WAITFORIT_TIMEOUT=${WAITFORIT_TIMEOUT:-15}
+WAITFORIT_STRICT=${WAITFORIT_STRICT:-0}
+WAITFORIT_CHILD=${WAITFORIT_CHILD:-0}
+WAITFORIT_QUIET=${WAITFORIT_QUIET:-0}
 
 # Check to see if timeout is from busybox?
 WAITFORIT_TIMEOUT_PATH=$(type -p timeout)
@@ -176,7 +176,7 @@ if [[ $WAITFORIT_CLI != "" ]]; then
         echoerr "$WAITFORIT_cmdname: strict mode, refusing to execute subprocess"
         exit $WAITFORIT_RESULT
     fi
-    exec "$***REMOVED***WAITFORIT_CLI[@]***REMOVED***"
+    exec "${WAITFORIT_CLI[@]}"
 else
     exit $WAITFORIT_RESULT
 fi

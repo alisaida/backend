@@ -1,31 +1,31 @@
 import mongoose from 'mongoose';
 
-const userSchema = mongoose.Schema(***REMOVED***
-    userId: ***REMOVED***
+const userSchema = mongoose.Schema({
+    userId: {
         type: String,
         required: true,
         unique: true
-    ***REMOVED***,
-    name: ***REMOVED***
+    },
+    name: {
         type: String,
         required: true
-    ***REMOVED***,
-    email: ***REMOVED***
+    },
+    email: {
         type: String,
         required: true,
         lowercase: true,
         unique: true,
-    ***REMOVED***,
-    username: ***REMOVED***
+    },
+    username: {
         type: String,
         required: true,
         unique: true
-    ***REMOVED***,
-    imageUri: ***REMOVED***
+    },
+    imageUri: {
         type: String,
         required: false
-    ***REMOVED***
-***REMOVED***);
+    }
+});
 
 const User = mongoose.model('User', userSchema);
 export default User;

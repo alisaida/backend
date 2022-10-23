@@ -1,13 +1,14 @@
 import express from "express";
 
-import ***REMOVED*** verifyAccessToken ***REMOVED*** from "../utils/jwt.js";
-import ***REMOVED*** home, fetchFeed, fetchPost, fetchUserPosts, createPost, updatePost, fetchPostComments, createComment, fetchLikes, fetchLikedPosts, likePost, unLikePost, isLiked, fetchBookmarkedPosts, bookmarkPost, unBookmarkPost, isBookmarked, getPostsByTagId, getTagsByNameLike, getTagByName, getLocationsByNameLike, getPostsByLocationId, fetchLocationById ***REMOVED*** from "../controllers/posts.js";
+import { verifyAccessToken } from "../utils/jwt.js";
+import { home, fetchFeed, fetchPost, deletePost, fetchUserPosts, createPost, updatePost, fetchPostComments, createComment, fetchLikes, fetchLikedPosts, likePost, unLikePost, isLiked, fetchBookmarkedPosts, bookmarkPost, unBookmarkPost, isBookmarked, getPostsByTagId, getTagsByNameLike, getTagByName, getLocationsByNameLike, getPostsByLocationId, fetchLocationById } from "../controllers/posts.js";
 
 const postsRoute = express.Router();
 
 postsRoute.get('/api/posts', home);
 postsRoute.get("/api/posts/feed/all", verifyAccessToken, fetchFeed);
 postsRoute.get("/api/posts/:id", verifyAccessToken, fetchPost);
+postsRoute.delete("/api/posts/:id", verifyAccessToken, deletePost);
 postsRoute.get("/api/posts/users/:id/fetchPosts", verifyAccessToken, fetchUserPosts);
 postsRoute.post("/api/posts/new", verifyAccessToken, createPost);
 postsRoute.patch("/api/posts/:id", verifyAccessToken, updatePost);

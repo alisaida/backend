@@ -4,33 +4,33 @@ import mongoose from 'mongoose';
 import Profile from '../models/profiles.js';
 import User from '../models/users.js';
 import Follow from '../models/follow.js';
-import ***REMOVED*** publishToQueue ***REMOVED*** from '../utils/rabbitmq.js'
+import { publishToQueue } from '../utils/rabbitmq.js'
 
 /**
  * home
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
-export const home = async (req, res, next) => ***REMOVED***
+export const home = async (req, res, next) => {
   res.send('Welcome!');
-***REMOVED***
+}
 
 /**
  * logs in user and generates a pair of access and refresh tokens
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
-export const me = async (req, res, next) => ***REMOVED***
-  try ***REMOVED***
-    const profile = await Profile.findOne(***REMOVED*** userId: req.authUser ***REMOVED***);
+export const me = async (req, res, next) => {
+  try {
+    const profile = await Profile.findOne({ userId: req.authUser });
 
-    res.status(200).send(***REMOVED*** profile ***REMOVED***);
-  ***REMOVED*** catch (err) ***REMOVED***
+    res.status(200).send({ profile });
+  } catch (err) {
     next(err);
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /**
  * create profile
@@ -38,41 +38,41 @@ export const me = async (req, res, next) => ***REMOVED***
  * @param res
  * @param next
  */
-export const createProfile = async (req, res, next) => ***REMOVED***
+export const createProfile = async (req, res, next) => {
   const userId = req.authUser;
-  const ***REMOVED*** bio, name, profilePicture, username ***REMOVED*** = req.body;
+  const { bio, name, profilePicture, username } = req.body;
 
-  try ***REMOVED***
-    if (!username) ***REMOVED***
+  try {
+    if (!username) {
       throw httpError.BadRequest('username field is empty');
-    ***REMOVED***
+    }
 
-    if (!name) ***REMOVED***
+    if (!name) {
       throw httpError.BadRequst('name field is empty');
-    ***REMOVED***
+    }
 
 
-    const doesExist = await Profile.findOne(***REMOVED*** userId ***REMOVED***);
+    const doesExist = await Profile.findOne({ userId });
 
-    if (doesExist) ***REMOVED***
+    if (doesExist) {
       throw httpError.Conflict('profile already exists, try updating');
-    ***REMOVED***
+    }
 
-    const profile = new Profile(***REMOVED***
+    const profile = new Profile({
       userId: userId,
       username: username,
       name: name,
       profilePicture: profilePicture || "",
       bio: bio || ""
-    ***REMOVED***);
+    });
 
     await profile.save();
 
     res.status(201).send('Profile created');
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error)
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /*
  * fetch profile by userId
@@ -80,22 +80,22 @@ export const createProfile = async (req, res, next) => ***REMOVED***
  * @param res
  * @param next
  */
-export const fetchProfileByUserId = async (req, res, next) => ***REMOVED***
+export const fetchProfileByUserId = async (req, res, next) => {
   const userId = req.params.id;
 
-  try ***REMOVED***
+  try {
 
-    const profile = await Profile.findOne(***REMOVED*** userId: userId ***REMOVED***);
+    const profile = await Profile.findOne({ userId: userId });
 
-    if (!profile) ***REMOVED***
+    if (!profile) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
-    res.status(200).send(***REMOVED*** profile ***REMOVED***);
-  ***REMOVED*** catch (error) ***REMOVED***
+    res.status(200).send({ profile });
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /*
  * fetch profile by username/name 
@@ -103,29 +103,29 @@ export const fetchProfileByUserId = async (req, res, next) => ***REMOVED***
  * @param res
  * @param next
  */
-export const fetchProfileByQueryParams = async (req, res, next) => ***REMOVED***
+export const fetchProfileByQueryParams = async (req, res, next) => {
 
-  const ***REMOVED*** name, username ***REMOVED*** = req.query;
-  if (!name && !username) ***REMOVED***
+  const { name, username } = req.query;
+  if (!name && !username) {
     throw httpError.BadRequest('Empty search params');
-  ***REMOVED***
+  }
 
-  try ***REMOVED***
+  try {
     let profiles;
     let caseInsensitive; //search with specific case
-    if (username) ***REMOVED***
+    if (username) {
       caseInsensitive = new RegExp(["^", username, "$"].join(""), "i");
-      profiles = await Profile.find(***REMOVED*** username: caseInsensitive ***REMOVED***);
-    ***REMOVED***
-    else ***REMOVED***
+      profiles = await Profile.find({ username: caseInsensitive });
+    }
+    else {
       caseInsensitive = new RegExp(["^", name, "$"].join(""), "i");
-      profiles = await Profile.find(***REMOVED*** name: caseInsensitive ***REMOVED***);
-    ***REMOVED***
-    res.status(200).send(***REMOVED*** profiles ***REMOVED***);
-  ***REMOVED*** catch (error) ***REMOVED***
+      profiles = await Profile.find({ name: caseInsensitive });
+    }
+    res.status(200).send({ profiles });
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /**
  * update profile picture
@@ -133,33 +133,33 @@ export const fetchProfileByQueryParams = async (req, res, next) => ***REMOVED***
  * @param res
  * @param next
  */
-export const updateProfilePicture = async (req, res, next) => ***REMOVED***
+export const updateProfilePicture = async (req, res, next) => {
   const userId = req.authUser;
-  const ***REMOVED*** imageUri ***REMOVED*** = req.body;
+  const { imageUri } = req.body;
 
-  try ***REMOVED***
-    if (!imageUri) ***REMOVED***
+  try {
+    if (!imageUri) {
       throw httpError.BadRequest('missing profile picture image uri from the request body: imageUri');
-    ***REMOVED***
+    }
 
     await Profile.findOneAndUpdate(
-      ***REMOVED*** userId: userId ***REMOVED***,
-      ***REMOVED***
-        $set: ***REMOVED***
+      { userId: userId },
+      {
+        $set: {
           profilePicture: imageUri,
           updatedAt: new Date().toISOString()
-        ***REMOVED***
-      ***REMOVED***
-      , ***REMOVED***
+        }
+      }
+      , {
         upsert: true
-      ***REMOVED***
+      }
     );
 
     res.status(200).send('Profile updated successfully');
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error)
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /**
  * update profile bio
@@ -167,33 +167,33 @@ export const updateProfilePicture = async (req, res, next) => ***REMOVED***
  * @param res
  * @param next
  */
-export const updateProfileBio = async (req, res, next) => ***REMOVED***
+export const updateProfileBio = async (req, res, next) => {
   const userId = req.authUser;
-  const ***REMOVED*** bio ***REMOVED*** = req.body;
+  const { bio } = req.body;
 
-  try ***REMOVED***
-    if (!bio) ***REMOVED***
+  try {
+    if (!bio) {
       throw httpError.BadRequest('missing bio from the request body');
-    ***REMOVED***
+    }
 
     await Profile.findOneAndUpdate(
-      ***REMOVED*** userId: userId ***REMOVED***,
-      ***REMOVED***
-        $set: ***REMOVED***
+      { userId: userId },
+      {
+        $set: {
           bio: bio,
           updatedAt: new Date().toISOString()
-        ***REMOVED***
-      ***REMOVED***
-      , ***REMOVED***
+        }
+      }
+      , {
         upsert: true
-      ***REMOVED***
+      }
     );
 
     res.status(200).send('Profile updated successfully');
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error)
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /**
  * update profile
@@ -201,41 +201,41 @@ export const updateProfileBio = async (req, res, next) => ***REMOVED***
  * @param res
  * @param next
  */
-export const updateProfile = async (req, res, next) => ***REMOVED***
+export const updateProfile = async (req, res, next) => {
   const userId = req.authUser;
-  const ***REMOVED*** bio, name, profilePicture, username, isPublic ***REMOVED*** = req.body;
+  const { bio, name, profilePicture, username, isPublic } = req.body;
 
-  try ***REMOVED***
-    if (!name && !username) ***REMOVED***
+  try {
+    if (!name && !username) {
       throw httpError.BadRequest('Payload missing name or username');
-    ***REMOVED***
+    }
 
     await Profile.findOneAndUpdate(
-      ***REMOVED*** userId: userId ***REMOVED***,
-      ***REMOVED***
-        $set: ***REMOVED***
+      { userId: userId },
+      {
+        $set: {
           bio: bio,
           name: name,
           profilePicture: profilePicture,
           username: username,
           isPublic: isPublic,
           updatedAt: new Date().toISOString()
-        ***REMOVED***
-      ***REMOVED***
-      , ***REMOVED***
+        }
+      }
+      , {
         upsert: true
-      ***REMOVED***
+      }
     );
 
     //payload for other microservices
-    let data = ***REMOVED***
+    let data = {
       userId: userId,
       name: name,
       profilePicture: profilePicture,
       username: username,
       isPublic: isPublic,
       bio: bio
-    ***REMOVED***
+    }
 
     console.log('publish events to rabbitmq UPDATE_USER_AUTH, UPDATE_USER_CHAT and UPDATE_USER_POST')
 
@@ -244,10 +244,10 @@ export const updateProfile = async (req, res, next) => ***REMOVED***
     publishToQueue('UPDATE_USER_POST', data);
 
     res.status(200).send('Profile updated successfully');
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error)
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /**
  * fetch following between two profiles
@@ -255,22 +255,22 @@ export const updateProfile = async (req, res, next) => ***REMOVED***
  * @param res
  * @param next
  */
-export const fetchFollow = async (req, res, next) => ***REMOVED***
+export const fetchFollow = async (req, res, next) => {
 
-  try ***REMOVED***
+  try {
     const follower = req.params.id1;
     const following = req.params.id2;
 
-    const follow = await Follow.findOne(***REMOVED*** follower: follower, following: following ***REMOVED***);
-    if (!follow) ***REMOVED***
+    const follow = await Follow.findOne({ follower: follower, following: following });
+    if (!follow) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
-    res.status(200).send(***REMOVED*** follow ***REMOVED***);
-  ***REMOVED*** catch (error) ***REMOVED***
+    res.status(200).send({ follow });
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /**
  * create following between two profiles
@@ -278,193 +278,193 @@ export const fetchFollow = async (req, res, next) => ***REMOVED***
  * @param res
  * @param next
  */
-export const createFollow = async (req, res, next) => ***REMOVED***
+export const createFollow = async (req, res, next) => {
 
-  try ***REMOVED***
+  try {
     const follower = req.authUser;
     const following = req.params.id;
 
-    const profile = await Profile.findOne(***REMOVED*** userId: following ***REMOVED***);
+    const profile = await Profile.findOne({ userId: following });
 
-    if (!profile) ***REMOVED***
+    if (!profile) {
       throw httpError.NotFound(`Profile you're trying to follow does not exist`);
-    ***REMOVED***
+    }
 
-    const ***REMOVED*** isPublic ***REMOVED*** = profile;
+    const { isPublic } = profile;
 
     const status = isPublic ? 'accepted' : 'pending';
 
-    const follow = new Follow(***REMOVED***
+    const follow = new Follow({
       follower: follower,
       following: following,
       status: status,
       createdAt: new Date().toISOString()
-    ***REMOVED***);
+    });
 
     const followingSaved = await follow.save();
 
     res.status(201).send(followingSaved);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error)
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /** 
  * unfollow profile
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
-export const unFollow = async (req, res, next) => ***REMOVED***
-  try ***REMOVED***
+export const unFollow = async (req, res, next) => {
+  try {
     const follower = req.authUser;
     const following = req.params.id;
-    const ***REMOVED*** relation ***REMOVED*** = req.body;
+    const { relation } = req.body;
 
-    if (!relation) ***REMOVED***
+    if (!relation) {
       throw httpError.BadRequest('Payload missing relation');
-    ***REMOVED***
+    }
 
     let follow;
-    if (relation === 'follower') ***REMOVED***
-      follow = await Follow.findOne(***REMOVED*** follower: follower, following: following ***REMOVED***);
-    ***REMOVED*** else if (relation === 'following') ***REMOVED***
-      follow = await Follow.findOne(***REMOVED*** following: follower, follower: following ***REMOVED***);
-    ***REMOVED***
+    if (relation === 'follower') {
+      follow = await Follow.findOne({ follower: follower, following: following });
+    } else if (relation === 'following') {
+      follow = await Follow.findOne({ following: follower, follower: following });
+    }
 
-    if (!follow) ***REMOVED***
+    if (!follow) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
     await follow.delete();
 
     res.status(202).send('Profile unfollowed');
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***;
+  }
+};
 
 /**
  * fetch followings by userId
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
-export const fetchFollowings = async (req, res, next) => ***REMOVED***
-  try ***REMOVED***
-    const ***REMOVED*** status ***REMOVED*** = req.body;
-    let ***REMOVED*** page, size ***REMOVED*** = req.query;
-    if (!page) ***REMOVED***
+export const fetchFollowings = async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    let { page, size } = req.query;
+    if (!page) {
       page = 1;
-    ***REMOVED***
+    }
 
-    if (!size) ***REMOVED***
+    if (!size) {
       size = 10;
-    ***REMOVED***
+    }
 
     const limit = parseInt(size);
 
-    let options = ***REMOVED***
-      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+    let options = {
+      sort: { createdAt: -1 },
       lean: true,
       page: page,
       limit: limit,
-    ***REMOVED***;
+    };
 
-    let ***REMOVED*** id ***REMOVED*** = req.params;
+    let { id } = req.params;
 
-    if (!id) ***REMOVED***
+    if (!id) {
       throw httpError.BadRequest();
-    ***REMOVED***
-    const profile = await Profile.findOne(***REMOVED*** userId: id ***REMOVED***);
+    }
+    const profile = await Profile.findOne({ userId: id });
 
-    if (!profile) ***REMOVED***
+    if (!profile) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
     let data;
     if (status)
-      data = await Follow.paginate(***REMOVED*** follower: id, status: status ***REMOVED***, options);
+      data = await Follow.paginate({ follower: id, status: status }, options);
     else
-      data = await Follow.paginate(***REMOVED*** follower: id ***REMOVED***, options);
+      data = await Follow.paginate({ follower: id }, options);
 
-    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
 
-    const results = ***REMOVED***
+    const results = {
       page,
       hasNextPage,
       nextPage,
       size,
       totalDocs,
       data: docs
-    ***REMOVED***
+    }
 
     res.status(200).send(results);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /**
  * fetch followings by userId
- * @param ***REMOVED*******REMOVED*** req 
- * @param ***REMOVED*******REMOVED*** res 
- * @param ***REMOVED*******REMOVED*** next 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
-export const fetchFollowers = async (req, res, next) => ***REMOVED***
-  try ***REMOVED***
-    const ***REMOVED*** status ***REMOVED*** = req.body;
-    let ***REMOVED*** page, size ***REMOVED*** = req.query;
-    if (!page) ***REMOVED***
+export const fetchFollowers = async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    let { page, size } = req.query;
+    if (!page) {
       page = 1;
-    ***REMOVED***
+    }
 
-    if (!size) ***REMOVED***
+    if (!size) {
       size = 10;
-    ***REMOVED***
+    }
 
     const limit = parseInt(size);
 
-    let options = ***REMOVED***
-      sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+    let options = {
+      sort: { createdAt: -1 },
       lean: true,
       page: page,
       limit: limit,
-    ***REMOVED***;
+    };
 
-    let ***REMOVED*** id ***REMOVED*** = req.params;
+    let { id } = req.params;
 
-    if (!id) ***REMOVED***
+    if (!id) {
       throw httpError.BadRequest();
-    ***REMOVED***
-    const profile = await Profile.findOne(***REMOVED*** userId: id ***REMOVED***);
+    }
+    const profile = await Profile.findOne({ userId: id });
 
-    if (!profile) ***REMOVED***
+    if (!profile) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
     let data;
     if (status)
-      data = await Follow.paginate(***REMOVED*** following: id, status: status ***REMOVED***, options);
+      data = await Follow.paginate({ following: id, status: status }, options);
     else
-      data = await Follow.paginate(***REMOVED*** following: id ***REMOVED***, options);
+      data = await Follow.paginate({ following: id }, options);
 
-    const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+    const { docs, hasNextPage, nextPage, totalDocs } = data;
 
-    const results = ***REMOVED***
+    const results = {
       page,
       hasNextPage,
       nextPage,
       size,
       totalDocs,
       data: docs
-    ***REMOVED***
+    }
 
     res.status(200).send(results);
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /**
  * accept pending following
@@ -472,33 +472,33 @@ export const fetchFollowers = async (req, res, next) => ***REMOVED***
  * @param res
  * @param next
  */
-export const acceptFollowing = async (req, res, next) => ***REMOVED***
-  try ***REMOVED***
+export const acceptFollowing = async (req, res, next) => {
+  try {
     const userId = req.authUser;
 
-    let ***REMOVED*** id ***REMOVED*** = req.params;
+    let { id } = req.params;
 
-    if (!id) ***REMOVED***
+    if (!id) {
       throw httpError.BadRequest();
-    ***REMOVED***
+    }
 
     await Follow.findOneAndUpdate(
-      ***REMOVED*** following: userId, _id: id ***REMOVED***,
-      ***REMOVED***
-        $set: ***REMOVED***
+      { following: userId, _id: id },
+      {
+        $set: {
           status: 'accepted'
-        ***REMOVED***
-      ***REMOVED***
-      , ***REMOVED***
+        }
+      }
+      , {
         upsert: true
-      ***REMOVED***
+      }
     );
 
     res.status(201).send('Following accepted');
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error)
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 /**
  * reject pending following
@@ -506,20 +506,20 @@ export const acceptFollowing = async (req, res, next) => ***REMOVED***
  * @param res
  * @param next
  */
-export const rejectFollowing = async (req, res, next) => ***REMOVED***
-  try ***REMOVED***
+export const rejectFollowing = async (req, res, next) => {
+  try {
     const userId = req.authUser;
-    let ***REMOVED*** id ***REMOVED*** = req.params;
+    let { id } = req.params;
 
-    const follow = await Follow.findOne(***REMOVED*** following: userId, _id: id ***REMOVED***);
-    if (!follow) ***REMOVED***
+    const follow = await Follow.findOne({ following: userId, _id: id });
+    if (!follow) {
       throw httpError.NotFound();
-    ***REMOVED***
+    }
 
     await follow.delete();
 
     res.status(202).send('Follow request deleted');
-  ***REMOVED*** catch (error) ***REMOVED***
+  } catch (error) {
     next(error);
-  ***REMOVED***
-***REMOVED***
+  }
+}

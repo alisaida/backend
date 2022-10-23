@@ -1,36 +1,36 @@
 import mongoose from 'mongoose';
 
-const profileSchema = mongoose.Schema(***REMOVED***
-    userId: ***REMOVED***
+const profileSchema = mongoose.Schema({
+    userId: {
         type: String,
         required: true,
-    ***REMOVED***,
-    username: ***REMOVED***
+    },
+    username: {
         type: String,
         required: true,
-    ***REMOVED***,
-    name: ***REMOVED***
+    },
+    name: {
         type: String,
         required: true
-    ***REMOVED***,
-    profilePicture: ***REMOVED***
+    },
+    profilePicture: {
         type: String
-    ***REMOVED***,
-    bio: ***REMOVED***
+    },
+    bio: {
         type: String
-    ***REMOVED***,
-    createdAt: ***REMOVED***
+    },
+    createdAt: {
         type: Date,
         default: new Date()
-    ***REMOVED***,
-    isPublic: ***REMOVED***
+    },
+    isPublic: {
         type: Boolean,
         default: false
-    ***REMOVED***,
-    updatedAt: ***REMOVED***
+    },
+    updatedAt: {
         type: Date
-    ***REMOVED***
-***REMOVED***)
+    }
+})
 
 const Profile = mongoose.model('Profile', profileSchema);
 export default Profile;

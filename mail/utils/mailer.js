@@ -9,40 +9,40 @@ dotenv.config();
 const EMAIL_ACCOUNT = process.env.EMAIL_ACCOUNT;
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
 
-const sendMail = async (name, email, subject, uri, template) => ***REMOVED***
-    try ***REMOVED***
-        const transport = nodemailer.createTransport(***REMOVED***
+const sendMail = async (name, email, subject, uri, template) => {
+    try {
+        const transport = nodemailer.createTransport({
             host: process.env.EMAIL_HOST,
             port: 465,
             secure: true,
-            auth: ***REMOVED***
+            auth: {
                 user: EMAIL_ACCOUNT,
                 pass: EMAIL_PASSWORD
-            ***REMOVED***
-        ***REMOVED***)
+            }
+        })
 
-        const mailOptions = ***REMOVED***
+        const mailOptions = {
             from: EMAIL_ACCOUNT,
             to: email,
             subject: subject,
-            html: template(***REMOVED*** name: name, uri: uri ***REMOVED***)
-        ***REMOVED***
+            html: template({ name: name, uri: uri })
+        }
 
-        transport.sendMail(mailOptions, (error, data) => ***REMOVED***
-            if (error) ***REMOVED***
-                console.log(`Error $***REMOVED***error***REMOVED***`);
-            ***REMOVED*** else ***REMOVED***
+        transport.sendMail(mailOptions, (error, data) => {
+            if (error) {
+                console.log(`Error ${error}`);
+            } else {
                 console.log('Email sent successfully');
-            ***REMOVED***
-        ***REMOVED***);
+            }
+        });
 
-    ***REMOVED*** catch (err) ***REMOVED***
+    } catch (err) {
         console.log(err)
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
-export const prepareAndSendEmail = async (data) => ***REMOVED***
-    const ***REMOVED*** name, email, subject, uri ***REMOVED*** = data;
+export const prepareAndSendEmail = async (data) => {
+    const { name, email, subject, uri } = data;
 
     const templateName = subject === 'Welcome!' ? 'welcome.hbs' : 'password-reset.hbs';
 
@@ -50,6 +50,6 @@ export const prepareAndSendEmail = async (data) => ***REMOVED***
     const filePath = path.join(path.resolve('./templates'), templateName);
     const source = fs.readFileSync(filePath, 'utf8');
 
-    const template = handlebars.compile(source, ***REMOVED*** encoding: 'utf8' ***REMOVED***);
+    const template = handlebars.compile(source, { encoding: 'utf8' });
     sendMail(name, email, subject, uri, template);
-***REMOVED***
+}

@@ -8,38 +8,38 @@ import Message from '../models/messages.js'
 
 /**
  * home
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const home = async (req, res, next) => ***REMOVED***
+export const home = async (req, res, next) => {
     res.send('Welcome!');
-***REMOVED***
+}
 
 /**
  * fetch chatroom data, recipients and last message
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const fetchChatroom = async (req, res, next) => ***REMOVED***
+export const fetchChatroom = async (req, res, next) => {
     const chatRoomId = req.params.id;
-    if (!chatRoomId) ***REMOVED***
+    if (!chatRoomId) {
         throw createHttpError.BadRequest();
-    ***REMOVED***
+    }
 
-    try ***REMOVED***
-        const chatRoomObj = await ChatRoom.findById(***REMOVED*** _id: chatRoomId ***REMOVED***)
-        if (!chatRoomObj) ***REMOVED***
+    try {
+        const chatRoomObj = await ChatRoom.findById({ _id: chatRoomId })
+        if (!chatRoomObj) {
             throw createHttpError.NotFound();
-        ***REMOVED***
+        }
 
         const recipients = await getRecipientsHelperFn(chatRoomId);
 
-        const lastList = await Message.find(***REMOVED*** chatRoomId: chatRoomId ***REMOVED***).sort(***REMOVED*** createdAt: -1 ***REMOVED***).limit(1).exec();
+        const lastList = await Message.find({ chatRoomId: chatRoomId }).sort({ createdAt: -1 }).limit(1).exec();
         const lastMessage = (lastList && lastList.length === 1) ? lastList[0] : null;
 
-        const chatRoom = ***REMOVED***
+        const chatRoom = {
             chatRoomId: chatRoomObj._id,
             name: chatRoomObj.name || '',
             isGroupChat: chatRoomObj.isGroupChat,
@@ -47,539 +47,539 @@ export const fetchChatroom = async (req, res, next) => ***REMOVED***
             updatedAt: chatRoomObj.updatedAt || '',
             lastMessage: lastMessage,
             recipients: recipients
-        ***REMOVED***
+        }
 
         res.status(200).send(chatRoom);
-    ***REMOVED*** catch (error) ***REMOVED***
+    } catch (error) {
         next(error);
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
 /**
  * fetch chatroom between me is recipient userId
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const fetchChatWithRecipient = async (req, res, next) => ***REMOVED***
-    try ***REMOVED***
+export const fetchChatWithRecipient = async (req, res, next) => {
+    try {
 
-        const authUser = await User.findOne(***REMOVED*** userId: req.authUser ***REMOVED***);
+        const authUser = await User.findOne({ userId: req.authUser });
         let authChatRooms = [];
         authChatRooms = await fetchChatsByUserId(authUser.userId);
 
         const userId = req.params.id
 
-        const doesExist = await User.findOne(***REMOVED*** userId ***REMOVED***);
+        const doesExist = await User.findOne({ userId });
 
-        if (!doesExist) ***REMOVED***
+        if (!doesExist) {
             throw createHttpError.NotFound("User not found!");
-        ***REMOVED***
+        }
 
         let userChatRooms = [];
         userChatRooms = await fetchChatsByUserId(userId);
 
         //no chats between authUser and recipient
-        if (!authChatRooms || authChatRooms.length === 0 || !userChatRooms || userChatRooms.length === 0) ***REMOVED***
+        if (!authChatRooms || authChatRooms.length === 0 || !userChatRooms || userChatRooms.length === 0) {
             throw createHttpError.NotFound("Chatroom not found!");
-        ***REMOVED***
+        }
 
         const chatsArray1 = authChatRooms.map(chatRooms => chatRooms._id.toString());
         const chatsArray2 = userChatRooms.map(chatRooms => chatRooms._id.toString());
 
         const filteredArray = chatsArray1.filter(chatRoom => chatsArray2.includes(chatRoom));
 
-        if (filteredArray && filteredArray.length > 0) ***REMOVED***
-            res.status(200).send(***REMOVED*** id: filteredArray[0] ***REMOVED***);
-        ***REMOVED*** else ***REMOVED***
+        if (filteredArray && filteredArray.length > 0) {
+            res.status(200).send({ id: filteredArray[0] });
+        } else {
             throw createHttpError.NotFound("Chatroom not found!");
-        ***REMOVED***
-    ***REMOVED*** catch (err) ***REMOVED***
+        }
+    } catch (err) {
         next(err);
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
 /**
  * fetch all chatrooms where user is recipient
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const fetchUserChatRooms = async (req, res, next) => ***REMOVED***
-    try ***REMOVED***
+export const fetchUserChatRooms = async (req, res, next) => {
+    try {
 
         const userId = req.params.id
 
-        const doesExist = await User.findOne(***REMOVED*** userId ***REMOVED***);
+        const doesExist = await User.findOne({ userId });
 
-        if (!doesExist) ***REMOVED***
+        if (!doesExist) {
             throw createHttpError.NotFound("User not found!");
-        ***REMOVED***
+        }
 
         const chatRooms = await fetchChatsByUserId(userId);
 
-        if (chatRooms) ***REMOVED***
-            res.status(200).send(***REMOVED*** chatRooms ***REMOVED***);
-        ***REMOVED*** else ***REMOVED***
+        if (chatRooms) {
+            res.status(200).send({ chatRooms });
+        } else {
             throw createHttpError.InternalServerError();
-        ***REMOVED***
-    ***REMOVED*** catch (err) ***REMOVED***
+        }
+    } catch (err) {
         next(err);
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
 /**
  * fetch chatroom recipients
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const fetchChatRoomRecipients = async (req, res, next) => ***REMOVED***
+export const fetchChatRoomRecipients = async (req, res, next) => {
     const chatRoomId = req.params.id;
-    if (!chatRoomId) ***REMOVED***
+    if (!chatRoomId) {
         throw createHttpError.BadRequest();
-    ***REMOVED***
+    }
 
-    try ***REMOVED***
-        const chatRoomObj = await ChatRoom.findById(***REMOVED*** _id: chatRoomId ***REMOVED***)
-        if (!chatRoomObj) ***REMOVED***
+    try {
+        const chatRoomObj = await ChatRoom.findById({ _id: chatRoomId })
+        if (!chatRoomObj) {
             createHttpError.NotFound();
-        ***REMOVED***
+        }
 
         const recipients = await getRecipientsHelperFn(chatRoomId);
-        const recipientsObj = ***REMOVED***
+        const recipientsObj = {
             recipients
-        ***REMOVED***
+        }
 
         res.status(200).send(recipientsObj);
-    ***REMOVED*** catch (error) ***REMOVED***
+    } catch (error) {
         next(error);
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
 /**
  * creates a new chatoom entity
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const createChatroom = async (req, res, next) => ***REMOVED***
-    const ***REMOVED*** username ***REMOVED*** = req.body;
+export const createChatroom = async (req, res, next) => {
+    const { username } = req.body;
 
-    if (!username) ***REMOVED***
+    if (!username) {
         throw createHttpError.BadRequest();
-    ***REMOVED***
+    }
 
     const session = await mongoose.startSession();
 
-    try ***REMOVED***
+    try {
         session.startTransaction();
 
-        const sender = await User.findOne(***REMOVED*** userId: req.authUser ***REMOVED***);
-        const recipient = await User.findOne(***REMOVED*** username ***REMOVED***);
+        const sender = await User.findOne({ userId: req.authUser });
+        const recipient = await User.findOne({ username });
 
-        if (!recipient) ***REMOVED***
+        if (!recipient) {
             throw createHttpError.InternalServerError();
-        ***REMOVED***
+        }
 
         const chatRoom = new ChatRoom();
-        const savedChatRoom = await chatRoom.save(***REMOVED*** session ***REMOVED***);
+        const savedChatRoom = await chatRoom.save({ session });
 
         // link users to chatrooms
-        await ChatRoomUser.create([***REMOVED***
+        await ChatRoomUser.create([{
             userId: sender.userId,
             chatRoomId: savedChatRoom._id
-        ***REMOVED***, ***REMOVED***
+        }, {
             userId: recipient.userId,
             chatRoomId: savedChatRoom._id
-        ***REMOVED***], ***REMOVED*** session ***REMOVED***);
+        }], { session });
 
         await session.commitTransaction();
-        console.log(`New chatroom $***REMOVED***savedChatRoom._id***REMOVED*** created between $***REMOVED***sender.userId***REMOVED*** and $***REMOVED***recipient.userId***REMOVED***`)
+        console.log(`New chatroom ${savedChatRoom._id} created between ${sender.userId} and ${recipient.userId}`)
 
         res.status(201).send(savedChatRoom);
-    ***REMOVED*** catch (error) ***REMOVED***
+    } catch (error) {
         await session.abortTransaction();
         next(error);
-    ***REMOVED*** finally ***REMOVED***
+    } finally {
         session.endSession();
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
 /**
  * update chatroom and links recipient to chatroom if included in the request payload
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const updateChatroom = async (req, res, next) => ***REMOVED***
+export const updateChatroom = async (req, res, next) => {
     const chatRoomId = req.params.id;
-    if (!chatRoomId) ***REMOVED***
+    if (!chatRoomId) {
         throw createHttpError.BadRequest();
-    ***REMOVED***
+    }
 
-    const ***REMOVED*** name, isGroupChat, recipient ***REMOVED*** = req.body;
+    const { name, isGroupChat, recipient } = req.body;
 
     const session = await mongoose.startSession();
-    try ***REMOVED***
+    try {
         session.startTransaction();
 
         //update document by payload
         await ChatRoom.findOneAndUpdate(
-            ***REMOVED*** _id: chatRoomId ***REMOVED***, ***REMOVED***
-            $set: ***REMOVED***
+            { _id: chatRoomId }, {
+            $set: {
                 name: name,
                 isGroupChat: isGroupChat,
                 updatedAt: new Date().toISOString()
-            ***REMOVED***
-        ***REMOVED***,
-            ***REMOVED*** upsert: true ***REMOVED***
+            }
+        },
+            { upsert: true }
         );
 
         // link any new contacts in the payload to the chatroom
-        if (recipient) ***REMOVED***
-            const doesExist = await User.findOne(***REMOVED*** userId: recipient ***REMOVED***);
-            if (!doesExist) ***REMOVED***
+        if (recipient) {
+            const doesExist = await User.findOne({ userId: recipient });
+            if (!doesExist) {
                 throw createHttpError.BadRequest('Recipient not found');
-            ***REMOVED***
+            }
 
-            await ChatRoomUser.create([***REMOVED***
+            await ChatRoomUser.create([{
                 userId: recipient,
                 chatRoomId: chatRoomId
-            ***REMOVED***], ***REMOVED*** session ***REMOVED***);
-            console.log(`Adding recipient: $***REMOVED***recipient***REMOVED*** to chatroom $***REMOVED***chatRoomId***REMOVED*** `)
-        ***REMOVED***
+            }], { session });
+            console.log(`Adding recipient: ${recipient} to chatroom ${chatRoomId} `)
+        }
         await session.commitTransaction();
         res.status(200).send('ChatRoom updated sucesfully');
-    ***REMOVED*** catch (error) ***REMOVED***
+    } catch (error) {
         await session.abortTransaction();
         next(error)
-    ***REMOVED*** finally ***REMOVED***
+    } finally {
         session.endSession();
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
 /**
  * reusable helper function to return chatroom recipients
- * @param ***REMOVED*******REMOVED*** chatRoomId
+ * @param {*} chatRoomId
  * @returns
  */
-const getRecipientsHelperFn = async (chatRoomId) => ***REMOVED***
-    if (!chatRoomId) ***REMOVED***
+const getRecipientsHelperFn = async (chatRoomId) => {
+    if (!chatRoomId) {
         createHttpError.BadRequest();
-    ***REMOVED***
+    }
 
-    const chatRoomUsers = await ChatRoomUser.find(***REMOVED*** chatRoomId: chatRoomId ***REMOVED***);
+    const chatRoomUsers = await ChatRoomUser.find({ chatRoomId: chatRoomId });
 
     //impossible for chatroom to exist without recipients
-    if (!chatRoomUsers || chatRoomUsers.length === 0) ***REMOVED***
+    if (!chatRoomUsers || chatRoomUsers.length === 0) {
         createHttpError.InternalServerError('No chatroom recipients found!');
-    ***REMOVED***
+    }
 
     //recipient array
     const users = chatRoomUsers.map(chatRoomUser => chatRoomUser.userId);
-    const recipientArray = await User.find(***REMOVED*** userId: ***REMOVED*** $in: users ***REMOVED*** ***REMOVED***);
-    const recipients = recipientArray.map(user => ***REMOVED***
-        return ***REMOVED***
+    const recipientArray = await User.find({ userId: { $in: users } });
+    const recipients = recipientArray.map(user => {
+        return {
             userId: user.userId,
             name: user.name,
             username: user.username,
-        ***REMOVED***
-    ***REMOVED***)
+        }
+    })
 
     return recipients;
-***REMOVED***
+}
 
-export const createMessage = async (req, res, next) => ***REMOVED***
+export const createMessage = async (req, res, next) => {
     const chatRoomId = req.params.id;
 
-    const ***REMOVED*** content ***REMOVED*** = req.body;
+    const { content } = req.body;
     const userId = req.authUser;
 
     const session = await mongoose.startSession();
 
-    try ***REMOVED***
-        if (!chatRoomId) ***REMOVED***
+    try {
+        if (!chatRoomId) {
             throw createHttpError.BadRequest();
-        ***REMOVED***
-        if (!content && !imageUri) ***REMOVED***
+        }
+        if (!content && !imageUri) {
             throw createHttpError.BadRequest('Payload missing content');
-        ***REMOVED***
+        }
         session.startTransaction();
 
-        const doesExist = await ChatRoom.findOne(***REMOVED*** _id: chatRoomId ***REMOVED***);
+        const doesExist = await ChatRoom.findOne({ _id: chatRoomId });
 
-        if (!doesExist) ***REMOVED***
+        if (!doesExist) {
             throw createHttpError.NotFound('Chatroom does not exist');
-        ***REMOVED***
+        }
 
-        const message = new Message(***REMOVED***
+        const message = new Message({
             chatRoomId: chatRoomId,
             userId: userId,
             content: content,
             createdAt: new Date().toISOString()
-        ***REMOVED***);
+        });
 
-        await message.save(***REMOVED*** session ***REMOVED***);
+        await message.save({ session });
 
         await session.commitTransaction();
 
         res.status(201).send(message);
 
-    ***REMOVED*** catch (error) ***REMOVED***
+    } catch (error) {
         session.abortTransaction();
         next(error);
-    ***REMOVED*** finally ***REMOVED***
+    } finally {
         session.endSession();
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
-export const createImageMessage = async (req, res, next) => ***REMOVED***
+export const createImageMessage = async (req, res, next) => {
     const chatRoomId = req.params.id;
 
-    const ***REMOVED*** imageUri ***REMOVED*** = req.body;
+    const { imageUri } = req.body;
     const userId = req.authUser;
 
     const session = await mongoose.startSession();
 
-    try ***REMOVED***
-        if (!chatRoomId) ***REMOVED***
+    try {
+        if (!chatRoomId) {
             throw createHttpError.BadRequest();
-        ***REMOVED***
-        if (!imageUri) ***REMOVED***
+        }
+        if (!imageUri) {
             throw createHttpError.BadRequest('Payload missing imageUri');
-        ***REMOVED***
+        }
         session.startTransaction();
 
-        const doesExist = await ChatRoom.findOne(***REMOVED*** _id: chatRoomId ***REMOVED***);
+        const doesExist = await ChatRoom.findOne({ _id: chatRoomId });
 
-        if (!doesExist) ***REMOVED***
+        if (!doesExist) {
             throw createHttpError.NotFound('Chatroom does not exist');
-        ***REMOVED***
+        }
 
-        const message = new Message(***REMOVED***
+        const message = new Message({
             chatRoomId: chatRoomId,
             userId: userId,
             imageUri: imageUri,
             createdAt: new Date().toISOString()
-        ***REMOVED***);
+        });
 
-        await message.save(***REMOVED*** session ***REMOVED***);
+        await message.save({ session });
 
         await session.commitTransaction();
 
         res.status(201).send(message);
 
-    ***REMOVED*** catch (error) ***REMOVED***
+    } catch (error) {
         session.abortTransaction();
         next(error);
-    ***REMOVED*** finally ***REMOVED***
+    } finally {
         session.endSession();
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
-export const createMessagePost = async (req, res, next) => ***REMOVED***
+export const createMessagePost = async (req, res, next) => {
     const chatRoomId = req.params.id;
 
-    const ***REMOVED*** postId ***REMOVED*** = req.body;
+    const { postId } = req.body;
     const userId = req.authUser;
 
     const session = await mongoose.startSession();
 
-    try ***REMOVED***
-        if (!chatRoomId) ***REMOVED***
+    try {
+        if (!chatRoomId) {
             throw createHttpError.BadRequest();
-        ***REMOVED***
-        if (!postId) ***REMOVED***
+        }
+        if (!postId) {
             throw createHttpError.BadRequest('Payload missing postId');
-        ***REMOVED***
+        }
         session.startTransaction();
 
-        const doesExist = await ChatRoom.findOne(***REMOVED*** _id: chatRoomId ***REMOVED***);
+        const doesExist = await ChatRoom.findOne({ _id: chatRoomId });
 
-        if (!doesExist) ***REMOVED***
+        if (!doesExist) {
             throw createHttpError.NotFound('Chatroom does not exist');
-        ***REMOVED***
+        }
 
-        const message = new Message(***REMOVED***
+        const message = new Message({
             chatRoomId: chatRoomId,
             userId: userId,
             postId: postId,
             type: 'post',
             createdAt: new Date().toISOString()
-        ***REMOVED***);
+        });
 
-        await message.save(***REMOVED*** session ***REMOVED***);
+        await message.save({ session });
 
         await session.commitTransaction();
 
         res.status(201).send(message);
 
-    ***REMOVED*** catch (error) ***REMOVED***
+    } catch (error) {
         session.abortTransaction();
         next(error);
-    ***REMOVED*** finally ***REMOVED***
+    } finally {
         session.endSession();
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
-export const createMessageCall = async (req, res, next) => ***REMOVED***
+export const createMessageCall = async (req, res, next) => {
     const chatRoomId = req.params.id;
 
-    const ***REMOVED*** type, duration ***REMOVED*** = req.body;
+    const { type, duration } = req.body;
     const userId = req.authUser;
 
     const session = await mongoose.startSession();
 
-    try ***REMOVED***
-        if (!chatRoomId) ***REMOVED***
+    try {
+        if (!chatRoomId) {
             throw createHttpError.BadRequest();
-        ***REMOVED***
-        if (!type) ***REMOVED***
+        }
+        if (!type) {
             throw createHttpError.BadRequest('Payload missing call type');
-        ***REMOVED***
-        if (!duration) ***REMOVED***
+        }
+        if (!duration) {
             throw createHttpError.BadRequest('Payload missing call duration');
-        ***REMOVED***
+        }
         session.startTransaction();
 
-        const doesExist = await ChatRoom.findOne(***REMOVED*** _id: chatRoomId ***REMOVED***);
+        const doesExist = await ChatRoom.findOne({ _id: chatRoomId });
 
-        if (!doesExist) ***REMOVED***
+        if (!doesExist) {
             throw createHttpError.NotFound('Chatroom does not exist');
-        ***REMOVED***
+        }
 
-        const message = new Message(***REMOVED***
+        const message = new Message({
             chatRoomId: chatRoomId,
             userId: userId,
             type: 'call',
             callType: type,
             callDuration: duration,
             createdAt: new Date().toISOString()
-        ***REMOVED***);
+        });
 
-        await message.save(***REMOVED*** session ***REMOVED***);
+        await message.save({ session });
 
         await session.commitTransaction();
 
         res.status(201).send(message);
 
-    ***REMOVED*** catch (error) ***REMOVED***
+    } catch (error) {
         session.abortTransaction();
         next(error);
-    ***REMOVED*** finally ***REMOVED***
+    } finally {
         session.endSession();
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
 /**
  * retreive chat messages
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const fetchChatRoomMessages = async (req, res, next) => ***REMOVED***
-    try ***REMOVED***
+export const fetchChatRoomMessages = async (req, res, next) => {
+    try {
 
         const chatRoomId = req.params.id;
-        let ***REMOVED*** page, size ***REMOVED*** = req.query;
+        let { page, size } = req.query;
 
-        if (!page) ***REMOVED***
+        if (!page) {
             page = 1;
-        ***REMOVED***
+        }
 
-        if (!size) ***REMOVED***
+        if (!size) {
             size = 10;
-        ***REMOVED***
+        }
 
         const limit = parseInt(size);
-        let options = ***REMOVED***
-            sort: ***REMOVED*** createdAt: -1 ***REMOVED***,
+        let options = {
+            sort: { createdAt: -1 },
             lean: true,
             page: page,
             limit: limit,
-        ***REMOVED***;
+        };
 
-        const doesExist = await ChatRoom.findOne(***REMOVED*** _id: chatRoomId ***REMOVED***);
-        if (!doesExist) ***REMOVED***
+        const doesExist = await ChatRoom.findOne({ _id: chatRoomId });
+        if (!doesExist) {
             throw createHttpError.NotFound('ChatRoom does not exist');
-        ***REMOVED***
+        }
 
-        const data = await Message.paginate(***REMOVED*** chatRoomId: chatRoomId ***REMOVED***, options);
-        const ***REMOVED*** docs, hasNextPage, nextPage, totalDocs ***REMOVED*** = data;
+        const data = await Message.paginate({ chatRoomId: chatRoomId }, options);
+        const { docs, hasNextPage, nextPage, totalDocs } = data;
 
-        const results = ***REMOVED***
+        const results = {
             page,
             hasNextPage,
             nextPage,
             size,
             totalDocs,
             data: docs
-        ***REMOVED***
+        }
 
         res.status(200).send(results);
 
-    ***REMOVED*** catch (error) ***REMOVED***
+    } catch (error) {
         next(error);
-    ***REMOVED***
-***REMOVED***
+    }
+}
 /**
  * retreive last message in the chat
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const fetchChatRoomLastMessage = async (req, res, next) => ***REMOVED***
-    try ***REMOVED***
+export const fetchChatRoomLastMessage = async (req, res, next) => {
+    try {
 
         const chatRoomId = req.params.id;
 
-        const doesExist = await ChatRoom.findOne(***REMOVED*** _id: chatRoomId ***REMOVED***);
-        if (!doesExist) ***REMOVED***
+        const doesExist = await ChatRoom.findOne({ _id: chatRoomId });
+        if (!doesExist) {
             throw createHttpError.NotFound('ChatRoom does not exist');
-        ***REMOVED***
+        }
 
-        const lastList = await Message.find(***REMOVED*** chatRoomId: chatRoomId ***REMOVED***).sort(***REMOVED*** createdAt: -1 ***REMOVED***).limit(1).exec();
+        const lastList = await Message.find({ chatRoomId: chatRoomId }).sort({ createdAt: -1 }).limit(1).exec();
         const lastMessage = (lastList && lastList.length === 1) ? lastList[0] : null;
 
         res.status(200).send(lastMessage);
 
-    ***REMOVED*** catch (error) ***REMOVED***
+    } catch (error) {
         next(error);
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
 /**
  * reusable helper function to retrieve chat rooms by userId
- * @param ***REMOVED*******REMOVED*** req
- * @param ***REMOVED*******REMOVED*** res
- * @param ***REMOVED*******REMOVED*** next
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
-export const fetchChatsByUserId = async (userId) => ***REMOVED***
-    try ***REMOVED***
-        const doesExist = await User.findOne(***REMOVED*** userId ***REMOVED***);
+export const fetchChatsByUserId = async (userId) => {
+    try {
+        const doesExist = await User.findOne({ userId });
 
-        if (!doesExist) ***REMOVED***
+        if (!doesExist) {
             throw createHttpError.NotFound();
-        ***REMOVED***
+        }
 
-        const chatRoomsArray = await ChatRoomUser.find(***REMOVED*** userId: userId ***REMOVED***);
+        const chatRoomsArray = await ChatRoomUser.find({ userId: userId });
 
         //if user isnt part of any chatrooms
-        if (!chatRoomsArray || chatRoomsArray.length === 0) ***REMOVED***
+        if (!chatRoomsArray || chatRoomsArray.length === 0) {
             res.status(200).send([]);
-        ***REMOVED***
+        }
 
         //otherwise link ChatRoomUsers back to chatrooms data
-        const chatRoomIds = chatRoomsArray.map(chatRoomUser => ***REMOVED***
-            return ***REMOVED***
+        const chatRoomIds = chatRoomsArray.map(chatRoomUser => {
+            return {
                 _id: chatRoomUser.chatRoomId
-            ***REMOVED***
-        ***REMOVED***);
-        const chatRooms = await ChatRoom.find(***REMOVED*** _id: ***REMOVED*** $in: chatRoomIds ***REMOVED*** ***REMOVED***);
+            }
+        });
+        const chatRooms = await ChatRoom.find({ _id: { $in: chatRoomIds } });
 
         return chatRooms;
-    ***REMOVED*** catch (error) ***REMOVED***
+    } catch (error) {
         return null;
-    ***REMOVED***
-***REMOVED***
+    }
+}

@@ -1,7 +1,7 @@
 import express from 'express';
 
-import ***REMOVED*** verifyAccessToken ***REMOVED*** from '../utils/jwt.js';
-import ***REMOVED*** createProfile, fetchProfileByUserId, fetchProfileByQueryParams, updateProfile, updateProfilePicture, updateProfileBio, home, me, fetchFollow, createFollow, unFollow, fetchFollowings, fetchFollowers, acceptFollowing, rejectFollowing ***REMOVED*** from '../controllers/profiles.js';
+import { verifyAccessToken } from '../utils/jwt.js';
+import { createProfile, fetchProfileByUserId, fetchProfileByQueryParams, updateProfile, updateProfilePicture, updateProfileBio, home, me, fetchFollow, createFollow, unFollow, fetchFollowings, fetchFollowers, acceptFollowing, rejectFollowing } from '../controllers/profiles.js';
 
 const profileRoute = express.Router();
 

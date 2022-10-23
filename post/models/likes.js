@@ -1,16 +1,16 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
-const likeSchema = mongoose.Schema(***REMOVED***
-  userId: ***REMOVED***
+const likeSchema = mongoose.Schema({
+  userId: {
     type: String,
     required: true,
-  ***REMOVED***,
-  postId: ***REMOVED***
+  },
+  postId: {
     type: String,
     require: true,
-  ***REMOVED***,
-***REMOVED***);
+  },
+});
 
 likeSchema.plugin(mongoosePaginate);
 

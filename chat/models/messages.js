@@ -1,46 +1,46 @@
 import mongoose from 'mongoose';
 import mongoosePaginate from "mongoose-paginate-v2";
 
-const messageSchema = mongoose.Schema(***REMOVED***
-    chatRoomId: ***REMOVED***
+const messageSchema = mongoose.Schema({
+    chatRoomId: {
         type: 'string',
         required: true,
-    ***REMOVED***,
-    userId: ***REMOVED***
+    },
+    userId: {
         type: 'string',
         required: true,
-    ***REMOVED***,
-    content: ***REMOVED***
+    },
+    content: {
         type: 'string',
         required: false,
-    ***REMOVED***,
-    imageUri: ***REMOVED***
+    },
+    imageUri: {
         type: 'string',
         required: false,
-    ***REMOVED***,
-    postId: ***REMOVED***
+    },
+    postId: {
         type: 'string',
         required: false,
-    ***REMOVED***,
-    callType: ***REMOVED***
+    },
+    callType: {
         type: 'string',
         required: false,
-    ***REMOVED***,
-    callDuration: ***REMOVED***
+    },
+    callDuration: {
         type: 'string',
         required: false,
-    ***REMOVED***,
-    type: ***REMOVED***
+    },
+    type: {
         type: 'string',
         default: 'default'
-    ***REMOVED***,
-    createdAt: ***REMOVED***
+    },
+    createdAt: {
         type: Date
-    ***REMOVED***,
-    updatedAt: ***REMOVED***
+    },
+    updatedAt: {
         type: Date
-    ***REMOVED***
-***REMOVED***);
+    }
+});
 
 messageSchema.plugin(mongoosePaginate);
 const Message = mongoose.model('Message', messageSchema);

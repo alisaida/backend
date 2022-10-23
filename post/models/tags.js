@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
-const tagSchema = mongoose.Schema(***REMOVED***
-    tag: ***REMOVED***
+const tagSchema = mongoose.Schema({
+    tag: {
         type: String,
         required: true,
-    ***REMOVED***
-***REMOVED***);
+    }
+});
 
 tagSchema.plugin(mongoosePaginate);
 
