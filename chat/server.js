@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 import chatroomRoute from './routes/chatrooms.js';
 import { consumeUsersQueue } from './utils/rabbitmq.js';
 
-dotenv.config();
+dotenv.config({ path: '../chat.env' });
 const NODE_ENV = process.env.NODE_ENV;
 const SERVICE_NAME = process.env.SERVICE_NAME;
 const PORT = process.env.PORT;

@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 import { consumeUsersQueue } from './utils/rabbitmq.js'
 
 import profileRoute from "./routes/profiles.js";
-dotenv.config();
+dotenv.config({ path: '../profile.env' });
 const NODE_ENV = process.env.NODE_ENV;
 const SERVICE_NAME = process.env.SERVICE_NAME;
 const PORT = process.env.PORT;

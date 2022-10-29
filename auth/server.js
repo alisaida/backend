@@ -7,7 +7,7 @@ import morgan from 'morgan';
 
 import authRouter from './routes/auth.js';
 
-dotenv.config();
+dotenv.config({ path: '../auth.env' });
 const NODE_ENV = process.env.NODE_ENV;
 const SERVICE_NAME = process.env.SERVICE_NAME;
 const PORT = process.env.PORT;
