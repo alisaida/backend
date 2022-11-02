@@ -98,29 +98,68 @@ export const fetchProfileByUserId = async (req, res, next) => {
 }
 
 /*
+ * fetch profile by name 
+ * @param req
+ * @param res
+ * @param next
+ */
+export const searchProfileByName = async (req, res, next) => {
+
+  const { name } = req.query;
+
+  try {
+    if (!name) {
+      throw httpError.BadRequest('Empty search params');
+    }
+
+    const profiles = await Profile.find({ $or: [{ name: { $regex: name, $options: 'i' } }] }).limit(5);
+
+    res.status(200).send({ profiles });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/*
+ * fetch profile by name 
+ * @param req
+ * @param res
+ * @param next
+ */
+export const searchProfileByUsername = async (req, res, next) => {
+
+  const { username } = req.query;
+  console.log(username)
+  try {
+    if (!username) {
+      throw httpError.BadRequest('Empty search params');
+    }
+
+    const profiles = await Profile.find({ $or: [{ username: { $regex: username, $options: 'i' } }] }).limit(5);
+
+    res.status(200).send({ profiles });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/*
  * fetch profile by username/name 
  * @param req
  * @param res
  * @param next
  */
-export const fetchProfileByQueryParams = async (req, res, next) => {
+export const searchProfile = async (req, res, next) => {
 
-  const { name, username } = req.query;
-  if (!name && !username) {
-    throw httpError.BadRequest('Empty search params');
-  }
+  const { name } = req.query;
 
   try {
-    let profiles;
-    let caseInsensitive; //search with specific case
-    if (username) {
-      caseInsensitive = new RegExp(["^", username, "$"].join(""), "i");
-      profiles = await Profile.find({ username: caseInsensitive });
+    if (!name) {
+      throw httpError.BadRequest('Empty search params');
     }
-    else {
-      caseInsensitive = new RegExp(["^", name, "$"].join(""), "i");
-      profiles = await Profile.find({ name: caseInsensitive });
-    }
+
+    const profiles = await Profile.find({ $or: [{ name: { $regex: name, $options: 'i' } }, { username: { $regex: name, $options: 'i' } }] }).limit(5);
+
     res.status(200).send({ profiles });
   } catch (error) {
     next(error);

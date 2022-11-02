@@ -118,11 +118,9 @@ export const fetchUserChatRooms = async (req, res, next) => {
 
         const chatRooms = await fetchChatsByUserId(userId);
 
-        if (chatRooms) {
-            res.status(200).send({ chatRooms });
-        } else {
-            throw createHttpError.InternalServerError();
-        }
+
+        res.status(200).send({ chatRooms });
+
     } catch (err) {
         next(err);
     }
